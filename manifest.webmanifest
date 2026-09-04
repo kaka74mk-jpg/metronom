@@ -1,0 +1,10 @@
+{
+  "name": "MK Studio",
+  "short_name": "MK Studio",
+  "description": "Piano Practice Studio & Metronome",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#05060b",
+  "theme_color": "#05060b",
+  "orientation": "portrait-primary"
+}
