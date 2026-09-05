@@ -8,20 +8,7 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-// Keep practice timers outside the moving beat/playhead layer.
-(function isolatePracticeTimers(){
-  const timer=document.getElementById('practiceTimerCard');
-  const visual=document.querySelector('.visual-studio');
-  if(timer && visual && timer.parentElement===visual){
-    timer.style.position='relative';
-    timer.style.zIndex='20';
-    timer.style.transform='none';
-    timer.style.width='calc(100% - 18px)';
-    timer.style.maxWidth='calc(100% - 18px)';
-  }
-})();
-</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/lucide@0.468.0"></script>
 <style>
@@ -69,7 +56,7 @@ button,input,select{font:inherit}button{cursor:pointer}
 .slider-row{display:grid;grid-template-columns:40px 1fr 55px;gap:8px;align-items:center;margin-top:10px}.round{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:18px}.bpm-number{font-size:12px;color:var(--muted);text-align:center}
 .range{direction:rtl;width:100%;height:6px;appearance:none;border-radius:99px;outline:none;background:linear-gradient(90deg,var(--cyan) 0%,var(--cyan) 50%,#1b2538 50%,#1b2538 100%)}
 .range::-webkit-slider-thumb{appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);box-shadow:0 0 18px rgba(0,245,255,.65)}
-.volume-row{display:grid;grid-template-columns:72px 1fr 40px;gap:8px;align-items:center;margin-top:8px;padding:8px 10px;background:#0b101a;border-radius:11px;border:1px solid #182237}
+.volume-row{display:grid;grid-template-columns:72px minmax(0,1fr) 40px auto;gap:8px;align-items:center;margin-top:8px;padding:8px 10px;background:#0b101a;border-radius:11px;border:1px solid #182237}
 .volume-row label{font-size:9px;color:var(--muted);display:flex;gap:5px;align-items:center}.volume-range{background:linear-gradient(90deg,var(--pink) 0%,var(--pink) 70%,#1b2538 70%,#1b2538 100%)}.volume-range::-webkit-slider-thumb{background:var(--pink);box-shadow:0 0 18px rgba(255,43,214,.6)}
 .vol-val{font-size:9px;color:var(--pink);text-align:center}
 .quick-bpm{display:flex;gap:4px;overflow:auto;padding:8px 0}.quick-bpm button{flex:0 0 auto;border:1px solid var(--line);background:var(--card2);color:var(--muted);border-radius:8px;padding:5px 9px;font-size:9px}
@@ -276,7 +263,7 @@ button,input,select{font:inherit}button{cursor:pointer}
 .focus-bpm{font-size:clamp(76px,18vw,170px);font-weight:900;line-height:.9;color:#e9f7ff;text-shadow:0 0 26px rgba(0,245,255,.25)}
 .focus-beat{font-size:38px;line-height:1;color:var(--cyan);transition:transform .08s}
 .focus-beat.pulse{transform:scale(1.55);filter:drop-shadow(0 0 12px rgba(0,245,255,.8))}
-.focus-info{display:flex;gap:22px;font-size:11px;color:var(--muted);letter-spacing:.08em}
+.focus-info{display:flex;gap:12px;align-items:center;font-size:11px;color:var(--muted);letter-spacing:.08em}.focus-timer{min-width:120px;padding:10px 14px;border:1px solid rgba(255,43,214,.24);border-radius:12px;background:#090e18;text-align:center}.focus-timer-label{display:block;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}.focus-timer-value{display:block;font-size:24px;font-weight:900;color:var(--pink);font-variant-numeric:tabular-nums;text-shadow:0 0 14px rgba(255,43,214,.2)}
 .focus-actions{display:flex;gap:8px}
 .focus-actions button{border:1px solid var(--line);background:#0a101a;color:var(--text);border-radius:9px;padding:9px 14px;font:inherit;cursor:pointer}
 .mk-pro-panel{position:fixed;z-index:10000;right:18px;bottom:18px;width:min(310px,calc(100vw - 36px));display:none;background:#080d16;border:1px solid rgba(0,245,255,.25);border-radius:14px;padding:12px;box-sizing:border-box;box-shadow:0 15px 45px rgba(0,0,0,.5)}
@@ -290,6 +277,164 @@ button,input,select{font:inherit}button{cursor:pointer}
 
 
 .tempo-direction-indicator{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:17px;margin:2px auto;padding:2px 7px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(5,9,15,.45);color:var(--muted);font-size:7px;font-weight:900;letter-spacing:.12em;line-height:1;transition:all .18s ease}.tempo-arrow{font-size:11px;line-height:1}.tempo-direction-indicator.up{color:#b8ff3d;border-color:rgba(184,255,61,.28);box-shadow:0 0 12px rgba(184,255,61,.08)}.tempo-direction-indicator.down{color:#ff2bd6;border-color:rgba(255,43,214,.28);box-shadow:0 0 12px rgba(255,43,214,.08)}.tempo-direction-indicator.steady{color:var(--muted)}
+
+/* === MK Studio visual pulse + compact controls === */
+.metro-card{transition:transform .09s ease,box-shadow .09s ease,border-color .09s ease}
+.tempo-display-card.beat-pulse{animation:metroBeatPulse .16s cubic-bezier(.2,.8,.2,1)}
+.tempo-display-card.beat-pulse{box-shadow:0 0 34px rgba(0,245,255,.18),inset 0 0 28px rgba(0,245,255,.06)}
+.tempo-display-card.beat-accent{animation:metroBeatAccent .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes metroBeatPulse{0%{transform:scale(1);box-shadow:var(--shadow)}35%{transform:scale(1.008);box-shadow:0 0 34px rgba(0,245,255,.18),var(--shadow)}100%{transform:scale(1);box-shadow:var(--shadow)}}
+@keyframes metroBeatAccent{0%{transform:scale(1)}35%{transform:scale(1.012);box-shadow:0 0 42px rgba(255,43,214,.20),0 0 0 1px rgba(255,43,214,.22),var(--shadow)}100%{transform:scale(1)}}
+.start-bar .start{min-height:36px;padding:7px 9px;border-radius:9px;font-size:9px;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:.01em;transition:transform .12s ease,filter .12s ease}
+.start-bar .start:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.start-bar .start:active{transform:translateY(0) scale(.98)}
+.start-bar .start svg{width:14px;height:14px}
+.section-collapse{width:100%;border:0;background:none;color:inherit;display:flex;align-items:center;justify-content:space-between;padding:0;cursor:pointer;font:inherit;text-align:left}
+.section-collapse .collapse-chevron{transition:transform .2s ease;color:var(--muted);display:grid;place-items:center}
+.section-card.collapsed>.section-body{display:none!important}
+.section-card.collapsed .collapse-chevron{transform:rotate(-90deg)}
+.period-card.section-card,.history.section-card,.right .section-card{overflow:hidden}
+.section-head{margin-bottom:10px}
+.period-card.section-card.collapsed .section-head,.history.section-card.collapsed .section-head,.right .section-card.collapsed .section-head{margin-bottom:0}
+.meter-grid{gap:8px}.meter-grid .field{padding:8px}.meter-grid label{font-size:8px}.meter-custom{gap:5px}.meter-grid .notice{font-size:8px;padding:7px 9px}.tempo-market-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-top:8px}
+.tempo-market-row .market-ticker{position:static!important;transform:none!important;margin:0!important;max-width:none}
+.tempo-market-row .tempo-direction-indicator{margin:0}
+@media(max-width:760px){
+  .metro-card{padding:11px;border-radius:16px}.metro-visual{height:175px}.visual-studio{width:100%;padding:14px 12px;border-radius:15px}
+  .bpm-big{font-size:52px}.slider-row{grid-template-columns:36px minmax(0,1fr) 48px;gap:6px}.round{width:36px;height:36px}
+  .volume-row{grid-template-columns:88px minmax(0,1fr) 38px auto}.start-bar{gap:5px}.start-bar .start{font-size:8px;min-height:34px;padding:6px 5px}
+  .tools{overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}.tool{flex:0 0 auto}.tempo-market-row{grid-template-columns:1fr}
+  .tempo-market-row .market-ticker{justify-self:center}
+}
+@media(max-width:430px){
+  .overview{gap:6px}.kpi{padding:9px}.kpi .v{font-size:17px}.period-card,.card{padding:11px}.metro-visual{height:164px}.bpm-big{font-size:47px}.start-bar .start{font-size:7.5px}
+}
+
+
+/* v3.1 dashboard/menu + focus controls */
+.section-card.collapsed .section-body{display:none}
+.dashboard-menu-btn{position:relative}
+.dashboard-menu{display:none;max-width:1380px;margin:0 auto 12px}
+.dashboard-menu.open{display:block}
+.dashboard-menu .period-card{margin:0}
+.practice-overview{margin:0 auto 12px;max-width:1380px}
+.practice-overview .section-body{padding-top:0}
+.practice-overview .overview{max-width:none;margin:0}
+.tempo-display-card{width:min(330px,88%);padding:14px 18px;border-radius:16px}
+.tempo-display-card .bpm-big{font-size:64px}
+.metro-visual{height:175px}
+.mute-btn{min-width:74px;height:32px;border:1px solid var(--line);background:var(--card2);color:var(--muted);border-radius:9px;font-size:8px;display:flex;align-items:center;justify-content:center;gap:5px}
+.mute-btn.active{color:var(--pink);border-color:rgba(255,43,214,.4);background:rgba(255,43,214,.08)}
+.focus-timers{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:min(430px,86vw)}
+.focus-timer{min-width:0;width:auto}
+.focus-season-actions{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap}
+.focus-season-start{background:linear-gradient(90deg,var(--cyan),#3cf7d2)!important;color:#041013!important;border-color:transparent!important;font-weight:900}
+.focus-tempo-controls{display:flex;align-items:center;gap:8px}
+.focus-tempo-controls button{width:42px;height:38px;font-size:18px;font-weight:900}
+.focus-tempo-value{min-width:82px;text-align:center;font-size:13px;font-weight:900;color:var(--cyan)}
+@media(max-width:760px){.focus-shell{width:94vw;height:94vh;padding:18px}.focus-timers{width:92vw}.tempo-display-card .bpm-big{font-size:56px}.metro-visual{height:160px}}
+
+
+/* v4 refinements */
+.tempo-status-row{display:flex;justify-content:center;align-items:center;margin:0 0 7px}.tempo-status-row .tempo-direction-indicator{margin:0!important;justify-content:center;text-align:center}.market-below-tempo{position:static!important;transform:none!important;margin:7px auto 2px!important;width:max-content;max-width:90%;padding:5px 9px!important;border:1px solid rgba(0,245,255,.12);background:rgba(8,14,23,.55);border-radius:8px;box-shadow:none!important}.market-below-tempo svg{width:11px;height:11px}.practice-timer-card{margin-top:7px!important}.focus-season-actions{gap:8px}.focus-action{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;min-width:42px;height:40px;padding:0 12px;border:1px solid rgba(255,255,255,.10);border-radius:11px;background:linear-gradient(180deg,#141d2b,#0b111b);color:#dfe9f5;font:inherit;font-size:9px;font-weight:800;cursor:pointer;box-shadow:0 5px 16px rgba(0,0,0,.22);transition:transform .12s ease,border-color .12s ease,box-shadow .12s ease}.focus-action svg{width:15px;height:15px}.focus-action:hover{transform:translateY(-1px);border-color:rgba(0,245,255,.35);box-shadow:0 7px 20px rgba(0,0,0,.28),0 0 15px rgba(0,245,255,.08)}.focus-action.exit{min-width:40px;padding:0 10px;color:#9aa7bb}.focus-season-start{min-width:125px!important}.focus-season-start span{font-size:9px}.focus-tempo-value{min-width:74px;height:40px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,245,255,.16);border-radius:11px;background:#08101b;color:var(--cyan);font-size:11px}.focus-tempo-value span{font-size:15px;margin-right:3px}@media(max-width:600px){.focus-action{height:38px;min-width:38px;padding:0 10px}.focus-season-start,.focus-action span{font-size:8px}.focus-season-start{min-width:112px!important}.market-below-tempo{font-size:8px!important}}
+</style>
+
+<style>
+/* Final layout polish */
+.metro-card{position:relative!important}
+.metro-visual{height:150px!important;margin-bottom:0!important}
+.tempo-display-card{width:min(360px,92%)!important;padding:10px 16px!important;border-radius:14px!important;position:relative!important}
+.tempo-display-card .bpm-big{font-size:58px!important;line-height:1!important;margin:0!important}
+.practice-timer-card{margin-top:-34px!important;position:relative!important;z-index:30!important;padding:0!important}
+.practice-timer-card .tempo-status-row{margin:0 0 4px!important;height:18px}
+.practice-timer-card .timer-grid{width:min(440px,94%)!important;margin:0 auto!important;gap:6px!important}
+.practice-timer-card .timer-box{padding:5px 7px!important;background:rgba(8,14,23,.94)!important}
+.practice-timer-card .timer-value{font-size:18px!important}
+.practice-timer-card .timer-state{margin-top:3px!important}
+.market-below-tempo{margin:4px auto 1px!important}
+.volume-row label{font-size:0!important;width:30px!important;justify-content:center}
+.volume-row label i{width:17px!important;height:17px!important}
+.mute-btn{min-width:34px!important;width:34px!important;padding:0!important;font-size:0!important}
+.mute-btn svg{width:16px!important;height:16px!important}
+.start-bar{margin-top:7px!important}
+/* Focus mode rebuilt as a clean vertical workspace */
+#focusOverlay{background:radial-gradient(circle at 50% 20%,rgba(0,245,255,.08),transparent 38%),#03060b!important}
+#focusOverlay .focus-shell{width:min(620px,92vw)!important;height:min(760px,92vh)!important;box-sizing:border-box!important;padding:26px!important;border:1px solid rgba(0,245,255,.12)!important;border-radius:24px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;gap:0!important;overflow:hidden!important}
+#focusOverlay .focus-top{width:100%!important;margin-bottom:26px!important}
+#focusOverlay .focus-bpm{font-size:clamp(76px,12vw,120px)!important;line-height:.9!important;margin:8px 0 2px!important}
+#focusOverlay .focus-beat{font-size:18px!important;height:28px!important}
+#focusOverlay .focus-info{margin:4px 0 18px!important}
+#focusOverlay .focus-timers{width:min(480px,100%)!important;gap:10px!important;margin:0 auto 18px!important}
+#focusOverlay .focus-timer{padding:14px 10px!important;border-radius:14px!important}
+#focusOverlay .focus-timer-value{font-size:26px!important}
+#focusOverlay .focus-season-actions{width:100%!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:9px!important;flex-wrap:wrap!important;margin-top:auto!important;padding-top:18px!important;border-top:1px solid rgba(255,255,255,.06)!important}
+#focusOverlay .focus-action{height:44px!important;border-radius:13px!important}
+#focusOverlay .focus-season-start{min-width:140px!important}
+#focusOverlay .focus-tempo-value{height:44px!important;min-width:86px!important}
+@media(max-width:600px){#focusOverlay .focus-shell{width:94vw!important;height:92vh!important;padding:18px!important;border-radius:20px!important}#focusOverlay .focus-top{margin-bottom:16px!important}#focusOverlay .focus-timer{padding:10px 6px!important}#focusOverlay .focus-timer-value{font-size:20px!important}#focusOverlay .focus-season-actions{gap:6px!important}#focusOverlay .focus-season-start{min-width:120px!important}}
+</style>
+
+<style>
+/* Final compact Focus Mode layout */
+#focusOverlay .focus-shell{box-sizing:border-box;width:min(520px,94vw);height:auto;max-height:92vh;min-height:0;padding:18px 20px 16px;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;gap:10px}
+#focusOverlay .focus-top{display:flex;align-items:center;justify-content:space-between;margin:0}
+#focusOverlay .focus-practice-name{font-size:10px;font-weight:950;letter-spacing:.16em;color:var(--cyan);margin-bottom:2px}
+#focusOverlay .focus-season{font-size:9px;opacity:.7}
+#focusOverlay .focus-close{width:34px;height:34px;display:grid;place-items:center;border-radius:10px}
+#focusOverlay .focus-close svg{width:17px;height:17px}
+#focusOverlay .focus-main{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:145px;padding:0;border:1px solid rgba(0,245,255,.09);border-radius:16px;background:radial-gradient(circle at center,rgba(0,245,255,.06),rgba(5,9,15,.25) 58%,transparent 75%)}
+#focusOverlay .focus-bpm{font-size:76px;line-height:.9;font-weight:950;letter-spacing:-.055em;margin:0;text-shadow:0 0 28px rgba(0,245,255,.2)}
+#focusOverlay .focus-beat{font-size:12px;line-height:1;margin-top:8px;color:var(--cyan)}
+#focusOverlay .focus-info{margin-top:6px;font-size:8px;letter-spacing:.14em;color:var(--muted)}
+#focusOverlay .focus-timers{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}
+#focusOverlay .focus-timer{box-sizing:border-box;min-width:0;padding:9px 8px;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:#080e17;text-align:center;display:grid;grid-template-columns:18px 1fr;grid-template-rows:auto auto;align-items:center;column-gap:5px}
+#focusOverlay .focus-timer>svg{grid-row:1 / span 2;width:14px;height:14px;color:var(--cyan);justify-self:center}
+#focusOverlay .focus-timer:nth-child(2)>svg{color:var(--pink)}
+#focusOverlay .focus-timer-label{font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;text-align:left}
+#focusOverlay .focus-timer-value{font-size:18px;line-height:1.05;font-weight:950;font-variant-numeric:tabular-nums;color:var(--cyan);text-align:left}
+#focusOverlay .focus-timer:nth-child(2) .focus-timer-value{color:var(--pink)}
+#focusOverlay .focus-controls{display:grid;grid-template-columns:1fr 1fr 40px 82px 40px;gap:7px;align-items:center;margin-top:1px}
+#focusOverlay .focus-icon-action{height:42px;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:#0b121d;color:#dfe9f5;display:flex;align-items:center;justify-content:center;gap:6px;font:inherit;font-size:8px;font-weight:900;cursor:pointer;box-shadow:0 5px 14px rgba(0,0,0,.2)}
+#focusOverlay .focus-icon-action svg{width:16px;height:16px}
+#focusOverlay .focus-icon-action.season{background:linear-gradient(135deg,var(--cyan),#3cf7d2);color:#041013;border-color:transparent}
+#focusOverlay .focus-icon-action.metro{background:linear-gradient(135deg,#151c2a,#0b111b)}
+#focusOverlay .focus-icon-action.tempo{padding:0;color:var(--cyan)}
+#focusOverlay .focus-tempo-value{height:42px;box-sizing:border-box;border:1px solid rgba(0,245,255,.15);border-radius:11px;background:#07101a;display:flex;align-items:center;justify-content:center;gap:3px;color:var(--cyan)}
+#focusOverlay .focus-tempo-value b{font-size:17px;font-variant-numeric:tabular-nums}
+#focusOverlay .focus-tempo-value small{font-size:7px;color:var(--muted);font-weight:800}
+.volume-row{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;align-items:center;gap:8px!important}
+.volume-row .volume-range{min-width:0!important}
+.volume-row .vol-val{min-width:34px;text-align:right}
+.volume-row .mute-btn{width:32px!important;min-width:32px!important;height:32px!important;padding:0!important;display:grid!important;place-items:center!important}
+.volume-row .mute-btn svg{width:16px;height:16px}
+@media(max-width:600px){#focusOverlay .focus-shell{width:94vw;padding:15px;gap:8px}#focusOverlay .focus-main{min-height:125px}#focusOverlay .focus-bpm{font-size:62px}#focusOverlay .focus-timers{gap:6px}#focusOverlay .focus-timer{padding:8px 6px}#focusOverlay .focus-timer-value{font-size:15px}#focusOverlay .focus-controls{grid-template-columns:1fr 1fr 36px 70px 36px;gap:5px}#focusOverlay .focus-icon-action{height:38px}#focusOverlay .focus-tempo-value{height:38px}}
+</style>
+
+<style>
+/* Final tempo + volume sizing */
+.tempo-display-card{box-sizing:border-box;min-height:82px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.tempo-display-card .bpm-big{font-size:clamp(44px,13vw,54px)!important;line-height:.92!important;letter-spacing:-.045em!important;max-width:100%;white-space:nowrap}
+.volume-row{display:grid!important;grid-template-columns:32px minmax(0,1fr) auto!important;align-items:center!important;gap:8px!important}
+.volume-row .mute-btn{grid-column:1!important;grid-row:1!important}
+.volume-row .volume-range{grid-column:2!important;grid-row:1!important;min-width:0!important}
+.volume-row .vol-val{grid-column:3!important;grid-row:1!important;min-width:34px;text-align:right}
+#focusOverlay .focus-main{min-height:132px!important;padding:8px 12px!important;box-sizing:border-box!important;overflow:hidden}
+#focusOverlay .focus-bpm{font-size:clamp(54px,14vw,88px)!important;line-height:.9!important;letter-spacing:-.06em!important;max-width:100%;white-space:nowrap}
+@media(max-width:600px){
+  .tempo-display-card{min-height:72px!important}
+  .tempo-display-card .bpm-big{font-size:44px!important}
+  #focusOverlay .focus-main{min-height:116px!important}
+  #focusOverlay .focus-bpm{font-size:58px!important}
+}
+</style>
+
+<style>
+/* Keep BPM number and beat dots on separate, stable rows */
+.tempo-display-card{display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:8px!important}
+.tempo-display-card .bpm-big{display:block!important;flex:0 0 auto!important;line-height:.95!important;margin:0!important;position:relative!important;z-index:2!important}
+.tempo-display-card .leds{display:flex!important;flex:0 0 8px!important;height:8px!important;min-height:8px!important;align-items:center!important;justify-content:center!important;gap:6px!important;position:relative!important;z-index:3!important}
+.tempo-display-card .led{display:block!important;flex:0 0 7px!important;width:7px!important;height:7px!important}
+@media(max-width:520px){.tempo-display-card{gap:6px!important}.tempo-display-card .bpm-big{font-size:clamp(42px,14vw,52px)!important}.tempo-display-card .leds{gap:5px!important}}
 </style>
 </head>
 <body>
@@ -307,47 +452,64 @@ button,input,select{font:inherit}button{cursor:pointer}
     <div><div class="current-name" id="currentName">My Practice</div><div class="current-meta" id="currentMeta">Ready</div></div>
     <div class="actions">
       <button class="icon-btn menu-btn" title="Seasons" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
+      <button class="icon-btn dashboard-menu-btn" title="All Seasons Dashboard" onclick="toggleDashboardMenu()"><i data-lucide="layout-dashboard"></i></button>
       <button class="icon-btn" title="Profile" onclick="openProfile()"><i data-lucide="user-round"></i></button>
       <button class="icon-btn" title="Settings" onclick="openSettings()"><i data-lucide="settings-2"></i></button>
       <button class="icon-btn" title="Rename" onclick="renameCurrent()"><i data-lucide="pencil"></i></button>
     </div>
   </header>
 
-  <section class="overview">
+  <section class="period-card section-card practice-overview collapsed" id="practiceOverview">
+    <div class="period-head section-head">
+      <button class="section-collapse" onclick="toggleSection('practiceOverview')" aria-expanded="false"><b>My Practice</b><span class="collapse-chevron"><i data-lucide="chevron-down"></i></span></button>
+    </div>
+    <div class="section-body">
+      <div class="overview">
     <div class="kpi"><div class="v" id="allSessions">0</div><div class="l">Total Sessions</div></div>
     <div class="kpi"><div class="v" id="allTime">0m</div><div class="l">Total Time</div></div>
     <div class="kpi"><div class="v" id="allDays">0</div><div class="l">Practice Days</div></div>
     <div class="kpi"><div class="v" id="allBest">—</div><div class="l">Best BPM</div></div>
     <div class="kpi"><div class="v" id="allAvg">—</div><div class="l">Average BPM</div></div>
     <div class="kpi"><div class="v" id="allStreak">0</div><div class="l">Current Streak</div></div><div class="kpi"><div class="v" id="allLongest">0m</div><div class="l">Longest Session</div></div>
+
+      </div>
+    </div>
   </section>
 
-  <section class="period-card">
-    <div class="period-head"><b>All Seasons Dashboard</b><div class="tabs">
-      <button class="tab active" data-period="week" onclick="setPeriod('week',this)">Weekly</button>
-      <button class="tab" data-period="month" onclick="setPeriod('month',this)">Monthly</button>
-      <button class="tab" data-period="year" onclick="setPeriod('year',this)">Yearly</button>
-      <button class="tab" data-period="calendar" onclick="setPeriod('calendar',this)"><i data-lucide="calendar-days"></i> Calendar</button>
-    </div></div>
-    <div class="period-grid">
-      <div class="period-box"><strong id="periodSessions">0</strong><span>Sessions</span></div>
-      <div class="period-box"><strong id="periodTime">0m</strong><span>Practice Time</span></div>
-      <div class="period-box"><strong id="periodDays">0</strong><span>Active Days</span></div>
+  <div class="dashboard-menu" id="dashboardMenu">
+  <section class="period-card section-card" id="allSeasonsCard">
+    <div class="period-head section-head">
+      <button class="section-collapse" onclick="toggleSection('allSeasonsCard')" aria-expanded="true"><b>All Seasons Dashboard</b><span class="collapse-chevron"><i data-lucide="chevron-down"></i></span></button>
+      <div class="tabs">
+        <button class="tab active" data-period="week" onclick="setPeriod('week',this)">Weekly</button>
+        <button class="tab" data-period="month" onclick="setPeriod('month',this)">Monthly</button>
+        <button class="tab" data-period="year" onclick="setPeriod('year',this)">Yearly</button>
+      </div>
     </div>
-    <div class="chart-wrap"><canvas id="overviewChart"></canvas></div>
+    <div class="section-body">
+      <div class="period-grid">
+        <div class="period-box"><strong id="periodSessions">0</strong><span>Sessions</span></div>
+        <div class="period-box"><strong id="periodTime">0m</strong><span>Practice Time</span></div>
+        <div class="period-box"><strong id="periodDays">0</strong><span>Active Days</span></div>
+      </div>
+      <div class="chart-wrap"><canvas id="overviewChart"></canvas></div>
+    </div>
   </section>
+
+  </div>
 
   <section class="layout">
     <div>
       <div class="metro-card">
-        <div class="metro-visual"><div class="visual-studio">
-          <div class="brand">NEON METRONOME</div>
+        <div class="metro-visual"><div class="visual-studio tempo-display-card">
           <div class="bpm-big" id="bpmDisplay">80</div>
-          <div class="tempo-direction-indicator" id="tempoDirectionIndicator" aria-live="polite"><span class="tempo-arrow" id="tempoArrow">•</span><span id="tempoDirectionText">STEADY</span></div>
-          <div class="market-ticker"><span id="tickerSeason">MY PRACTICE</span><b id="tickerRhythm">4/4 • ♩</b></div>
-          <div class="practice-timer-card" id="practiceTimerCard"><div class="timer-title">Practice Time</div><div class="timer-grid"><div class="timer-box"><span class="timer-label">Today in Season</span><span class="timer-value" id="daySessionTime">00:00:00</span></div><div class="timer-box current"><span class="timer-label">Current Session</span><span class="timer-value" id="sessionTime">00:00:00</span></div></div><div class="timer-state" id="sessionTimerState">Ready</div></div>
           <div class="leds" id="leds"></div>
         </div></div>
+        <div class="practice-timer-card" id="practiceTimerCard">
+          <div class="tempo-status-row"><div class="tempo-direction-indicator" id="tempoDirectionIndicator" aria-live="polite"><span class="tempo-arrow" id="tempoArrow">•</span><span id="tempoDirectionText">STEADY</span></div></div>
+          <div class="timer-grid"><div class="timer-box"><span class="timer-label">Today in Season</span><span class="timer-value" id="daySessionTime">00:00:00</span></div><div class="timer-box current"><span class="timer-label">Current Session</span><span class="timer-value" id="sessionTime">00:00:00</span></div></div><div class="timer-state" id="sessionTimerState">Ready</div>
+        </div>
+        <div class="market-ticker market-below-tempo"><i data-lucide="store"></i><span id="tickerSeason">MY PRACTICE</span><b id="tickerRhythm">4/4 • ♩</b></div>
 
         <div class="slider-row">
           <button class="round" onclick="changeBpm(-1)">−</button>
@@ -355,7 +517,7 @@ button,input,select{font:inherit}button{cursor:pointer}
           <div class="bpm-number"><span id="bpmValue">80</span> BPM</div>
         </div>
         <div class="volume-row">
-          <label><i data-lucide="volume-2"></i> Metronome Volume</label>
+          <button class="mute-btn" id="muteBtn" onclick="toggleMute()" title="Mute / unmute"><i data-lucide="volume-x"></i></button>
           <input class="range volume-range" id="volume" type="range" min="0" max="1" step=".01" value=".7" oninput="updateVolumeUI()">
           <div class="vol-val" id="volumeValue">70%</div>
         </div>
@@ -368,22 +530,23 @@ button,input,select{font:inherit}button{cursor:pointer}
           <button onclick="setBpm(40)">40</button><button onclick="setBpm(60)">60</button><button onclick="setBpm(72)">72</button><button onclick="setBpm(80)">80</button><button onclick="setBpm(90)">90</button><button onclick="setBpm(100)">100</button><button onclick="setBpm(120)">120</button><button onclick="setBpm(140)">140</button><button onclick="setBpm(160)">160</button><button onclick="setBpm(180)">180</button><button onclick="setBpm(200)">200</button>
         </div>
         <div class="start-bar">
-          <button id="metroBtn" class="start metro" onclick="toggleMetro()">▶ Start Metronome</button>
-          <button id="sessionBtn" class="start session" onclick="toggleSession()">⏱ Start Practice</button>
-          <button class="start record" onclick="toggleRecording()">● Record</button>
+          <button id="metroBtn" class="start metro" onclick="toggleMetro()"><i data-lucide="play"></i><span>Start Metronome</span></button>
+          <button id="sessionBtn" class="start session" onclick="toggleSession()"><i data-lucide="timer"></i><span>Start Practice</span></button>
+          <button class="start record" onclick="toggleRecording()"><i data-lucide="circle"></i><span>Record</span></button>
         </div>
         
         <div class="tools">
-          <button class="tool active" onclick="togglePanel('meter',this)"><i data-lucide="music-2"></i>Meter</button>
+          <button class="tool" onclick="togglePanel('meter',this)"><i data-lucide="music-2"></i>Meter</button>
           <button class="tool" onclick="togglePanel('rhythm',this)"><i data-lucide="grid-2x2"></i>Rhythm</button>
           <button class="tool" onclick="togglePanel('sound',this)"><i data-lucide="audio-lines"></i>Sound</button>
           <button class="tool" onclick="togglePanel('drums',this)"><i data-lucide="drum"></i>Drums</button>
           <button class="tool" onclick="togglePanel('special',this)"><i data-lucide="sparkles"></i>Techniques</button>
           
           <button class="tool" onclick="togglePanel('record',this)"><i data-lucide="mic"></i>Recordings</button>
+          <button class="tool" onclick="togglePanel('calendar',this)"><i data-lucide="calendar-days"></i>Calendar</button>
         </div>
 
-        <div class="panel open" id="panel-meter">
+        <div class="panel" id="panel-meter">
           <div class="panel-title">Meter & Note Values</div>
           <div class="meter-grid">
             <div class="field"><label>Time Signature</label><select id="meterSelect" class="select" onchange="setMeterFromSelect(this.value)">
@@ -433,7 +596,7 @@ button,input,select{font:inherit}button{cursor:pointer}
             <div class="technique-tempo-status" id="techniqueTempoStatus">Choose Accelerando or Ritardando to configure automatic tempo.</div>
           </div>
         </div>
-        <div class="panel" id="panel-calendar" style="display:none">
+        <div class="panel" id="panel-calendar">
           <div class="calendar-head"><button class="small-btn" onclick="changeCalendarMonth(-1)">‹</button><strong id="calMonth">September 2026</strong><button class="small-btn" onclick="changeCalendarMonth(1)">›</button></div>
           <div class="calendar-weekdays" id="calendarWeekdays"></div><div class="calendar-grid-full" id="calendarGrid"></div>
           <div class="calendar-summary"><div><b id="calMonthSessions">0</b><span>Sessions</span></div><div><b id="calMonthTime">0m</b><span>Practice Time</span></div><div><b id="calMonthDays">0</b><span>Practice Days</span></div></div>
@@ -446,19 +609,26 @@ button,input,select{font:inherit}button{cursor:pointer}
         </div>
       </div>
 
-      <div class="card history">
-        <div class="period-head"><b>Current Season History</b><button class="small-btn" onclick="clearCurrentHistory()">Clear</button></div>
-        <div id="historyList"></div>
+      <div class="card history section-card" id="historyCard">
+        <div class="period-head section-head">
+          <button class="section-collapse" onclick="toggleSection('historyCard')" aria-expanded="true"><b>Current Season History</b><span class="collapse-chevron"><i data-lucide="chevron-down"></i></span></button>
+          <button class="small-btn" onclick="clearCurrentHistory()">Clear</button>
+        </div>
+        <div class="section-body"><div id="historyList"></div></div>
       </div>
     </div>
 
     <aside class="right">
-      <div class="card">
-        <div class="period-head"><b>Current Season Stats</b></div>
-        <div class="stats-grid">
-          <div class="stat"><strong id="statBest">—</strong><span>Best BPM</span></div><div class="stat"><strong id="statLast">—</strong><span>Last BPM</span></div>
-          <div class="stat"><strong id="statAvg">—</strong><span>Average BPM</span></div><div class="stat"><strong id="statSessions">0</strong><span>Sessions</span></div>
-          <div class="stat"><strong id="statTime">0m</strong><span>Total Time</span></div><div class="stat"><strong id="statStreak">0</strong><span>Streak</span></div>
+      <div class="card section-card" id="statsCard">
+        <div class="period-head section-head">
+          <button class="section-collapse" onclick="toggleSection('statsCard')" aria-expanded="true"><b>Current Season Stats</b><span class="collapse-chevron"><i data-lucide="chevron-down"></i></span></button>
+        </div>
+        <div class="section-body">
+          <div class="stats-grid">
+            <div class="stat"><strong id="statBest">—</strong><span>Best BPM</span></div><div class="stat"><strong id="statLast">—</strong><span>Last BPM</span></div>
+            <div class="stat"><strong id="statAvg">—</strong><span>Average BPM</span></div><div class="stat"><strong id="statSessions">0</strong><span>Sessions</span></div>
+            <div class="stat"><strong id="statTime">0m</strong><span>Total Time</span></div><div class="stat"><strong id="statStreak">0</strong><span>Streak</span></div>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -530,12 +700,12 @@ function formatMinutes(sec){sec=Number(sec)||0;let h=Math.floor(sec/3600),m=Math
 function formatDuration(sec){sec=Math.floor(sec||0);return `${String(Math.floor(sec/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`}
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 
-function loadPracticeSettings(p){let s=p.settings||{};bpm=s.bpm||80;targetBpm=s.target||p.target||120;meterTime=s.meterTime||"4/4";meterNote=s.meterNote||"quarter";rhythmPattern=s.rhythmPattern||[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];sound=s.sound||"classic";drums=s.drums||"off";special=s.special||"normal";let v=document.getElementById("bpmRange");if(v)v.value=bpm;let t=document.getElementById("targetRange");if(t)t.value=targetBpm;let ms=document.getElementById("meterSelect");if(ms){if([...ms.options].some(o=>o.value===meterTime))ms.value=meterTime;else{meterTime="4/4";ms.value="4/4"}}}
+function loadPracticeSettings(p){let s=p.settings||{};bpm=s.bpm||80;targetBpm=s.target||p.target||120;meterTime=s.meterTime||"4/4";meterNote=s.meterNote||"quarter";rhythmPattern=s.rhythmPattern||[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];sound=s.sound||"classic";drums=s.drums||"off";special=s.special||"normal";metroMuted=!!s.muted;let v=document.getElementById("bpmRange");if(v)v.value=bpm;let t=document.getElementById("targetRange");if(t)t.value=targetBpm;let ms=document.getElementById("meterSelect");if(ms){if([...ms.options].some(o=>o.value===meterTime))ms.value=meterTime;else{meterTime="4/4";ms.value="4/4"}}}
 function toggleSidebar(force){const sb=document.querySelector(".sidebar"),ov=document.getElementById("sidebarOverlay");if(!sb||!ov)return;const willOpen=typeof force==="boolean"?force:!sb.classList.contains("open");sb.classList.toggle("open",willOpen);ov.classList.toggle("open",willOpen)}
 function renderPracticeList(){let e=document.getElementById("practiceList");e.innerHTML="";db.practices.forEach(p=>{let r=document.createElement("div");r.className="item "+(p.id===currentId?"active":"");r.draggable=true;r.innerHTML=`<span class="season-icon" style="color:${p.color||"var(--cyan)"}"><i data-lucide="${p.icon||"music-2"}"></i></span><span class="season-name" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHTML(p.name)}</span><button class="season-delete" title="Delete season" aria-label="Delete ${escapeHTML(p.name)}" onclick="event.stopPropagation();deleteSeason('${p.id}')"><i data-lucide="trash-2"></i></button>`;r.onclick=()=>{currentId=p.id;localStorage.setItem("studioMetronomeCurrent",currentId);loadPracticeSettings(p);renderAll();toggleSidebar(false)};r.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",p.id);r.classList.add("dragging")});r.addEventListener("dragend",()=>r.classList.remove("dragging"));r.addEventListener("dragover",e=>e.preventDefault());r.addEventListener("drop",e=>{e.preventDefault();let from=e.dataTransfer.getData("text/plain"),to=p.id;if(from&&from!==to){let fi=db.practices.findIndex(x=>x.id===from),ti=db.practices.findIndex(x=>x.id===to);let [m]=db.practices.splice(fi,1);db.practices.splice(ti,0,m);saveDB()}});e.appendChild(r)})}
 function renderHeader(){let p=currentPractice();if(!p)return;document.getElementById("currentName").textContent=p.name;document.getElementById("currentMeta").textContent=`${p.sessions.length} sessions • Target ${p.target} BPM`;let ts=document.getElementById("tickerSeason"),tr=document.getElementById("tickerRhythm");if(ts)ts.textContent=p.name.toUpperCase();if(tr)tr.textContent=`${meterTime} • ${noteDefs[meterNote]?.symbol||customNotes.find(n=>n.id===meterNote)?.symbol||"♩"}`}
 function setRangeFill(el,val,color){let min=Number(el.min),max=Number(el.max),pct=((Number(val)-min)/(max-min))*100;el.style.background=`linear-gradient(90deg,${color} 0%,${color} ${pct}%,#1b2538 ${pct}%,#1b2538 100%)`}
-function setBpm(v){bpm=Math.max(20,Math.min(300,Math.round(Number(v))));document.getElementById("bpmRange").value=bpm;document.getElementById("bpmDisplay").textContent=bpm;document.getElementById("bpmValue").textContent=bpm;setRangeFill(document.getElementById("bpmRange"),bpm,"#00f5ff");updateTarget();settings().bpm=bpm;localStorage.setItem(DB_KEY,JSON.stringify(db))}
+function setBpm(v){bpm=Math.max(20,Math.min(300,Math.round(Number(v))));document.getElementById("bpmRange").value=bpm;document.getElementById("bpmDisplay").textContent=bpm;document.getElementById("bpmValue").textContent=bpm;const fv=document.getElementById("focusTempoValue");if(fv)fv.textContent=bpm;const fb=document.getElementById("focusBpm");if(fb)fb.textContent=bpm;setRangeFill(document.getElementById("bpmRange"),bpm,"#00f5ff");updateTarget();settings().bpm=bpm;localStorage.setItem(DB_KEY,JSON.stringify(db))}
 function changeBpm(n){setBpm(bpm+n)}
 function updateVolumeUI(){let e=document.getElementById("volume"),v=Number(e.value);document.getElementById("volumeValue").textContent=Math.round(v*100)+"%";setRangeFill(e,v,"#ff2bd6");settings().volume=v;localStorage.setItem(DB_KEY,JSON.stringify(db))}
 function setTarget(v){targetBpm=Number(v);let p=currentPractice();if(p)p.target=targetBpm;document.getElementById("targetValue").textContent=targetBpm;localStorage.setItem(DB_KEY,JSON.stringify(db))}
@@ -574,7 +744,7 @@ function renderOptionGroup(id,defs,current,fn){let e=document.getElementById(id)
 function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}
 function playClick(time,type="normal"){
   initAudio();
-  const gain=audioCtx.createGain(),osc=audioCtx.createOscillator(),v=Number(document.getElementById("volume").value);
+  const gain=audioCtx.createGain(),osc=audioCtx.createOscillator(),v=(metroMuted?0:Number(document.getElementById("volume").value));
   let freq=type==="accent"?1200:800,d=.055;
   if(type==="secondary") freq=1500,d=.035;
   if(sound==="soft")freq=650;if(sound==="sharp")freq=2200;if(sound==="beep"){freq=900;d=.09}if(sound==="digital")freq=1600;if(sound==="wood")freq=420;
@@ -583,18 +753,18 @@ function playClick(time,type="normal"){
   gain.gain.setValueAtTime(Math.min(1,v*(type==="accent"?1.25:type==="secondary"?.55:.75)),time);gain.gain.exponentialRampToValueAtTime(.001,time+d);
   osc.connect(gain);gain.connect(audioCtx.destination);osc.start(time);osc.stop(time+d);
 }
-function playNoise(time,duration,vol=.2){let buffer=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*duration)),audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;let src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buffer;g.gain.setValueAtTime(vol*Number(document.getElementById("volume").value),time);g.gain.exponentialRampToValueAtTime(.001,time+duration);src.connect(g);g.connect(audioCtx.destination);src.start(time)}
-function playKick(time){let o=audioCtx.createOscillator(),g=audioCtx.createGain(),v=Number(document.getElementById("volume").value);o.type="sine";o.frequency.setValueAtTime(150,time);o.frequency.exponentialRampToValueAtTime(45,time+.12);g.gain.setValueAtTime(.8*v,time);g.gain.exponentialRampToValueAtTime(.001,time+.14);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.14)}
-function playSnare(time){playNoise(time,.08,.5);let o=audioCtx.createOscillator(),g=audioCtx.createGain(),v=Number(document.getElementById("volume").value);o.type="square";o.frequency.setValueAtTime(180,time);g.gain.setValueAtTime(.28*v,time);g.gain.exponentialRampToValueAtTime(.001,time+.06);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.06)}
+function playNoise(time,duration,vol=.2){let buffer=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*duration)),audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;let src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buffer;g.gain.setValueAtTime(vol*(metroMuted?0:Number(document.getElementById("volume").value)),time);g.gain.exponentialRampToValueAtTime(.001,time+duration);src.connect(g);g.connect(audioCtx.destination);src.start(time)}
+function playKick(time){let o=audioCtx.createOscillator(),g=audioCtx.createGain(),v=(metroMuted?0:Number(document.getElementById("volume").value));o.type="sine";o.frequency.setValueAtTime(150,time);o.frequency.exponentialRampToValueAtTime(45,time+.12);g.gain.setValueAtTime(.8*v,time);g.gain.exponentialRampToValueAtTime(.001,time+.14);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.14)}
+function playSnare(time){playNoise(time,.08,.5);let o=audioCtx.createOscillator(),g=audioCtx.createGain(),v=(metroMuted?0:Number(document.getElementById("volume").value));o.type="square";o.frequency.setValueAtTime(180,time);g.gain.setValueAtTime(.28*v,time);g.gain.exponentialRampToValueAtTime(.001,time+.06);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.06)}
 function playDrum(time,type){if(type==="K")playKick(time);else if(type==="S")playSnare(time);else if(type==="H")playNoise(time,.025,.18);else if(type==="R")playNoise(time,.035,.14);else if(type==="C")playClick(time,"accent");else if(type==="G")playNoise(time,.018,.08)}
 
 function toggleMetro(){metroRunning?stopMetro():startMetro()}
-function startMetro(){initAudio();metroRunning=true;beatIndex=0;nextBeatTime=audioCtx.currentTime+.05;schedulerTimer=setInterval(scheduler,20);document.getElementById("metroBtn").textContent="■ Stop Metronome";if(!tempoAutomationRunning&&settings().autoTempo?.change)startTempoAutomation()}
-function stopMetro(){metroRunning=false;clearInterval(schedulerTimer);schedulerTimer=null;document.getElementById("metroBtn").textContent="▶ Start Metronome";if(tempoAutomationRunning)stopTempoAutomation()}
+function startMetro(){initAudio();metroRunning=true;beatIndex=0;nextBeatTime=audioCtx.currentTime+.05;schedulerTimer=setInterval(scheduler,20);document.getElementById("metroBtn").innerHTML='<i data-lucide="square"></i><span>Stop Metronome</span>';lucide.createIcons();if(!tempoAutomationRunning&&settings().autoTempo?.change)startTempoAutomation()}
+function stopMetro(){metroRunning=false;clearInterval(schedulerTimer);schedulerTimer=null;document.getElementById("metroBtn").innerHTML='<i data-lucide="play"></i><span>Start Metronome</span>';lucide.createIcons();if(tempoAutomationRunning)stopTempoAutomation()}
 function scheduler(){if(!metroRunning)return;while(nextBeatTime<audioCtx.currentTime+.12){scheduleBeat(nextBeatTime);let pulse=getPulseSeconds();nextBeatTime+=pulse;beatIndex++}}
 function getPulseSeconds(){let n=noteDefs[meterNote]||customNotes.find(x=>x.id===meterNote);let div=n?.div||1;let den=Number(meterTime.split("/")[1])||4;let quarterSec=60/bpm;return quarterSec*div*(4/den)}
-function playNoise(time,duration,vol=.2){let buffer=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*duration)),audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;let src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buffer;g.gain.setValueAtTime(vol*Number(document.getElementById("volume").value),time);g.gain.exponentialRampToValueAtTime(.001,time+duration);src.connect(g);g.connect(audioCtx.destination);src.start(time)}
-function playKick(time){let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="sine";o.frequency.setValueAtTime(150,time);o.frequency.exponentialRampToValueAtTime(45,time+.12);g.gain.setValueAtTime(.75*Number(document.getElementById("volume").value),time);g.gain.exponentialRampToValueAtTime(.001,time+.14);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.14)}
+function playNoise(time,duration,vol=.2){let buffer=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*duration)),audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;let src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buffer;g.gain.setValueAtTime(vol*(metroMuted?0:Number(document.getElementById("volume").value)),time);g.gain.exponentialRampToValueAtTime(.001,time+duration);src.connect(g);g.connect(audioCtx.destination);src.start(time)}
+function playKick(time){let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="sine";o.frequency.setValueAtTime(150,time);o.frequency.exponentialRampToValueAtTime(45,time+.12);g.gain.setValueAtTime(.75*(metroMuted?0:Number(document.getElementById("volume").value)),time);g.gain.exponentialRampToValueAtTime(.001,time+.14);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.14)}
 function playSnare(time){playNoise(time,.07,.35);let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="square";o.frequency.setValueAtTime(180,time);g.gain.setValueAtTime(.22,time);g.gain.exponentialRampToValueAtTime(.001,time+.06);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.06)}
 function playDrum(time,type){if(type==="K")playKick(time);else if(type==="S")playSnare(time);else if(type==="H")playNoise(time,.025,.12);else if(type==="R")playNoise(time,.035,.1);else if(type==="C")playClick(time,"accent");else if(type==="G")playNoise(time,.015,.05)}
 
@@ -612,7 +782,9 @@ function scheduleBeat(t){
       if(special==="grace") playClick(Math.max(audioCtx.currentTime,et-.045),"secondary");
       playClick(et,type);
     }
-    const delay=Math.max(0,(et-audioCtx.currentTime)*1000);setTimeout(()=>highlightBeat(beatIndex*pat.length+i),delay);
+    const delay=Math.max(0,(et-audioCtx.currentTime)*1000);
+    setTimeout(()=>highlightBeat(beatIndex*pat.length+i),delay);
+    pulseAtAudioTime(et,isBarStart&&i===0);
   });
   // Drums run on their own 16th-note grid, independent of the selected rhythm.
   if(drumPat&&drumPat.length){
@@ -630,9 +802,9 @@ function highlightBeat(i){document.querySelectorAll(".led").forEach((x,j)=>x.cla
 
 function toggleSession(){sessionRunning?stopSession(true):startSession()}
 function getTodaySeasonSeconds(){const key=localDateKey(new Date()),p=currentPractice();return (p?.sessions||[]).filter(s=>localDateKey(s.date)===key).reduce((a,s)=>a+(Number(s.seconds)||0),0)}
-function startSession(){sessionRunning=true;sessionStartedAt=Date.now();sessionElapsed=0;document.getElementById("sessionBtn").textContent="■ End Practice";updateSessionTimer()}
-function stopSession(save=true){if(!sessionRunning)return;sessionElapsed=Math.floor((Date.now()-sessionStartedAt)/1000);sessionRunning=false;stopMetro();document.getElementById("sessionBtn").textContent="⏱ Start Practice";if(save&&sessionElapsed>=1)saveSession(sessionElapsed);updateSessionTimer()}
-function updateSessionTimer(){const e=document.getElementById("sessionTime"),day=document.getElementById("daySessionTime"),card=document.getElementById("practiceTimerCard"),state=document.getElementById("sessionTimerState");const current=sessionRunning?Math.floor((Date.now()-sessionStartedAt)/1000):sessionElapsed;const todayTotal=getTodaySeasonSeconds()+current;e.textContent=formatDurationLong(current);if(day)day.textContent=formatDurationLong(todayTotal);if(card)card.classList.toggle("running",sessionRunning);if(state)state.textContent=sessionRunning?"● Recording practice time":"Ready";if(sessionRunning)sessionRAF=requestAnimationFrame(updateSessionTimer)}
+function startSession(){sessionRunning=true;sessionStartedAt=Date.now();sessionElapsed=0;document.getElementById("sessionBtn").innerHTML='<i data-lucide="square"></i><span>End Practice</span>';lucide.createIcons();updateSessionTimer()}
+function stopSession(save=true){if(!sessionRunning)return;sessionElapsed=Math.floor((Date.now()-sessionStartedAt)/1000);sessionRunning=false;stopMetro();document.getElementById("sessionBtn").innerHTML='<i data-lucide="timer"></i><span>Start Practice</span>';lucide.createIcons();if(save&&sessionElapsed>=1)saveSession(sessionElapsed);updateSessionTimer()}
+function updateSessionTimer(){const e=document.getElementById("sessionTime"),day=document.getElementById("daySessionTime"),card=document.getElementById("practiceTimerCard"),state=document.getElementById("sessionTimerState");const current=sessionRunning?Math.floor((Date.now()-sessionStartedAt)/1000):sessionElapsed;const todayTotal=getTodaySeasonSeconds()+current;e.textContent=formatDurationLong(current);if(day)day.textContent=formatDurationLong(todayTotal);if(card)card.classList.toggle("running",sessionRunning);if(state)state.textContent=sessionRunning?"● Recording practice time":"Ready";if(sessionRunning)sessionRAF=requestAnimationFrame(updateSessionTimer);if(document.getElementById("focusOverlay")?.classList.contains("open")&&typeof updateFocusUI==="function")updateFocusUI()}
 function formatDurationLong(sec){sec=Math.max(0,Math.floor(Number(sec)||0));return `${String(Math.floor(sec/3600)).padStart(2,"0")}:${String(Math.floor((sec%3600)/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`}
 function saveSession(seconds){let p=currentPractice();if(!p)return;p.sessions.push({id:crypto.randomUUID(),date:new Date().toISOString(),seconds,bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning});p.practiceDays=p.practiceDays||{};p.practiceDays[localDateKey(new Date())]=true;saveDB()}
 
@@ -647,7 +819,7 @@ function playLastRecording(){let r=(currentPractice().recordings||[]).at(-1);if(
 function formatDateTime(d){return new Date(d).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}
 
 function periodSessions(){if(period==="calendar")period="month";let now=new Date();let start=new Date(now);if(period==="week"){let day=(now.getDay()+6)%7;start.setDate(now.getDate()-day);start.setHours(0,0,0,0)}else if(period==="month"){start=new Date(now.getFullYear(),now.getMonth(),1)}else start=new Date(now.getFullYear(),0,1);return allSessions().filter(s=>new Date(s.date)>=start)}
-function setPeriod(v,b){period=v;if(v==="calendar"){document.getElementById("panel-calendar").style.display="block";renderCalendar()}else document.getElementById("panel-calendar").style.display="none";document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderOverview()}
+function setPeriod(v,b){period=v;if(v==="calendar"){document.getElementById("panel-calendar").style.display="block";renderCalendar()}else document.getElementById("panel-calendar").style.display="none";document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));if(b)b.classList.add("active");renderOverview()}
 function renderOverview(){let ss=periodSessions(),time=ss.reduce((a,s)=>a+(s.seconds||0),0),days=new Set(ss.map(s=>localDateKey(s.date)));document.getElementById("periodSessions").textContent=ss.length;document.getElementById("periodTime").textContent=formatMinutes(time);document.getElementById("periodDays").textContent=days.size;let buckets=period==="week"?7:period==="month"?30:12,labels=[],vals=[];if(period==="year"){for(let m=0;m<12;m++){labels.push(new Date(new Date().getFullYear(),m,1).toLocaleDateString("fa-IR",{month:"short"}));vals.push(ss.filter(s=>new Date(s.date).getMonth()===m).reduce((a,s)=>a+(s.seconds||0),0)/60)}}else{for(let i=buckets-1;i>=0;i--){let d=new Date();d.setDate(d.getDate()-i);let k=localDateKey(d);labels.push(d.getDate());vals.push(ss.filter(s=>localDateKey(s.date)===k).reduce((a,s)=>a+(s.seconds||0),0)/60)}}let c=document.getElementById("overviewChart").getContext("2d");if(chart)chart.destroy();chart=new Chart(c,{type:"line",data:{labels,datasets:[{data:vals,borderColor:"#00f5ff",backgroundColor:"rgba(0,245,255,.08)",fill:true,tension:.35,pointRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:"rgba(255,255,255,.03)"},ticks:{color:"#66728c",font:{size:7}}},y:{grid:{color:"rgba(255,255,255,.03)"},ticks:{color:"#66728c",font:{size:7}}}}}})}
 
 function currentStats(){let s=currentPractice()?.sessions||[],bp=s.map(x=>Number(x.bpm)).filter(Boolean),total=s.reduce((a,x)=>a+(x.seconds||0),0);return{best:bp.length?Math.max(...bp):null,last:s.at(-1)?.bpm||null,avg:bp.length?Math.round(bp.reduce((a,b)=>a+b,0)/bp.length):null,total,longest:s.length?Math.max(...s.map(x=>x.seconds||0)):0}}
@@ -657,7 +829,51 @@ function renderHistory(){let e=document.getElementById("historyList"),s=currentP
 function changeCalendarMonth(delta){calendarCursor.setMonth(calendarCursor.getMonth()+delta);renderCalendar()}
 function renderCalendar(){const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth(),names=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];document.getElementById("calMonth").textContent=new Date(y,m,1).toLocaleDateString("en-US",{month:"long",year:"numeric"});document.getElementById("calendarWeekdays").innerHTML=names.map(x=>`<div>${x}</div>`).join("");const first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate(),sessions=allSessions().filter(s=>{let d=new Date(s.date);return d.getFullYear()===y&&d.getMonth()===m}),byDay={};sessions.forEach(s=>{let d=new Date(s.date).getDate();(byDay[d]??=[]).push(s)});let html="";for(let i=0;i<first;i++)html+='<div class="calendar-cell empty"></div>';for(let d=1;d<=last;d++){let a=byDay[d]||[],t=new Date(),today=t.getFullYear()===y&&t.getMonth()===m&&t.getDate()===d,mins=Math.round(a.reduce((x,s)=>x+(s.seconds||0),0)/60);html+=`<div class="calendar-cell ${a.length?"practiced":""} ${today?"today":""}"><span class="num">${d}</span>${a.length?'<span class="check">✓</span>':""}${mins?`<span class="mins">${mins}m</span>`:""}</div>`}document.getElementById("calendarGrid").innerHTML=html;document.getElementById("calMonthSessions").textContent=sessions.length;document.getElementById("calMonthTime").textContent=formatMinutes(sessions.reduce((a,x)=>a+(x.seconds||0),0));document.getElementById("calMonthDays").textContent=new Set(sessions.map(s=>localDateKey(s.date))).size}
 
-function renderAll(){let p=currentPractice();if(p)loadPracticeSettings(p);renderPracticeList();renderHeader();setBpm(bpm);updateVolumeUI();updateTarget();renderVisual();renderMeter();renderRhythm();renderOptions();renderStats();renderHistory();renderOverview();renderCalendar();renderRecordings();lucide.createIcons()}
+function toggleSection(id){
+  const card=document.getElementById(id); if(!card)return;
+  const collapsed=card.classList.toggle("collapsed");
+  const btn=card.querySelector(".section-collapse");
+  if(btn)btn.setAttribute("aria-expanded",collapsed?"false":"true");
+  localStorage.setItem("mkStudioCollapse_"+id,collapsed?"1":"0");
+}
+function restoreSectionState(){
+  ["practiceOverview","historyCard","statsCard"].forEach(id=>{
+    const card=document.getElementById(id); if(!card)return;
+    const saved=localStorage.getItem("mkStudioCollapse_"+id);
+    const collapsed=saved===null ? true : saved==="1";
+    card.classList.toggle("collapsed",collapsed);
+    const btn=card.querySelector(".section-collapse");
+    if(btn)btn.setAttribute("aria-expanded",collapsed?"false":"true");
+  });
+}
+function pulseMetroCard(accent=false){
+  const card=document.querySelector(".tempo-display-card"); if(!card)return;
+  card.classList.remove("beat-pulse","beat-accent"); void card.offsetWidth;
+  card.classList.add(accent?"beat-accent":"beat-pulse");
+  clearTimeout(window.__metroPulseClear);
+  window.__metroPulseClear=setTimeout(()=>card.classList.remove("beat-pulse","beat-accent"),240);
+  const focusBeat=document.getElementById("focusBeat");
+  if(focusBeat){focusBeat.classList.remove("pulse");void focusBeat.offsetWidth;focusBeat.classList.add("pulse");setTimeout(()=>focusBeat.classList.remove("pulse"),130)}
+}
+function pulseAtAudioTime(time,accent=false){
+  if(!audioCtx)return;
+  const delay=Math.max(0,(time-audioCtx.currentTime)*1000);
+  setTimeout(()=>{if(metroRunning)pulseMetroCard(accent)},delay);
+}
+
+function toggleDashboardMenu(){
+  const m=document.getElementById("dashboardMenu"); if(!m)return;
+  m.classList.toggle("open");
+  if(m.classList.contains("open"))restoreSectionState();
+}
+let metroMuted=false;
+function toggleMute(){
+  metroMuted=!metroMuted;
+  const b=document.getElementById("muteBtn");
+  if(b){b.classList.toggle("active",metroMuted);b.innerHTML=metroMuted?'<i data-lucide="volume-x"></i><span>Muted</span>':'<i data-lucide="volume-2"></i><span>Mute</span>';lucide.createIcons()}
+  settings().muted=metroMuted;localStorage.setItem(DB_KEY,JSON.stringify(db));
+}
+function renderAll(){let p=currentPractice();if(p)loadPracticeSettings(p);renderPracticeList();renderHeader();setBpm(bpm);updateVolumeUI();updateTarget();renderVisual();renderMeter();renderRhythm();renderOptions();renderStats();renderHistory();renderOverview();renderCalendar();renderRecordings();const mb=document.getElementById("muteBtn");if(mb){mb.classList.toggle("active",metroMuted);mb.innerHTML=metroMuted?'<i data-lucide="volume-x"></i><span>Muted</span>':'<i data-lucide="volume-2"></i><span>Mute</span>'}lucide.createIcons()}
 function togglePanel(name,btn){let p=document.getElementById("panel-"+name),open=p.classList.contains("open");document.querySelectorAll(".panel").forEach(x=>x.classList.remove("open"));document.querySelectorAll(".tool").forEach(x=>x.classList.remove("active"));if(!open){p.classList.add("open");btn.classList.add("active")}}
 
 function openNew(){document.getElementById("practiceModal").classList.add("open");setTimeout(()=>document.getElementById("newName").focus(),80)}
@@ -787,15 +1003,66 @@ async function signOut(){if(sb)await sb.auth.signOut();document.getElementById("
 async function loadUserEmail(){if(!sb){document.getElementById("profileEmail").textContent="Local mode";return}try{let {data}=await sb.auth.getUser();const email=data?.user?.email;document.getElementById("profileEmail").textContent=email||"Not signed in";const b=document.getElementById("authActionBtn");if(b){b.textContent=email?"Sign Out":"Sign In";b.onclick=email?signOut:openAuth}}catch{document.getElementById("profileEmail").textContent="Not signed in"}}
 let syncTimer=null;function debouncedSync(){clearTimeout(syncTimer);syncTimer=setTimeout(syncNow,900)}
 async function loadCloudData(){if(!sb)return;try{const {data:{user}}=await sb.auth.getUser();if(!user)return;const localDirty=localStorage.getItem("mkStudioLocalDirtyAt");const {data,error}=await sb.from(SUPABASE_TABLE).select("data").eq("user_id",user.id).maybeSingle();if(error)throw error;if(localDirty){await syncNow(true);return}if(data?.data?.practices){db=data.data;currentId=localStorage.getItem("studioMetronomeCurrent");if(!currentId||!db.practices.some(p=>p.id===currentId))currentId=db.practices[0]?.id;localStorage.setItem(DB_KEY,JSON.stringify(db));if(currentId)localStorage.setItem("studioMetronomeCurrent",currentId);renderAll();setSync("Synced","Cloud data loaded.")}else{await syncNow(true)}}catch(e){console.error("Cloud load failed",e);setSync("Local","Cloud load failed; local data preserved.")}}
-async function syncNow(silent=false){if(!sb){setSync("Local","Supabase client is unavailable.");return false}try{let {data:{user}}=await sb.auth.getUser();if(!user){setSync("Local","Not signed in; data is local.");return false}if(!silent)setSync("Syncing…","Saving MK Studio data to Supabase");let payload={user_id:user.id,data:db,updated_at:new Date().toISOString()};let {error}=await sb.from(SUPABASE_TABLE).upsert(payload,{onConflict:"user_id"});if(error)throw error;localStorage.removeItem("mkStudioLocalDirtyAt");setSync("Synced","Supabase sync is active.");return true}catch(e){console.error("Sync failed",e);setSync("Local","Sync failed; local data was preserved.");return false}}
+async function syncNow(silent=false){if(!sb){setSync("Local","Supabase client is unavailable.");return false}try{let {data:{user}}=await sb.auth.getUser();if(!user){setSync("Local","Not signed in; data is local.");return false}if(!silent)setSync("Syncing…","Saving MK Studio data to Supabase");let updatedAt=new Date().toISOString();realtimeLastUpdatedAt=updatedAt;let payload={user_id:user.id,data:db,updated_at:updatedAt};let {error}=await sb.from(SUPABASE_TABLE).upsert(payload,{onConflict:"user_id"});if(error)throw error;localStorage.removeItem("mkStudioLocalDirtyAt");setSync("Synced","Supabase sync is active.");return true}catch(e){console.error("Sync failed",e);setSync("Local","Sync failed; local data was preserved.");return false}}
 function setSync(a,b){document.getElementById("syncStatus").textContent=a;document.getElementById("syncDetail").textContent=b}
 
 document.addEventListener("keydown",e=>{if(["INPUT","SELECT","TEXTAREA"].includes(e.target.tagName))return;if(e.code==="Space"){e.preventDefault();toggleMetro()}if(e.key==="ArrowUp")changeBpm(1);if(e.key==="ArrowDown")changeBpm(-1);if(e.key.toLowerCase()==="r")toggleRecording()});
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&audioCtx?.state==="suspended")audioCtx.resume()});
 window.addEventListener("resize",()=>{if(window.innerWidth>760)toggleSidebar(false)});
 
-loadPracticeSettings(currentPractice());renderAll();
-if(sb){sb.auth.onAuthStateChange(async (event,session)=>{await loadUserEmail();if(session && (event==="SIGNED_IN"||event==="INITIAL_SESSION"))await loadCloudData()})}
+let realtimeChannel=null;
+let realtimeUserId=null;
+let realtimeApplying=false;
+let realtimeLastUpdatedAt="";
+function startRealtimeSync(user){
+  if(!sb||!user)return;
+  if(realtimeChannel)sb.removeChannel(realtimeChannel);
+  realtimeUserId=user.id;
+  realtimeChannel=sb.channel("mk-studio-realtime-"+user.id)
+    .on("postgres_changes",{event:"UPDATE",schema:"public",table:SUPABASE_TABLE,filter:"user_id=eq."+user.id},payload=>{
+      const remote=payload?.new;
+      if(!remote?.data?.practices||realtimeApplying)return;
+      if(remote.updated_at&&remote.updated_at===realtimeLastUpdatedAt)return;
+      const localDirty=localStorage.getItem("mkStudioLocalDirtyAt");
+      if(localDirty){
+        setSync("Local changes","Waiting for your latest local changes to sync.");
+        debouncedSync();
+        return;
+      }
+      try{
+        realtimeApplying=true;
+        db=remote.data;
+        currentId=localStorage.getItem("studioMetronomeCurrent");
+        if(!currentId||!db.practices.some(p=>p.id===currentId))currentId=db.practices[0]?.id;
+        if(currentId)localStorage.setItem("studioMetronomeCurrent",currentId);
+        localStorage.setItem(DB_KEY,JSON.stringify(db));
+        loadPracticeSettings(currentPractice());
+        renderAll();
+        restoreSectionState();
+        setSync("Realtime","Updated from another device.");
+        realtimeLastUpdatedAt=remote.updated_at||"";
+      }finally{realtimeApplying=false}
+    })
+    .subscribe(status=>{
+      if(status==="SUBSCRIBED")setSync("Realtime","Live Supabase sync is connected.");
+      else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")setSync("Local","Realtime connection unavailable; normal sync remains active.");
+    });
+}
+function stopRealtimeSync(){
+  if(sb&&realtimeChannel){sb.removeChannel(realtimeChannel);realtimeChannel=null}
+  realtimeUserId=null;
+}
+loadPracticeSettings(currentPractice());renderAll();restoreSectionState();
+if(sb){
+  sb.auth.onAuthStateChange(async (event,session)=>{
+    await loadUserEmail();
+    if(session && (event==="SIGNED_IN"||event==="INITIAL_SESSION")){
+      await loadCloudData();
+      startRealtimeSync(session.user);
+    }
+    if(!session)stopRealtimeSync();
+  });
+}
 let at=settings().autoTempo;
 if((special==="accelerando"||special==="ritardando")&&at){
   const i=document.getElementById("techniqueTempoInterval");
@@ -847,19 +1114,27 @@ function updateFocusUI(){
   const seasonEl=document.getElementById("focusSeason");
   const tempoEl=document.getElementById("focusTempoInfo");
   const timerEl=document.getElementById("focusTimerInfo");
+  const dayTimerEl=document.getElementById("focusDayTimerInfo");
   const btn=document.getElementById("focusPracticeBtn");
+  const seasonBtn=document.getElementById("focusSeasonBtn");
+  const tempoValue=document.getElementById("focusTempoValue");
   if(bpmEl)bpmEl.textContent=String(bpm);
   if(seasonEl){
     try{seasonEl.textContent=(typeof currentSeason!=="undefined"&&currentSeason?.name)?currentSeason.name.toUpperCase():"MK STUDIO"}catch(e){}
   }
   if(tempoEl)tempoEl.textContent=metroRunning?"RUNNING":"READY";
-  if(timerEl){
-    try{
-      const secs=(typeof sessionStartTime!=="undefined"&&sessionStartTime)?Math.max(0,Math.floor((Date.now()-sessionStartTime)/1000)):0;
-      timerEl.textContent=fmtTime?fmtTime(secs):"00:00";
-    }catch(e){}
-  }
-  if(btn)btn.textContent=metroRunning?"■ Stop":"▶ Start";
+  try{
+    const secs=(typeof sessionRunning!=="undefined"&&sessionRunning&&typeof sessionStartedAt!=="undefined"&&sessionStartedAt)?Math.max(0,Math.floor((Date.now()-sessionStartedAt)/1000)):(typeof sessionElapsed!=="undefined"?Math.max(0,sessionElapsed):0);
+    if(timerEl)timerEl.textContent=(typeof formatDurationLong==="function")?formatDurationLong(secs):new Date(secs*1000).toISOString().slice(11,19);
+    if(dayTimerEl){const total=(typeof getTodaySeasonSeconds==="function"?getTodaySeasonSeconds():0)+(sessionRunning?secs:0);dayTimerEl.textContent=(typeof formatDurationLong==="function")?formatDurationLong(total):new Date(total*1000).toISOString().slice(11,19)}
+  }catch(e){}
+  if(tempoValue)tempoValue.textContent=String(bpm);
+  if(btn)btn.textContent=metroRunning?"■ Stop Metronome":"▶ Start Metronome";
+  if(seasonBtn)seasonBtn.textContent=sessionRunning?"■ Stop Season":"▶ Start Season";
+}
+function toggleSeasonFromFocus(){
+  try{toggleSession()}catch(e){}
+  updateFocusUI();
 }
 function togglePracticeFromFocus(){
   try{
@@ -884,21 +1159,44 @@ function togglePracticeFromFocus(){
   },500);
 })();
 
+
+window.addEventListener("DOMContentLoaded",()=>{
+  document.querySelectorAll(".panel").forEach(x=>x.classList.remove("open"));
+  document.querySelectorAll(".tool").forEach(x=>x.classList.remove("active"));
+  const dm=document.getElementById("dashboardMenu");if(dm)dm.classList.remove("open");
+  restoreSectionState();
+  lucide.createIcons();
+});
 </script>
 
 <!-- MK Studio Pro additions -->
 <div class="mk-pro-modal" id="focusOverlay" aria-hidden="true">
   <div class="focus-shell">
     <div class="focus-top">
-      <div class="focus-season" id="focusSeason">SEASON</div>
-      <button class="focus-close" onclick="toggleFocusMode()">×</button>
+      <div>
+        <div class="focus-practice-name">PRACTICE</div>
+        <div class="focus-season" id="focusSeason">SEASON</div>
+      </div>
+      <button class="focus-close" onclick="toggleFocusMode()" title="Exit focus mode"><i data-lucide="x"></i></button>
     </div>
-    <div class="focus-bpm" id="focusBpm">120</div>
-    <div class="focus-beat" id="focusBeat">●</div>
-    <div class="focus-info"><span id="focusTempoInfo">READY</span><span id="focusTimerInfo">00:00</span></div>
-    <div class="focus-actions">
-      <button id="focusPracticeBtn" onclick="togglePracticeFromFocus()">▶ Start</button>
-      <button onclick="toggleFocusMode()">Exit Focus</button>
+
+    <div class="focus-main">
+      <div class="focus-bpm" id="focusBpm">120</div>
+      <div class="focus-beat" id="focusBeat">●</div>
+      <div class="focus-info"><span id="focusTempoInfo">READY</span></div>
+    </div>
+
+    <div class="focus-timers">
+      <div class="focus-timer"><i data-lucide="calendar-days"></i><span class="focus-timer-label">Today in Season</span><span class="focus-timer-value" id="focusDayTimerInfo">00:00:00</span></div>
+      <div class="focus-timer"><i data-lucide="timer"></i><span class="focus-timer-label">Current Session</span><span class="focus-timer-value" id="focusTimerInfo">00:00:00</span></div>
+    </div>
+
+    <div class="focus-controls">
+      <button class="focus-icon-action season" id="focusSeasonBtn" onclick="toggleSeasonFromFocus()" title="Start / stop season"><i data-lucide="play"></i><span>Season</span></button>
+      <button class="focus-icon-action metro" id="focusPracticeBtn" onclick="togglePracticeFromFocus()" title="Start / stop metronome"><i data-lucide="play"></i><span>Metronome</span></button>
+      <button class="focus-icon-action tempo" onclick="changeBpm(-1)" title="Decrease tempo"><i data-lucide="minus"></i></button>
+      <div class="focus-tempo-value"><b id="focusTempoValue">120</b><small>BPM</small></div>
+      <button class="focus-icon-action tempo" onclick="changeBpm(1)" title="Increase tempo"><i data-lucide="plus"></i></button>
     </div>
   </div>
 </div>
