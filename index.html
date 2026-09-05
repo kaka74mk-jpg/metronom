@@ -1380,7 +1380,7 @@ button, input, select, textarea {
           <div class="panel-title">Simple Practice Recording — No Layers or Mixing</div>
           <div class="simple-rec"><button id="recordBtn" class="rec-btn r" onclick="toggleRecording()">● Start Recording</button><button id="stopRecordBtn" class="rec-btn s" onclick="stopRecording()" disabled>■ Stop</button><button class="rec-btn p" onclick="playLastRecording()">▶ Play Last</button><span class="rec-status" id="recordStatus">Ready</span></div>
           <div class="recordings" id="recordingsList"></div>
-          <div class="notice">Recording captures the current practice with or without the metronome; microphone audio is recorded independently.</div>
+          <div class="notice">Recording captures the current practice with or without the metronome. Cloud recordings require the Supabase Storage bucket <b>mk-studio-recordings</b>; otherwise the recording remains local to this device.</div>
         </div>
       </div>
 
@@ -1433,6 +1433,7 @@ button, input, select, textarea {
 const SUPABASE_URL="https://ufynbbtrvkdvdcozpzpg.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_uzXbeTG-OBU2MGZPKLhPLQ_GkH-AG5B";
 const SUPABASE_TABLE="mk_studio_data";
+const SUPABASE_RECORDINGS_BUCKET="mk-studio-recordings";
 const sb=(window.supabase&&SUPABASE_PUBLISHABLE_KEY)?window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
 
 const DB_KEY="studioMetronome_neon_v7";
@@ -1464,7 +1465,7 @@ const specialDefs={normal:"Normal",trill:"Trill",tremolo2:"Tremolo ×2",tremolo3
 
 function defaultDB(){return{version:7,practices:[{id:crypto.randomUUID(),name:"My Practice",target:120,sessions:[],settings:{},practiceDays:{},recordings:[]}]}}
 function loadDB(){try{let x=JSON.parse(localStorage.getItem(DB_KEY)||"null");return x?.practices?x:defaultDB()}catch{return defaultDB()}}
-function saveDB(skipSync=false){localStorage.setItem(DB_KEY,JSON.stringify(db));if(!skipSync)localStorage.setItem("mkStudioLocalDirtyAt",String(Date.now()));renderAll();if(!skipSync)debouncedSync()}
+function saveDB(skipSync=false){localStorage.setItem(DB_KEY,JSON.stringify(db));if(!skipSync){localStorage.setItem("mkStudioLocalDirtyAt",String(Date.now()));}renderAll();if(!skipSync)debouncedSync()}
 function currentPractice(){let p=db.practices.find(x=>x.id===currentId);if(!p){p=db.practices[0];currentId=p?.id}return p}
 function settings(){let p=currentPractice();return p.settings||(p.settings={})}
 function saveSetting(k,v){settings()[k]=v;saveDB()}
@@ -1475,15 +1476,15 @@ function formatMinutes(sec){sec=Number(sec)||0;let h=Math.floor(sec/3600),m=Math
 function formatDuration(sec){sec=Math.floor(sec||0);return `${String(Math.floor(sec/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`}
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 
-function loadPracticeSettings(p){let s=p.settings||{};bpm=s.bpm||80;targetBpm=s.target||p.target||120;meterTime=s.meterTime||"4/4";meterNote=s.meterNote||"quarter";rhythmPattern=s.rhythmPattern||[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];sound=s.sound||"classic";drums=s.drums||"off";special=s.special||"normal";metroMuted=!!s.muted;let v=document.getElementById("bpmRange");if(v)v.value=bpm;let t=document.getElementById("targetRange");if(t)t.value=targetBpm;let ms=document.getElementById("meterSelect");if(ms){if([...ms.options].some(o=>o.value===meterTime))ms.value=meterTime;else{meterTime="4/4";ms.value="4/4"}}}
+function loadPracticeSettings(p){let s=p.settings||{};bpm=s.bpm||80;targetBpm=s.target||p.target||120;meterTime=s.meterTime||"4/4";meterNote=s.meterNote||"quarter";rhythmPattern=s.rhythmPattern||[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];sound=s.sound||"classic";drums=s.drums||"off";special=s.special||"normal";metroMuted=!!s.muted;customNotes=Array.isArray(s.customNotes)?s.customNotes:(JSON.parse(localStorage.getItem("metroCustomNotes")||"[]"));localStorage.setItem("metroCustomNotes",JSON.stringify(customNotes));let v=document.getElementById("bpmRange");if(v)v.value=bpm;let t=document.getElementById("targetRange");if(t)t.value=targetBpm;let ms=document.getElementById("meterSelect");if(ms){if([...ms.options].some(o=>o.value===meterTime))ms.value=meterTime;else{meterTime="4/4";ms.value="4/4"}}}
 function toggleSidebar(force){const sb=document.querySelector(".sidebar"),ov=document.getElementById("sidebarOverlay");if(!sb||!ov)return;const willOpen=typeof force==="boolean"?force:!sb.classList.contains("open");sb.classList.toggle("open",willOpen);ov.classList.toggle("open",willOpen)}
 function renderPracticeList(){let e=document.getElementById("practiceList");e.innerHTML="";db.practices.forEach(p=>{let r=document.createElement("div");r.className="item "+(p.id===currentId?"active":"");r.draggable=true;r.innerHTML=`<span class="season-icon" style="color:${p.color||"var(--cyan)"}"><i data-lucide="${p.icon||"music-2"}"></i></span><span class="season-name" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHTML(p.name)}</span><button class="season-delete" title="Delete season" aria-label="Delete ${escapeHTML(p.name)}" onclick="event.stopPropagation();deleteSeason('${p.id}')"><i data-lucide="trash-2"></i></button>`;r.onclick=()=>{currentId=p.id;localStorage.setItem("studioMetronomeCurrent",currentId);loadPracticeSettings(p);renderAll();toggleSidebar(false)};r.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",p.id);r.classList.add("dragging")});r.addEventListener("dragend",()=>r.classList.remove("dragging"));r.addEventListener("dragover",e=>e.preventDefault());r.addEventListener("drop",e=>{e.preventDefault();let from=e.dataTransfer.getData("text/plain"),to=p.id;if(from&&from!==to){let fi=db.practices.findIndex(x=>x.id===from),ti=db.practices.findIndex(x=>x.id===to);let [m]=db.practices.splice(fi,1);db.practices.splice(ti,0,m);saveDB()}});e.appendChild(r)})}
 function renderHeader(){let p=currentPractice();if(!p)return;document.getElementById("currentName").textContent=p.name;document.getElementById("currentMeta").textContent=`${p.sessions.length} sessions • Target ${p.target} BPM`;let ts=document.getElementById("tickerSeason"),tr=document.getElementById("tickerRhythm");if(ts)ts.textContent=p.name.toUpperCase();if(tr)tr.textContent=`${meterTime} • ${noteDefs[meterNote]?.symbol||customNotes.find(n=>n.id===meterNote)?.symbol||"♩"}`}
 function setRangeFill(el,val,color){let min=Number(el.min),max=Number(el.max),pct=((Number(val)-min)/(max-min))*100;el.style.background=`linear-gradient(90deg,${color} 0%,${color} ${pct}%,#1b2538 ${pct}%,#1b2538 100%)`}
-function setBpm(v){bpm=Math.max(20,Math.min(300,Math.round(Number(v))));document.getElementById("bpmRange").value=bpm;document.getElementById("bpmDisplay").textContent=bpm;document.getElementById("bpmValue").textContent=bpm;const fv=document.getElementById("focusTempoValue");if(fv)fv.textContent=bpm;const fb=document.getElementById("focusBpm");if(fb)fb.textContent=bpm;setRangeFill(document.getElementById("bpmRange"),bpm,"#00f5ff");updateTarget();settings().bpm=bpm;localStorage.setItem(DB_KEY,JSON.stringify(db))}
+function setBpm(v,persist=true){bpm=Math.max(20,Math.min(300,Math.round(Number(v))));document.getElementById("bpmRange").value=bpm;document.getElementById("bpmDisplay").textContent=bpm;document.getElementById("bpmValue").textContent=bpm;const fv=document.getElementById("focusTempoValue");if(fv)fv.textContent=bpm;const fb=document.getElementById("focusBpm");if(fb)fb.textContent=bpm;setRangeFill(document.getElementById("bpmRange"),bpm,"#00f5ff");settings().bpm=bpm;updateTarget();if(persist&&!realtimeApplying)saveDB()}
 function changeBpm(n){setBpm(bpm+n)}
-function updateVolumeUI(){let e=document.getElementById("volume"),v=Number(e.value);document.getElementById("volumeValue").textContent=Math.round(v*100)+"%";setRangeFill(e,v,"#ff2bd6");settings().volume=v;localStorage.setItem(DB_KEY,JSON.stringify(db))}
-function setTarget(v){targetBpm=Number(v);let p=currentPractice();if(p)p.target=targetBpm;document.getElementById("targetValue").textContent=targetBpm;localStorage.setItem(DB_KEY,JSON.stringify(db))}
+function updateVolumeUI(persist=false){let e=document.getElementById("volume"),v=Number(e.value);document.getElementById("volumeValue").textContent=Math.round(v*100)+"%";setRangeFill(e,v,"#ff2bd6");settings().volume=v;if(persist&&!realtimeApplying)saveDB()}
+function setTarget(v,persist=true){targetBpm=Math.max(20,Math.min(300,Math.round(Number(v)||120)));let p=currentPractice();if(p)p.target=targetBpm;document.getElementById("targetValue").textContent=targetBpm;document.getElementById("targetRange").value=targetBpm;setRangeFill(document.getElementById("targetRange"),targetBpm,"#b8ff3d");if(persist&&!realtimeApplying)saveDB()}
 function updateTarget(){let p=currentPractice();if(!p)return;targetBpm=p.target||120;document.getElementById("targetValue").textContent=targetBpm;document.getElementById("targetRange").value=targetBpm;setRangeFill(document.getElementById("targetRange"),targetBpm,"#b8ff3d")}
 function renderVisual(){let n=Math.max(4,getRhythmPattern().length);document.getElementById("leds").innerHTML=Array.from({length:Math.min(n,16)},(_,i)=>`<span class="led ${i===0?"first":""}" id="led-${i}"></span>`).join("")}
 function renderMeter(){document.getElementById("currentMeterDisplay").textContent=`${meterTime} • ${noteDefs[meterNote]?.symbol||customNotes.find(n=>n.id===meterNote)?.symbol||"♩"}`;renderNotes();let ms=document.getElementById("meterSelect");if(ms&&[...ms.options].some(o=>o.value===meterTime))ms.value=meterTime}
@@ -1491,11 +1492,11 @@ function renderNotes(){let e=document.getElementById("noteList");e.innerHTML="";
 function setMeterNote(v){meterNote=v;settings().meterNote=v;saveDB()}
 function setMeterFromSelect(v){meterTime=v;settings().meterTime=v;saveDB()}
 function applyCustomMeter(){let a=Number(document.getElementById("meterNum").value),b=Number(document.getElementById("meterDen").value);if(!a||!b)return;meterTime=`${a}/${b}`;settings().meterTime=meterTime;saveDB()}
-function addCustomNote(){let label=document.getElementById("customNoteName").value.trim();let div=Number(document.getElementById("customNoteDiv").value);if(!label||!div)return;let n={id:"custom_"+crypto.randomUUID(),label,symbol:"•",div};customNotes.push(n);localStorage.setItem("metroCustomNotes",JSON.stringify(customNotes));meterNote=n.id;settings().meterNote=meterNote;document.getElementById("customNoteName").value="";saveDB()}
+function addCustomNote(){let label=document.getElementById("customNoteName").value.trim();let div=Number(document.getElementById("customNoteDiv").value);if(!label||!div)return;let n={id:"custom_"+crypto.randomUUID(),label,symbol:"•",div};customNotes.push(n);settings().customNotes=customNotes;localStorage.setItem("metroCustomNotes",JSON.stringify(customNotes));meterNote=n.id;settings().meterNote=meterNote;document.getElementById("customNoteName").value="";saveDB()}
 
 function getRhythmPattern(){let active=[];rhythmPattern.forEach((x,i)=>{if(x)active.push(i/16)});return active.length?active:[0]}
 function rhythmSymbol(v){return v===2?"♬":v===1?"♪":"·"}
-function renderRhythm(){let e=document.getElementById("rhythmGrid");e.innerHTML="";for(let i=0;i<16;i++){let v=Number(rhythmPattern[i]||0),b=document.createElement("button");b.className="step "+(v?"on":"");b.innerHTML=`<span>${rhythmSymbol(v)}</span><small>${i+1}</small>`;b.title=v===0?"Rest":"Click to change note";b.onclick=()=>{rhythmPattern[i]=(v+1)%3;if(i===0&&rhythmPattern[i]===0)rhythmPattern[i]=1;settings().rhythmPattern=rhythmPattern;localStorage.setItem(DB_KEY,JSON.stringify(db));renderRhythm();renderHeader()};e.appendChild(b)}}
+function renderRhythm(){let e=document.getElementById("rhythmGrid");e.innerHTML="";for(let i=0;i<16;i++){let v=Number(rhythmPattern[i]||0),b=document.createElement("button");b.className="step "+(v?"on":"");b.innerHTML=`<span>${rhythmSymbol(v)}</span><small>${i+1}</small>`;b.title=v===0?"Rest":"Click to change note";b.onclick=()=>{rhythmPattern[i]=(v+1)%3;if(i===0&&rhythmPattern[i]===0)rhythmPattern[i]=1;settings().rhythmPattern=rhythmPattern;saveDB()};e.appendChild(b)}}
 function loadRhythmPreset(n){let x={quarter:[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],eighth:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],triplet:[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0],sixteenth:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]}[n];rhythmPattern=x;settings().rhythmPattern=x;saveDB()}
 function clearRhythm(){rhythmPattern=[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];settings().rhythmPattern=rhythmPattern;saveDB()}
 
@@ -1586,10 +1587,59 @@ function saveSession(seconds){let p=currentPractice();if(!p)return;p.sessions.pu
 async function toggleRecording(){mediaRecorder?.state==="recording"?stopRecording():startRecording()}
 async function startRecording(){try{mediaStream=await navigator.mediaDevices.getUserMedia({audio:true});recordingChunks=[];mediaRecorder=new MediaRecorder(mediaStream);mediaRecorder.ondataavailable=e=>{if(e.data.size)recordingChunks.push(e.data)};mediaRecorder.onstop=finishRecording;mediaRecorder.start(250);recordingStartedAt=Date.now();document.getElementById("recordBtn").textContent="● Recording";document.getElementById("stopRecordBtn").disabled=false;document.getElementById("recordStatus").textContent=metroRunning?"Recording with metronome":"Recording without metronome"}catch(e){alert("Microphone permission is required for recording.")}}
 function stopRecording(){if(mediaRecorder?.state==="recording")mediaRecorder.stop()}
-function finishRecording(){let blob=new Blob(recordingChunks,{type:mediaRecorder.mimeType||"audio/webm"});let p=currentPractice();p.recordings=p.recordings||[];p.recordings.push({id:crypto.randomUUID(),date:new Date().toISOString(),duration:Math.floor((Date.now()-recordingStartedAt)/1000),metro:metroRunning,blobUrl:URL.createObjectURL(blob)});recordings=p.recordings;mediaStream?.getTracks().forEach(t=>t.stop());mediaRecorder=null;document.getElementById("recordBtn").textContent="● Start Recording";document.getElementById("stopRecordBtn").disabled=true;document.getElementById("recordStatus").textContent="Record saved";renderRecordings()}
-function renderRecordings(){let p=currentPractice(),e=document.getElementById("recordingsList");e.innerHTML="";(p?.recordings||[]).slice(-12).reverse().forEach(r=>{let row=document.createElement("div");row.className="recording";row.innerHTML=`<span>${formatDateTime(r.date)} • ${formatDuration(r.duration)} • ${r.metro?"With metronome":"Without metronome"}</span><div style="display:flex;gap:4px"><button class="small-btn" onclick="playRecording('${r.id}')">▶</button><button class="small-btn" style="color:var(--danger)" onclick="deleteRecording('${r.id}')">✕</button></div>`;e.appendChild(row)})}
-function deleteRecording(id){let p=currentPractice();if(!p)return;let r=(p.recordings||[]).find(x=>x.id===id);if(!r||!confirm("Delete this recording?"))return;try{if(r.blobUrl)URL.revokeObjectURL(r.blobUrl)}catch{}p.recordings=p.recordings.filter(x=>x.id!==id);saveDB()}
-function playRecording(id){let r=(currentPractice().recordings||[]).find(x=>x.id===id);if(!r?.blobUrl)return;new Audio(r.blobUrl).play()}
+async function uploadRecordingBlob(blob,recordingId,practiceId){
+  if(!sb)return null;
+  const {data:{user}}=await sb.auth.getUser();
+  if(!user)return null;
+  const ext=blob.type&&blob.type.includes("mp4")?"m4a":"webm";
+  const path=`${user.id}/${practiceId}/${recordingId}.${ext}`;
+  const {error}=await sb.storage.from(SUPABASE_RECORDINGS_BUCKET).upload(path,blob,{contentType:blob.type||"audio/webm",upsert:false});
+  if(error)throw error;
+  return path;
+}
+async function getRecordingUrl(storagePath){
+  if(!sb||!storagePath)return null;
+  const {data,error}=await sb.storage.from(SUPABASE_RECORDINGS_BUCKET).createSignedUrl(storagePath,3600);
+  if(error)throw error;
+  return data?.signedUrl||null;
+}
+async function finishRecording(){
+  const mime=mediaRecorder?.mimeType||"audio/webm";
+  const blob=new Blob(recordingChunks,{type:mime});
+  const p=currentPractice();
+  if(!p)return;
+  p.recordings=p.recordings||[];
+  const id=crypto.randomUUID();
+  const localUrl=URL.createObjectURL(blob);
+  const rec={id,date:new Date().toISOString(),duration:Math.floor((Date.now()-recordingStartedAt)/1000),metro:metroRunning,mimeType:mime,size:blob.size,blobUrl:localUrl,uploading:true};
+  p.recordings.push(rec);
+  recordings=p.recordings;
+  mediaStream?.getTracks().forEach(t=>t.stop());
+  mediaStream=null; mediaRecorder=null;
+  document.getElementById("recordBtn").textContent="● Start Recording";
+  document.getElementById("stopRecordBtn").disabled=true;
+  document.getElementById("recordStatus").textContent="Uploading recording…";
+  renderRecordings();
+  saveDB();
+  try{
+    const storagePath=await uploadRecordingBlob(blob,id,p.id);
+    rec.storagePath=storagePath;
+    delete rec.uploading;
+    rec.blobUrl=localUrl;
+    saveDB();
+    document.getElementById("recordStatus").textContent="Record saved to cloud";
+  }catch(e){
+    console.error("Recording upload failed",e);
+    delete rec.uploading;
+    rec.uploadError=true;
+    saveDB();
+    document.getElementById("recordStatus").textContent="Saved locally; cloud upload failed";
+  }
+  renderRecordings();
+}
+function renderRecordings(){let p=currentPractice(),e=document.getElementById("recordingsList");e.innerHTML="";(p?.recordings||[]).slice(-12).reverse().forEach(r=>{let row=document.createElement("div");row.className="recording";const cloud=r.storagePath?" ☁":"";const state=r.uploading?" • Uploading…":(r.uploadError?" • Local only":"");row.innerHTML=`<span>${formatDateTime(r.date)} • ${formatDuration(r.duration)} • ${r.metro?"With metronome":"Without metronome"}${cloud}${state}</span><div style="display:flex;gap:4px"><button class="small-btn" onclick="playRecording('${r.id}')">▶</button><button class="small-btn" style="color:var(--danger)" onclick="deleteRecording('${r.id}')">✕</button></div>`;e.appendChild(row)})}
+async function deleteRecording(id){let p=currentPractice();if(!p)return;let r=(p.recordings||[]).find(x=>x.id===id);if(!r||!confirm("Delete this recording?"))return;if(r.storagePath&&sb){try{const {error}=await sb.storage.from(SUPABASE_RECORDINGS_BUCKET).remove([r.storagePath]);if(error)throw error}catch(e){console.warn("Cloud recording delete failed",e)}}try{if(r.blobUrl)URL.revokeObjectURL(r.blobUrl)}catch{}p.recordings=p.recordings.filter(x=>x.id!==id);saveDB()}
+async function playRecording(id){let r=(currentPractice().recordings||[]).find(x=>x.id===id);if(!r)return;try{let url=r.blobUrl;if(!url&&r.storagePath)url=await getRecordingUrl(r.storagePath);if(!url)return;new Audio(url).play()}catch(e){console.error("Recording playback failed",e);alert("This recording could not be played. Check the cloud recording storage setup.")}}
 function playLastRecording(){let r=(currentPractice().recordings||[]).at(-1);if(r)playRecording(r.id)}
 function formatDateTime(d){return new Date(d).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}
 
@@ -1646,9 +1696,9 @@ function toggleMute(){
   metroMuted=!metroMuted;
   const b=document.getElementById("muteBtn");
   if(b){b.classList.toggle("active",metroMuted);b.innerHTML=metroMuted?'<i data-lucide="volume-x"></i><span>Muted</span>':'<i data-lucide="volume-2"></i><span>Mute</span>';lucide.createIcons()}
-  settings().muted=metroMuted;localStorage.setItem(DB_KEY,JSON.stringify(db));
+  settings().muted=metroMuted;saveDB();
 }
-function renderAll(){let p=currentPractice();if(p)loadPracticeSettings(p);renderPracticeList();renderHeader();setBpm(bpm);updateVolumeUI();updateTarget();renderVisual();renderMeter();renderRhythm();renderOptions();renderStats();renderHistory();renderOverview();renderCalendar();renderRecordings();const mb=document.getElementById("muteBtn");if(mb){mb.classList.toggle("active",metroMuted);mb.innerHTML=metroMuted?'<i data-lucide="volume-x"></i><span>Muted</span>':'<i data-lucide="volume-2"></i><span>Mute</span>'}lucide.createIcons()}
+function renderAll(){let p=currentPractice();if(p)loadPracticeSettings(p);renderPracticeList();renderHeader();setBpm(bpm,false);updateVolumeUI(false);updateTarget();renderVisual();renderMeter();renderRhythm();renderOptions();renderStats();renderHistory();renderOverview();renderCalendar();renderRecordings();const mb=document.getElementById("muteBtn");if(mb){mb.classList.toggle("active",metroMuted);mb.innerHTML=metroMuted?'<i data-lucide="volume-x"></i><span>Muted</span>':'<i data-lucide="volume-2"></i><span>Mute</span>'}lucide.createIcons()}
 function togglePanel(name,btn){let p=document.getElementById("panel-"+name),open=p.classList.contains("open");document.querySelectorAll(".panel").forEach(x=>x.classList.remove("open"));document.querySelectorAll(".tool").forEach(x=>x.classList.remove("active"));if(!open){p.classList.add("open");btn.classList.add("active")}}
 
 function openNew(){document.getElementById("practiceModal").classList.add("open");setTimeout(()=>document.getElementById("newName").focus(),80)}
@@ -1685,7 +1735,7 @@ async function resetAll(){
     localStorage.setItem("mkStudioLocalDirtyAt",String(Date.now()));
     alert("Cloud reset could not be completed. Your local reset was not discarded; existing cloud data was kept from being silently reloaded.");
     setSync("Local","Reset is local until cloud sync succeeds.");
-  };const longest=a.length?Math.max(...a.map(x=>Number(x.seconds)||0)):0;const longestEl=document.getElementById("allLongest");if(longestEl)longestEl.textContent=formatMinutes(longest)
+  }
 }
 function openProfile(){let a=allSessions(),bp=a.map(s=>Number(s.bpm)).filter(Boolean),t=a.reduce((x,s)=>x+s.seconds,0);document.getElementById("profileEmail").textContent="Loading…";document.getElementById("profileSessions").textContent=a.length;document.getElementById("profileTime").textContent=formatMinutes(t);document.getElementById("profileSeasons").textContent=db.practices.length;document.getElementById("profileDays").textContent=allDays().size;document.getElementById("profileBest").textContent=bp.length?Math.max(...bp):"—";document.getElementById("profileModal").classList.add("open");loadUserEmail()}
 function closeProfile(){document.getElementById("profileModal").classList.remove("open")}
@@ -1749,9 +1799,10 @@ function startTempoAutomation(){
   if(!metroRunning)startMetro();
   tempoModifierTimer=setInterval(()=>{
     if(!metroRunning)return;
-    setBpm(bpm+change);
+    setBpm(bpm+change,false);
+    saveDB();
   },interval*1000);
-  localStorage.setItem(DB_KEY,JSON.stringify(db));
+  saveDB();
   syncTechniqueTempoUI();
   return true;
 }
@@ -1767,7 +1818,7 @@ function closeSettings(){document.getElementById("settingsModal").classList.remo
 function openBackup(){document.getElementById("backupModal").classList.add("open")}
 function closeBackup(){document.getElementById("backupModal").classList.remove("open")}
 function exportData(){let a=document.createElement("a"),u=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:"application/json"}));a.href=u;a.download="studio-metronome-backup.json";a.click();URL.revokeObjectURL(u)}
-function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.practices)throw 0;db=x;currentId=db.practices[0].id;localStorage.setItem(DB_KEY,JSON.stringify(db));renderAll();closeBackup()}catch{alert("Invalid file.")}};r.readAsText(f)}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x||!Array.isArray(x.practices)||!x.practices.length)throw 0;x.version=Number(x.version)||7;x.practices=x.practices.map(p=>({...p,sessions:Array.isArray(p.sessions)?p.sessions:[],recordings:Array.isArray(p.recordings)?p.recordings:[],settings:p.settings&&typeof p.settings==="object"?p.settings:{},practiceDays:p.practiceDays&&typeof p.practiceDays==="object"?p.practiceDays:{}}));db=x;currentId=db.practices[0].id;localStorage.setItem("studioMetronomeCurrent",currentId);closeBackup();saveDB();alert("Backup imported and queued for cloud sync.")}catch{alert("Invalid backup file.")}finally{e.target.value=""}};r.readAsText(f)}
 
 function openAuth(){document.getElementById("authModal").classList.add("open");document.getElementById("authEmail").focus()}
 function closeAuth(){document.getElementById("authModal").classList.remove("open")}
@@ -1915,6 +1966,14 @@ if(sb){
     }
     if(!session)stopRealtimeSync();
   });
+  // Bootstrap the live channel even if the initial auth event was missed by the page lifecycle.
+  sb.auth.getSession().then(async ({data})=>{
+    const session=data?.session;
+    if(session){
+      await loadCloudData();
+      startRealtimeSync(session.user);
+    }
+  }).catch(()=>{});
 }
 let at=settings().autoTempo;
 if((special==="accelerando"||special==="ritardando")&&at){
@@ -2126,8 +2185,9 @@ window.addEventListener("DOMContentLoaded",()=>{
   // Ensure user-driven slider changes sync to other logged-in devices.
   document.addEventListener("input",function(e){
     if(e.target.matches("#bpmRange,#volume,#targetRange")){
-      localStorage.setItem("mkStudioLocalDirtyAt",String(Date.now()));
-      if(typeof debouncedSync==="function")debouncedSync();
+      if(e.target.id==="bpmRange")setBpm(e.target.value,true);
+      else if(e.target.id==="volume")updateVolumeUI(true);
+      else setTarget(e.target.value,true);
     }
   });
 
