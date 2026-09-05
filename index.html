@@ -281,6 +281,56 @@ button,input,select{font:inherit}button{cursor:pointer}
 
 
 .tempo-direction-indicator{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:17px;margin:2px auto;padding:2px 7px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(5,9,15,.45);color:var(--muted);font-size:7px;font-weight:900;letter-spacing:.12em;line-height:1;transition:all .18s ease}.tempo-arrow{font-size:11px;line-height:1}.tempo-direction-indicator.up{color:#b8ff3d;border-color:rgba(184,255,61,.28);box-shadow:0 0 12px rgba(184,255,61,.08)}.tempo-direction-indicator.down{color:#ff2bd6;border-color:rgba(255,43,214,.28);box-shadow:0 0 12px rgba(255,43,214,.08)}.tempo-direction-indicator.steady{color:var(--muted)}
+
+/* MK Studio Step 1 — mobile responsive season drawer + overflow protection */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+.main{min-width:0;width:100%}
+.main>*{min-width:0;max-width:100%}
+.layout,.visual-studio,.meter-card,.rhythm-card,.period-card,.history-card,.card,.overview{min-width:0}
+.mobile-season-btn{display:none}
+.season-drawer-backdrop{display:none}
+
+@media(max-width:760px){
+  .app{width:100%;max-width:100%;overflow-x:hidden}
+  .main{width:100%;max-width:100%;padding-left:10px;padding-right:10px;overflow-x:hidden}
+  .topbar{width:100%;min-width:0}
+  .topbar>div:first-child{min-width:0;overflow:hidden}
+  .current-name,.current-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .actions{flex:0 0 auto}
+  .mobile-season-btn{display:grid}
+
+  /* Turn the existing desktop Season List into a real mobile drawer. */
+  .sidebar{
+    display:block;
+    width:min(82vw,310px);
+    max-width:310px;
+    padding:16px 12px;
+    transform:translateX(-105%);
+    transition:transform .22s ease,box-shadow .22s ease;
+    box-shadow:18px 0 50px rgba(0,0,0,.5);
+    overflow-y:auto;
+    overflow-x:hidden;
+    z-index:100;
+  }
+  .sidebar.mobile-open{transform:translateX(0);box-shadow:18px 0 70px rgba(0,0,0,.7)}
+  .season-drawer-backdrop{
+    position:fixed;inset:0;background:rgba(0,0,0,.48);backdrop-filter:blur(2px);
+    z-index:90;display:block;opacity:0;pointer-events:none;transition:opacity .2s ease;
+  }
+  .season-drawer-backdrop.open{opacity:1;pointer-events:auto}
+
+  /* Prevent fixed/min-content children from forcing horizontal scrolling. */
+  .overview,.period-grid,.right,.history-row,.start-bar,.timer-grid,.tempo-ramp-grid{min-width:0;width:100%;}
+  .overview>*{min-width:0}
+  .kpi{min-width:0;overflow:hidden}
+  .kpi .v,.kpi .l{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .visual-studio{width:100%;max-width:100%;overflow:hidden}
+  .slider-row,.volume-row,.start-bar,.mk-pro-tools,.tools{max-width:100%;min-width:0}
+  .range{min-width:0;max-width:100%}
+  .bpm-number,.vol-val{flex:0 0 auto}
+  .market-ticker{max-width:100%;overflow:hidden}
+  .market-ticker span,.market-ticker b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+}
 </style>
 </head>
 <body>
@@ -291,11 +341,13 @@ button,input,select{font:inherit}button{cursor:pointer}
   <div class="section-label">SEASONS</div>
   <div id="practiceList"></div>
 </aside>
+<div class="season-drawer-backdrop" id="seasonDrawerBackdrop" onclick="closeSeasonDrawer()"></div>
 
 <main class="main">
   <header class="topbar">
     <div><div class="current-name" id="currentName">My Practice</div><div class="current-meta" id="currentMeta">Ready</div></div>
     <div class="actions">
+      <button class="icon-btn mobile-season-btn" title="Seasons" aria-label="Open seasons" onclick="toggleSeasonDrawer()"><i data-lucide="menu"></i></button>
       <button class="icon-btn" title="Profile" onclick="openProfile()"><i data-lucide="user-round"></i></button>
       <button class="icon-btn" title="Settings" onclick="openSettings()"><i data-lucide="settings-2"></i></button>
       <button class="icon-btn" title="Rename" onclick="renameCurrent()"><i data-lucide="pencil"></i></button>
@@ -910,6 +962,21 @@ function togglePracticeFromFocus(){
         });
     });
   }
+
+function openSeasonDrawer(){
+  const s=document.querySelector('.sidebar'),b=document.getElementById('seasonDrawerBackdrop');
+  if(s)s.classList.add('mobile-open'); if(b)b.classList.add('open');
+}
+function closeSeasonDrawer(){
+  const s=document.querySelector('.sidebar'),b=document.getElementById('seasonDrawerBackdrop');
+  if(s)s.classList.remove('mobile-open'); if(b)b.classList.remove('open');
+}
+function toggleSeasonDrawer(){
+  const s=document.querySelector('.sidebar');
+  if(s?.classList.contains('mobile-open')) closeSeasonDrawer(); else openSeasonDrawer();
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSeasonDrawer()});
+document.getElementById('practiceList')?.addEventListener('click',()=>{if(window.innerWidth<=760)closeSeasonDrawer()});
 </script>
 
 </body></html>
