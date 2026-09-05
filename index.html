@@ -1102,6 +1102,115 @@ button, input, select, textarea {
 }
 </style>
 
+
+<style id="mk-studio-v3-polish">
+/* ===== v3 interaction + color polish ===== */
+:root{--season-color:#00f5ff}
+
+.current-name,.current-meta,.market-below-tempo,.market-below-tempo b{
+  transition:color .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+.current-name{cursor:pointer}
+.current-name::after{content:" ✎";font-size:.55em;opacity:.45;vertical-align:middle}
+.current-name:hover{color:var(--season-color)!important}
+
+.market-below-tempo{
+  cursor:pointer!important;
+  border-color:color-mix(in srgb,var(--season-color) 30%,transparent)!important;
+  box-shadow:0 0 14px color-mix(in srgb,var(--season-color) 10%,transparent)!important;
+}
+.market-below-tempo:hover{
+  color:var(--season-color)!important;
+  border-color:color-mix(in srgb,var(--season-color) 55%,transparent)!important;
+}
+.market-below-tempo::after{
+  content:"✎";
+  font-size:9px;
+  opacity:.5;
+  margin-left:2px;
+}
+
+/* Recording is deliberately the strongest red action */
+.start.record{
+  background:linear-gradient(135deg,#ff2638,#c90028)!important;
+  color:#fff!important;
+  border:1px solid rgba(255,70,85,.75)!important;
+  box-shadow:0 0 18px rgba(255,38,56,.18);
+}
+.start.record:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.start.record:active{transform:translateY(0);filter:brightness(.96)}
+
+/* Practice = violet / premium */
+.start.session{
+  background:linear-gradient(135deg,#8b5cf6,#6d28d9)!important;
+  color:#fff!important;
+  border-color:rgba(167,139,250,.55)!important;
+  box-shadow:0 0 18px rgba(124,58,237,.18);
+}
+.start.session:hover{filter:brightness(1.08);transform:translateY(-1px)}
+
+/* Green volume slider */
+.volume-range{
+  background:linear-gradient(90deg,#22c55e 0%,#22c55e 70%,#1b2538 70%,#1b2538 100%)!important;
+}
+.volume-range::-webkit-slider-thumb{
+  background:#22c55e!important;
+  box-shadow:0 0 18px rgba(34,197,94,.62)!important;
+}
+.volume-range::-moz-range-thumb{
+  background:#22c55e!important;
+  border:0;
+  box-shadow:0 0 18px rgba(34,197,94,.62);
+}
+.vol-val{color:#22c55e!important}
+
+/* Metronome pulse follows the selected Season color */
+.tempo-display-card.beat-pulse{
+  box-shadow:0 0 38px color-mix(in srgb,var(--season-color) 28%,transparent),
+             inset 0 0 28px color-mix(in srgb,var(--season-color) 9%,transparent)!important;
+}
+.tempo-display-card.beat-accent{
+  box-shadow:0 0 44px color-mix(in srgb,var(--season-color) 34%,transparent),
+             0 0 0 1px color-mix(in srgb,var(--season-color) 38%,transparent),
+             var(--shadow)!important;
+}
+.led.on{
+  background:var(--season-color)!important;
+  box-shadow:0 0 18px var(--season-color)!important;
+}
+.led.first{background:var(--season-color)!important}
+
+/* Sync status: animated live indicator */
+#syncStatus{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  transition:color .2s ease;
+}
+#syncStatus::before{
+  content:"";
+  width:7px;height:7px;border-radius:50%;
+  background:currentColor;
+  box-shadow:0 0 0 0 currentColor;
+  opacity:.95;
+}
+#syncStatus.sync-live::before{animation:syncPulse 1.45s infinite}
+#syncStatus.sync-working::before{animation:syncSpinPulse .7s infinite}
+#syncStatus.sync-offline::before{animation:none;opacity:.5}
+@keyframes syncPulse{
+  0%,100%{transform:scale(1);box-shadow:0 0 0 0 currentColor}
+  50%{transform:scale(1.18);box-shadow:0 0 0 5px color-mix(in srgb,currentColor 0%,transparent)}
+}
+@keyframes syncSpinPulse{
+  0%{transform:scale(.75);opacity:.45}
+  50%{transform:scale(1.3);opacity:1}
+  100%{transform:scale(.75);opacity:.45}
+}
+
+/* Small edit affordance for the meter */
+.market-below-tempo{user-select:none}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -1887,6 +1996,103 @@ window.addEventListener("DOMContentLoaded",()=>{
         });
     });
   }
+</script>
+
+
+<script id="mk-studio-v3-js">
+(function(){
+  function seasonColor(){
+    const p=typeof currentPractice==="function"?currentPractice():null;
+    return p?.color || "#00f5ff";
+  }
+
+  function applySeasonColor(){
+    const c=seasonColor();
+    document.documentElement.style.setProperty("--season-color",c);
+    const card=document.querySelector(".metro-card");
+    if(card)card.style.setProperty("--season-color",c);
+  }
+
+  function openMeterEditor(){
+    const panel=document.getElementById("panel-meter");
+    const btn=[...document.querySelectorAll(".tool")].find(x=>/Meter/i.test(x.textContent||""));
+    if(panel){
+      document.querySelectorAll(".panel").forEach(x=>x.classList.remove("open"));
+      document.querySelectorAll(".tool").forEach(x=>x.classList.remove("active"));
+      panel.classList.add("open");
+      if(btn)btn.classList.add("active");
+      panel.scrollIntoView({behavior:"smooth",block:"nearest"});
+    }
+  }
+
+  function editSeasonName(){
+    const p=typeof currentPractice==="function"?currentPractice():null;
+    if(!p)return;
+    const next=prompt("Season name:",p.name);
+    if(next!==null && next.trim() && next.trim()!==p.name){
+      p.name=next.trim();
+      if(typeof saveDB==="function")saveDB();
+      else localStorage.setItem(DB_KEY,JSON.stringify(db));
+      applySeasonColor();
+    }
+  }
+
+  // Clickable session/season name and meter summary.
+  document.addEventListener("click",function(e){
+    const name=e.target.closest("#currentName");
+    if(name){e.preventDefault();editSeasonName();return}
+    const ticker=e.target.closest("#tickerSeason,#tickerRhythm,.market-below-tempo");
+    if(ticker){e.preventDefault();openMeterEditor()}
+  });
+
+  // Ensure user-driven slider changes sync to other logged-in devices.
+  document.addEventListener("input",function(e){
+    if(e.target.matches("#bpmRange,#volume,#targetRange")){
+      localStorage.setItem("mkStudioLocalDirtyAt",String(Date.now()));
+      if(typeof debouncedSync==="function")debouncedSync();
+    }
+  });
+
+  // Faster debounce for genuinely near-real-time cloud updates.
+  const originalDebouncedSync=window.debouncedSync;
+  if(typeof originalDebouncedSync==="function"){
+    window.debouncedSync=function(){
+      clearTimeout(window.__mkFastSyncTimer);
+      window.__mkFastSyncTimer=setTimeout(function(){
+        if(typeof syncNow==="function")syncNow();
+      },250);
+    };
+  }
+
+  // Animated sync state without changing the existing sync logic.
+  const originalSetSync=window.setSync;
+  if(typeof originalSetSync==="function"){
+    window.setSync=function(a,b){
+      originalSetSync(a,b);
+      const el=document.getElementById("syncStatus");
+      if(!el)return;
+      el.classList.remove("sync-live","sync-working","sync-offline");
+      if(/realtime|synced/i.test(String(a)))el.classList.add("sync-live");
+      else if(/syncing/i.test(String(a)))el.classList.add("sync-working");
+      else if(/local|failed|offline/i.test(String(a)))el.classList.add("sync-offline");
+    };
+  }
+
+  // Re-apply the selected Season color after every render.
+  const oldRenderAll=window.renderAll;
+  if(typeof oldRenderAll==="function"){
+    window.renderAll=function(){
+      const r=oldRenderAll.apply(this,arguments);
+      applySeasonColor();
+      return r;
+    };
+  }
+
+  // Initial state.
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",applySeasonColor,{once:true});
+  }else applySeasonColor();
+})();
 </script>
 
 </body></html>
