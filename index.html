@@ -436,6 +436,672 @@ button,input,select{font:inherit}button{cursor:pointer}
 .tempo-display-card .led{display:block!important;flex:0 0 7px!important;width:7px!important;height:7px!important}
 @media(max-width:520px){.tempo-display-card{gap:6px!important}.tempo-display-card .bpm-big{font-size:clamp(42px,14vw,52px)!important}.tempo-display-card .leds{gap:5px!important}}
 </style>
+<style>
+/* =========================================================
+   FINAL MOBILE RESPONSIVE FIX
+   Prevent horizontal clipping / half-visible UI on phones.
+   ========================================================= */
+
+html, body, .app, .main, .layout, .layout > div, .right,
+.metro-card, .period-card, .card, .section-body, .panel {
+  min-width: 0;
+}
+
+img, svg, canvas, video, iframe, input, select, button {
+  max-width: 100%;
+}
+
+button, input, select {
+  min-width: 0;
+}
+
+.topbar {
+  min-width: 0;
+}
+
+.current-name,
+.current-meta {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.period-head {
+  min-width: 0;
+}
+
+.period-head .section-collapse {
+  min-width: 0;
+}
+
+.period-head .tabs {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.layout > div,
+.layout > aside {
+  width: 100%;
+}
+
+.metro-visual,
+.visual-studio,
+.tempo-display-card,
+.practice-timer-card,
+.timer-grid,
+.timer-box,
+.market-ticker {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.volume-row,
+.slider-row,
+.start-bar,
+.simple-rec,
+.auto-grid,
+.technique-tempo-grid,
+.custom-note,
+.meter-custom {
+  min-width: 0;
+}
+
+.volume-row input,
+.slider-row input,
+.auto-grid input,
+.auto-grid select,
+.technique-tempo-grid input,
+.custom-note input,
+.meter-custom input {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.history-row > div,
+.recording > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .main {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 9px;
+    padding-right: 9px;
+    overflow-x: hidden;
+  }
+
+  .topbar {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .topbar > div:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .actions {
+    flex: 0 0 auto;
+    gap: 5px;
+  }
+
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .overview {
+    width: 100%;
+  }
+
+  .period-card,
+  .card,
+  .metro-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .period-head {
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+
+  .period-head .section-collapse {
+    flex: 1 1 140px;
+  }
+
+  .period-head .tabs {
+    flex: 0 1 auto;
+  }
+
+  .period-head .tabs .tab {
+    padding: 5px 8px;
+  }
+
+  .metro-visual {
+    width: 100%;
+    height: 164px !important;
+    overflow: hidden;
+  }
+
+  .visual-studio {
+    width: min(100%, 360px) !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .tempo-display-card .bpm-big {
+    max-width: 100%;
+  }
+
+  .practice-timer-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: -30px !important;
+  }
+
+  .practice-timer-card .timer-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .timer-box .timer-value {
+    font-size: clamp(13px, 4.4vw, 18px) !important;
+  }
+
+  .market-below-tempo {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .slider-row {
+    grid-template-columns: 34px minmax(0, 1fr) 44px !important;
+    gap: 5px !important;
+  }
+
+  .volume-row {
+    grid-template-columns: 32px minmax(0, 1fr) auto !important;
+  }
+
+  .start-bar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  }
+
+  .start-bar .start {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .start-bar .start.record {
+    grid-column: 1 / -1;
+  }
+
+  .tools {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .tool {
+    flex: 0 0 auto;
+  }
+
+  .meter-grid,
+  .profile-grid {
+    min-width: 0;
+  }
+
+  .rhythm-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+
+  .calendar-grid-full,
+  .calendar-weekdays {
+    gap: 3px;
+  }
+
+  .calendar-cell {
+    min-width: 0;
+    min-height: 34px;
+    padding: 4px;
+  }
+
+  .simple-rec {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .simple-rec .rec-btn.p {
+    grid-column: 1 / -1;
+  }
+
+  .rec-status {
+    grid-column: 1 / -1;
+  }
+
+  .recording {
+    gap: 6px;
+    align-items: flex-start;
+  }
+
+  .recording > span {
+    flex: 1 1 auto;
+  }
+
+  /* Focus mode: never let the five-column desktop controls overflow. */
+  #focusOverlay .focus-shell {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100vh - 20px) !important;
+    padding: 14px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  #focusOverlay .focus-controls {
+    width: 100% !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 36px 68px 36px !important;
+    gap: 5px !important;
+  }
+
+  #focusOverlay .focus-icon-action,
+  #focusOverlay .focus-tempo-value {
+    min-width: 0 !important;
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .main {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  .topbar {
+    gap: 6px;
+  }
+
+  .actions {
+    gap: 3px;
+  }
+
+  .icon-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+  }
+
+  .current-name {
+    font-size: 17px;
+  }
+
+  .current-meta {
+    font-size: 9px;
+  }
+
+  .overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .metro-card {
+    padding: 9px !important;
+  }
+
+  .metro-visual {
+    height: 150px !important;
+  }
+
+  .visual-studio {
+    width: 100% !important;
+    padding: 9px 8px !important;
+  }
+
+  .tempo-display-card .bpm-big {
+    font-size: 42px !important;
+  }
+
+  .practice-timer-card {
+    margin-top: -24px !important;
+  }
+
+  .timer-box {
+    padding: 5px 4px !important;
+  }
+
+  .timer-box .timer-label {
+    font-size: 6px !important;
+  }
+
+  .timer-box .timer-value {
+    font-size: 12px !important;
+  }
+
+  .start-bar .start {
+    font-size: 7px !important;
+    gap: 3px !important;
+  }
+
+  .start-bar .start svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+
+  .tool {
+    font-size: 8px !important;
+    padding: 6px 7px !important;
+  }
+
+  .panel {
+    padding: 9px !important;
+  }
+
+  .rhythm-grid {
+    gap: 3px !important;
+  }
+
+  .rhythm-grid .step {
+    font-size: 17px !important;
+  }
+
+  #focusOverlay .focus-shell {
+    width: calc(100vw - 12px) !important;
+    max-width: calc(100vw - 12px) !important;
+    padding: 11px !important;
+  }
+
+  #focusOverlay .focus-main {
+    min-height: 105px !important;
+  }
+
+  #focusOverlay .focus-bpm {
+    font-size: 54px !important;
+  }
+
+  #focusOverlay .focus-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 32px 62px 32px !important;
+  }
+
+  #focusOverlay .focus-icon-action,
+  #focusOverlay .focus-tempo-value {
+    height: 36px !important;
+  }
+
+  #focusOverlay .focus-icon-action span {
+    display: none;
+  }
+
+  #focusOverlay .focus-tempo-value b {
+    font-size: 14px !important;
+  }
+}
+
+@media (max-width: 350px) {
+  .actions .icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .current-name {
+    font-size: 15px;
+  }
+
+  .current-meta {
+    font-size: 8px;
+  }
+
+  .tempo-display-card .bpm-big {
+    font-size: 38px !important;
+  }
+
+  .slider-row {
+    grid-template-columns: 31px minmax(0, 1fr) 39px !important;
+  }
+
+  .round {
+    width: 31px !important;
+    height: 31px !important;
+  }
+
+  .start-bar .start {
+    font-size: 6.5px !important;
+  }
+}
+</style>
+
+<style id="mk-mobile-polish-v2">
+/* ===== MK Studio — final mobile polish ===== */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+img, svg, video, canvas, iframe {
+  max-width: 100%;
+}
+
+button, input, select, textarea {
+  max-width: 100%;
+  font: inherit;
+}
+
+@media (max-width: 760px) {
+  body {
+    min-width: 0 !important;
+  }
+
+  .app, .app-shell, .container, .main, main,
+  .content, .page, .workspace, .panel, .card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Header: prevent the right-side action group from forcing the page wider */
+  .topbar, header {
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .topbar > *, header > * {
+    min-width: 0 !important;
+  }
+
+  .topbar .actions, .header-actions, .top-actions {
+    max-width: 100%;
+    flex-wrap: wrap !important;
+    justify-content: flex-end;
+  }
+
+  /* Generic rows/grids */
+  .row, .toolbar, .controls, .actions, .stats, .form-row {
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+
+  .grid, [class*="grid"] {
+    min-width: 0 !important;
+  }
+
+  /* Tabs and segmented controls */
+  .tabs, .tab-list, .segmented, .period-tabs {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tabs::-webkit-scrollbar,
+  .tab-list::-webkit-scrollbar,
+  .segmented::-webkit-scrollbar,
+  .period-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Cards/content that contain long text */
+  .card, .panel, .section, .modal, .dialog {
+    overflow-wrap: anywhere;
+  }
+
+  /* Make common two-column layouts stack cleanly */
+  .two-col, .two-columns, .split, .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  /* Sliders: never create horizontal overflow */
+  input[type="range"] {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Tables: allow horizontal scrolling inside the table, not on the page */
+  .table-wrap, .table-container, .table-responsive {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    max-width: none;
+  }
+
+  /* Practice/focus controls */
+  .focus-shell {
+    width: min(100%, 680px) !important;
+    max-width: calc(100vw - 20px) !important;
+    margin-inline: auto;
+  }
+
+  .focus-main, .focus-timers, .focus-controls {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .focus-controls {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+  }
+
+  .focus-controls > * {
+    min-width: 0 !important;
+  }
+
+  .focus-controls button,
+  .focus-controls .tempo-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .focus-controls .bpm-value,
+  .focus-controls [class*="bpm"] {
+    min-width: 0 !important;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 520px) {
+  .topbar, header {
+    align-items: center !important;
+  }
+
+  .topbar .brand, .brand, .logo {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .topbar .actions, .header-actions, .top-actions {
+    flex: 0 1 auto;
+  }
+
+  /* Compact controls without making touch targets too small */
+  button, .icon-btn {
+    min-height: 38px;
+  }
+
+  .period-head, .period-header,
+  .section-head, .card-head {
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .period-head > *, .period-header > *,
+  .section-head > *, .card-head > * {
+    min-width: 0;
+  }
+
+  .focus-controls {
+    gap: 5px !important;
+  }
+
+  .focus-controls button {
+    padding-inline: 4px !important;
+  }
+
+  .focus-controls .label,
+  .focus-controls .control-label {
+    display: none !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .topbar, header {
+    padding-inline: 10px !important;
+  }
+
+  main, .main, .content, .app-shell {
+    padding-inline: 10px !important;
+  }
+
+  button, .icon-btn {
+    min-height: 36px;
+  }
+
+  .focus-shell {
+    max-width: calc(100vw - 12px) !important;
+  }
+
+  .focus-controls {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+  }
+
+  .focus-controls button {
+    min-height: 34px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 330px) {
+  .focus-controls {
+    gap: 3px !important;
+  }
+
+  .focus-controls button {
+    padding: 2px !important;
+    font-size: 11px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="app">
