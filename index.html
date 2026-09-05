@@ -11,6 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/lucide@0.468.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 <style>
 :root{
  --bg:#05060b;--bg2:#0a0d15;--card:#0e121d;--card2:#141a28;--line:#202a3d;
@@ -1222,11 +1223,11 @@ button, input, select, textarea {
 .season-dropdown{display:none;position:absolute;left:0;top:calc(100% + 9px);width:min(310px,80vw);padding:6px;background:rgba(8,12,20,.97);border:1px solid color-mix(in srgb,var(--season-color) 30%,#202a3d);border-radius:14px;box-shadow:0 18px 45px rgba(0,0,0,.5),0 0 24px color-mix(in srgb,var(--season-color) 10%,transparent);backdrop-filter:blur(18px);z-index:90}
 .season-dropdown.open{display:grid;gap:3px}
 .season-option{width:100%;display:flex;align-items:center;gap:9px;padding:10px 11px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--muted);text-align:left;cursor:pointer}
-.season-option:hover{background:#111927;color:var(--text);border-color:#24314a}
+.season-option:hover{background:#111927;color:var(--text);border-color:#24314a}.season-option{cursor:pointer}
 .season-option.active{background:color-mix(in srgb,var(--season-color) 9%,#0d1420);border-color:color-mix(in srgb,var(--season-color) 24%,transparent);color:var(--text)}
 .season-option-icon{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:#0a1019;border:1px solid #202b40}
 .season-option-name{font-size:10px;font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.season-option-meta{margin-left:auto;font-size:7px;color:#66728c}
+.season-option-meta{margin-left:auto;font-size:7px;color:#66728c}.season-option .season-delete{margin-left:6px;opacity:.65}.season-option:hover .season-delete,.season-option.active .season-delete{opacity:1}.season-option .season-delete svg{width:13px;height:13px}
 
 /* No duplicate season list in sidebar */
 .sidebar-season-hint{display:flex;align-items:center;gap:7px;padding:10px 9px;color:#65718a;font-size:8px;line-height:1.5;border:1px dashed #202a3d;border-radius:10px;background:rgba(10,15,24,.55)}
@@ -1269,7 +1270,21 @@ button, input, select, textarea {
 .record-meta{display:flex;gap:7px;align-items:center;font-size:7px;color:#68758e}
 .record-meta .cloud{color:var(--lime)}.record-meta .local{color:var(--orange)}.record-actions{display:flex;gap:4px}
 .record-actions .small-btn{width:30px;height:30px;padding:0;display:grid;place-items:center}
-.record-actions svg{width:13px;height:13px}
+ .record-actions svg{width:13px;height:13px}
+.record-expand{grid-column:1/-1;display:none;border-top:1px solid #202b40;padding-top:8px;margin-top:2px}
+.recording-card.playing .record-expand{display:block}
+.player-controls{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.player-btn{height:27px;min-width:27px;padding:0 7px;border:1px solid #26344d;border-radius:7px;background:#0b111b;color:#aebbd0;display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:7px;cursor:pointer}
+.player-btn:hover{border-color:var(--season-color);color:var(--text)}
+.player-btn svg{width:12px;height:12px}
+.player-btn.primary{background:color-mix(in srgb,var(--season-color) 13%,#0b111b);color:var(--season-color);border-color:color-mix(in srgb,var(--season-color) 35%,#26344d)}
+.player-control-label{display:flex;align-items:center;gap:5px;height:27px;padding:0 7px;border:1px solid #202b40;border-radius:7px;background:#0b111b;color:#718099;font-size:7px}
+.player-control-label input{width:55px}
+.player-speed{appearance:none;background:#202b3d;height:3px;border-radius:99px}
+.player-volume{appearance:none;background:#202b3d;height:3px;border-radius:99px}
+.player-loop.active{color:var(--season-color);border-color:var(--season-color);box-shadow:0 0 10px color-mix(in srgb,var(--season-color) 12%,transparent)}
+.player-info{display:flex;justify-content:space-between;gap:8px;margin-top:7px;color:#63708a;font-size:7px}
+.recording-card.compact .record-expand{display:block}
 .record-empty{padding:18px 10px;text-align:center;border:1px dashed #202b40;border-radius:12px;color:#66728c;font-size:8px}
 
 /* ===== Sync status ===== */
@@ -1548,7 +1563,7 @@ button, input, select, textarea {
 <div class="modal" id="editSeasonModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">Edit Season</div><button class="modal-close" onclick="closeEditSeason()">×</button></div>
 <div class="field"><label>Season Name</label><input id="editSeasonName" class="num" placeholder="Season name"></div>
 <div class="season-custom" style="margin-top:8px"><div class="field"><label>Season Color</label><input id="editSeasonColor" type="color" value="#00f5ff"></div><div class="field"><label>Season Icon</label><select id="editSeasonIcon" class="select"><option value="music-2">Music</option><option value="guitar">Guitar</option><option value="piano">Piano</option><option value="drum">Drums</option><option value="mic-2">Mic</option><option value="headphones">Headphones</option><option value="star">Star</option><option value="zap">Practice</option></select></div></div>
-<div class="modal-actions"><button class="small-btn" onclick="closeEditSeason()">Cancel</button><button class="small-btn" style="background:var(--cyan);color:#001014" onclick="saveSeasonEdits()">Save Changes</button></div></div></div>
+<div class="modal-actions"><button class="small-btn" style="color:var(--danger);margin-right:auto" onclick="deleteCurrentSeason()"><i data-lucide="trash-2"></i> Delete Season</button><button class="small-btn" onclick="closeEditSeason()">Cancel</button><button class="small-btn" style="background:var(--cyan);color:#001014" onclick="saveSeasonEdits()">Save Changes</button></div></div></div>
 
 <div class="modal" id="profileModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">Profile</div><button class="modal-close" onclick="closeProfile()">×</button></div><div class="profile-grid"><div class="profile-item"><div class="label">Login Email</div><div class="value" id="profileEmail">—</div></div><div class="profile-item"><div class="label">Total Sessions</div><div class="value" id="profileSessions">0</div></div><div class="profile-item"><div class="label">Total Time</div><div class="value" id="profileTime">0m</div></div><div class="profile-item"><div class="label">تعداد Season</div><div class="value" id="profileSeasons">0</div></div><div class="profile-item"><div class="label">Practice Days</div><div class="value" id="profileDays">0</div></div><div class="profile-item"><div class="label">Best BPM</div><div class="value" id="profileBest">—</div></div></div><div class="modal-actions"><button class="small-btn" id="authActionBtn" onclick="openAuth()">Sign In</button><button class="small-btn" onclick="openBackup()">Backup</button><button class="small-btn" style="color:var(--danger)" onclick="resetAll()">Reset All</button></div></div></div>
 
@@ -1624,11 +1639,12 @@ function renderSeasonDropdown(){
   const e=document.getElementById("seasonDropdown"); if(!e)return;
   e.innerHTML="";
   db.practices.forEach(p=>{
-    const b=document.createElement("button");
+    const b=document.createElement("div");
     b.className="season-option "+(p.id===currentId?"active":"");
-    b.type="button"; b.setAttribute("role","option"); b.setAttribute("aria-selected",p.id===currentId?"true":"false");
-    b.innerHTML=`<span class="season-option-icon" style="color:${p.color||"var(--cyan)"}"><i data-lucide="${p.icon||"music-2"}"></i></span><span class="season-option-name">${escapeHTML(p.name)}</span><span class="season-option-meta">${(p.sessions||[]).length} sessions</span>`;
-    b.onclick=()=>selectSeason(p.id);
+    b.setAttribute("role","option"); b.setAttribute("aria-selected",p.id===currentId?"true":"false");
+    b.innerHTML=`<span class="season-option-icon" style="color:${p.color||"var(--cyan)"}"><i data-lucide="${p.icon||"music-2"}"></i></span><span class="season-option-name">${escapeHTML(p.name)}</span><span class="season-option-meta">${(p.sessions||[]).length} sessions</span><button class="season-delete" type="button" title="Delete season" aria-label="Delete ${escapeHTML(p.name)}"><i data-lucide="trash-2"></i></button>`;
+    b.onclick=(ev)=>{if(ev.target.closest('.season-delete'))return;selectSeason(p.id)};
+    b.querySelector('.season-delete').onclick=(ev)=>{ev.stopPropagation();deleteSeason(p.id)};
     e.appendChild(b);
   });
   lucide.createIcons();
@@ -1819,6 +1835,21 @@ function encodeWav(buffers,sampleRate){
   for(const b of buffers){for(let i=0;i<b.length;i++){const sample=Math.max(-1,Math.min(1,b[i]));view.setInt16(offset,sample<0?sample*0x8000:sample*0x7FFF,true);offset+=2}}
   return new Blob([view],{type:"audio/wav"});
 }
+function encodeMp3(buffers,sampleRate){
+  if(!window.lamejs?.Mp3Encoder)throw new Error("MP3 encoder is not available");
+  let length=0; for(const b of buffers)length+=b.length;
+  const pcm=new Int16Array(length); let pos=0;
+  for(const b of buffers){for(let i=0;i<b.length;i++){const sample=Math.max(-1,Math.min(1,b[i]));pcm[pos++]=sample<0?sample*0x8000:sample*0x7FFF}}
+  const encoder=new lamejs.Mp3Encoder(1,sampleRate,128),mp3=[];
+  const block=1152;
+  for(let i=0;i<pcm.length;i+=block){const chunk=pcm.subarray(i,Math.min(i+block,pcm.length));const data=encoder.encodeBuffer(chunk);if(data.length)mp3.push(new Int8Array(data))}
+  const end=encoder.flush();if(end.length)mp3.push(new Int8Array(end));
+  return new Blob(mp3,{type:"audio/mpeg"});
+}
+function encodeAudioBufferToMp3(audioBuffer){
+  const channel=audioBuffer.getChannelData(0);
+  return encodeMp3([channel],audioBuffer.sampleRate||44100);
+}
 function updateRecordingUI(active){
   const main=document.getElementById("mainRecordBtn"),btn=document.getElementById("recordBtn"),stop=document.getElementById("stopRecordBtn"),badge=document.getElementById("recordLiveBadge");
   if(main){main.classList.toggle("recording-active",active);main.innerHTML=active?'<i data-lucide="square"></i><span>Recording…</span>':'<i data-lucide="mic"></i><span>Record</span>'}
@@ -1831,9 +1862,9 @@ async function uploadRecordingBlob(blob,recordingId,practiceId){
   if(!sb)return null;
   const {data:{user}}=await sb.auth.getUser();
   if(!user)return null;
-  const ext=blob.type&&blob.type.includes("wav")?"wav":(blob.type&&blob.type.includes("mp4")?"m4a":"webm");
+  const ext=blob.type&&blob.type.includes("mpeg")?"mp3":(blob.type&&blob.type.includes("wav")?"wav":(blob.type&&blob.type.includes("mp4")?"m4a":"webm"));
   const path=`${user.id}/${practiceId}/${recordingId}.${ext}`;
-  const {error}=await sb.storage.from(SUPABASE_RECORDINGS_BUCKET).upload(path,blob,{contentType:blob.type||"audio/webm",upsert:false});
+  const {error}=await sb.storage.from(SUPABASE_RECORDINGS_BUCKET).upload(path,blob,{contentType:blob.type||"audio/mpeg",upsert:false});
   if(error)throw error;
   return path;
 }
@@ -1850,7 +1881,12 @@ function recordingWave(){
 }
 function recordingName(r){return `Take ${String(r.takeNumber||1).padStart(2,"0")}`}
 async function finishRecording(){
-  const blob=recordingBuffers.length?encodeWav(recordingBuffers,recordingSampleRate):new Blob(recordingChunks,{type:mediaRecorder?.mimeType||"audio/webm"});
+  let blob;
+  if(recordingBuffers.length){
+    try{blob=encodeMp3(recordingBuffers,recordingSampleRate)}catch(mp3Error){console.warn("MP3 encoding failed, using WAV fallback",mp3Error);blob=encodeWav(recordingBuffers,recordingSampleRate)}
+  }else{
+    blob=new Blob(recordingChunks,{type:mediaRecorder?.mimeType||"audio/mpeg"});
+  }
   const mime=blob.type||"audio/wav";
   const p=currentPractice();if(!p)return;
   p.recordings=p.recordings||[];
@@ -1869,6 +1905,9 @@ async function finishRecording(){
   try{
     const storagePath=await uploadRecordingBlob(blob,id,p.id);
     rec.storagePath=storagePath; delete rec.uploading; rec.blobUrl=localUrl; saveDB();
+    // Push the recording metadata immediately after the cloud file exists.
+    // This makes the take appear on other devices without waiting for the normal UI debounce.
+    await syncNow(true);
     document.getElementById("recordStatus").textContent="Take saved to cloud";
   }catch(e){
     console.error("Recording upload failed",e); delete rec.uploading; rec.uploadError=true; saveDB();
@@ -1889,8 +1928,23 @@ async function ensureRecordingAudio(r){
     try{
       const response=await fetch(url,{cache:"no-store"});
       if(!response.ok)throw new Error(`Cloud audio download failed (${response.status})`);
-      const cloudBlob=await response.blob();
+      let cloudBlob=await response.blob();
       if(!cloudBlob.size)throw new Error("Cloud audio file is empty");
+      // iPhone/Safari is most reliable with MP3. Convert legacy WAV cloud takes
+      // to MP3 in-browser before playback, while new takes are already MP3.
+      if((r.mimeType||cloudBlob.type||"").toLowerCase().includes("wav") && !r._cloudBlobUrl){
+        try{
+          const AC=window.AudioContext||window.webkitAudioContext;
+          if(AC&&window.lamejs?.Mp3Encoder){
+            const ctx=new AC();
+            const ab=await cloudBlob.arrayBuffer();
+            const decoded=await ctx.decodeAudioData(ab.slice(0));
+            const mp3Blob=encodeAudioBufferToMp3(decoded);
+            await ctx.close();
+            cloudBlob=mp3Blob;
+          }
+        }catch(convertError){console.warn("Legacy WAV to MP3 conversion failed",convertError)}
+      }
       if(!r._cloudBlobUrl)r._cloudBlobUrl=URL.createObjectURL(cloudBlob);
       url=r._cloudBlobUrl;
     }catch(downloadError){
@@ -1927,6 +1981,54 @@ function seekRecording(id,v){
   if(!recordingAudio||activeRecordingId!==id||!Number.isFinite(recordingAudio.duration))return;
   recordingAudio.currentTime=(Number(v)/100)*recordingAudio.duration;
 }
+function seekRecordingBy(id,seconds){
+  if(!recordingAudio||activeRecordingId!==id||!Number.isFinite(recordingAudio.duration))return;
+  recordingAudio.currentTime=Math.max(0,Math.min(recordingAudio.duration,recordingAudio.currentTime+seconds));
+}
+function setRecordingSpeed(id,v){
+  if(!recordingAudio||activeRecordingId!==id)return;
+  recordingAudio.playbackRate=Number(v)||1;
+  const el=document.getElementById("speedValue_"+id);if(el)el.textContent=(Number(v)||1).toFixed(2)+"×";
+}
+function setRecordingVolume(id,v){
+  if(!recordingAudio||activeRecordingId!==id)return;
+  recordingAudio.volume=Math.max(0,Math.min(1,Number(v)));
+  const el=document.getElementById("volumeValue_"+id);if(el)el.textContent=Math.round(recordingAudio.volume*100)+"%";
+}
+function toggleRecordingLoop(id){
+  if(!recordingAudio||activeRecordingId!==id)return;
+  recordingAudio.loop=!recordingAudio.loop;
+  const b=document.getElementById("loopBtn_"+id);if(b)b.classList.toggle("active",recordingAudio.loop);
+}
+async function downloadRecording(id){
+  const p=currentPractice(),r=(p?.recordings||[]).find(x=>x.id===id);if(!r)return;
+  try{
+    let blob=null;
+    if(r.storagePath){
+      const url=await getRecordingUrl(r.storagePath);
+      const response=await fetch(url,{cache:"no-store"});
+      if(!response.ok)throw new Error("Cloud download failed");
+      blob=await response.blob();
+    }else if(r.blobUrl){
+      const response=await fetch(r.blobUrl);
+      blob=await response.blob();
+    }
+    if(!blob||!blob.size)throw new Error("No audio file available");
+    const ext=(r.mimeType||blob.type||"").includes("mpeg")?"mp3":((r.mimeType||blob.type||"").includes("wav")?"wav":"mp3");
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=url;a.download=`MK-Studio-${String(r.takeNumber||1).padStart(2,"0")}.${ext}`;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){console.error(e);alert("Could not download this recording.\n\n"+(e.message||"Unknown error"))}
+}
+function renameRecording(id){
+  const p=currentPractice(),r=(p?.recordings||[]).find(x=>x.id===id);if(!r)return;
+  const current=recordingName(r);
+  const name=prompt("Recording name:",current);
+  if(name===null)return;
+  const clean=name.trim();
+  if(!clean)return;
+  r.name=clean;saveDB();syncCloudImmediately();
+}
 function formatPlayerTime(sec){return formatDuration(Math.max(0,Number(sec)||0))}
 function renderRecordings(){
   const p=currentPractice(),e=document.getElementById("recordingsList"),count=document.getElementById("recordingCount");
@@ -1936,17 +2038,40 @@ function renderRecordings(){
   e.innerHTML="";
   if(!list.length){e.innerHTML='<div class="record-empty"><i data-lucide="mic-off"></i><div>No takes yet</div><span>Press Record to capture your first practice take.</span></div>';lucide.createIcons();return}
   list.forEach(r=>{
-    const row=document.createElement("div");row.className="recording-card"+(activeRecordingId===r.id&&!recordingAudio?.paused?" playing":"");
+    const playing=activeRecordingId===r.id&&!recordingAudio?.paused;
+    const loaded=activeRecordingId===r.id&&recordingAudio;
+    const progress=loaded&&Number.isFinite(recordingAudio.duration)&&recordingAudio.duration?((recordingAudio.currentTime/recordingAudio.duration)*100):0;
+    const speed=loaded?recordingAudio.playbackRate:1;
+    const volume=loaded?recordingAudio.volume:1;
+    const loop=loaded&&recordingAudio.loop;
+    const row=document.createElement("div");row.className="recording-card"+(playing?" playing":"");
     const cloud=r.storagePath?'<span class="cloud">● Cloud</span>':'<span class="local">● Local</span>';
     const state=r.uploading?'Uploading…':(r.uploadError?'Upload failed':'Saved');
-    row.innerHTML=`<button class="record-play" onclick="toggleRecordingPlayback('${r.id}')" title="Play / pause"><i data-lucide="${activeRecordingId===r.id&&!recordingAudio?.paused?"pause":"play"}"></i></button>
+    row.innerHTML=`<button class="record-play" onclick="toggleRecordingPlayback('${r.id}')" title="Play / pause"><i data-lucide="${playing?"pause":"play"}"></i></button>
       <div class="record-main">
-        <div class="record-top"><span class="record-name">${recordingName(r)}${r.metro?" · Metro":""}</span><span class="record-time">${formatDateTime(r.date)}</span></div>
+        <div class="record-top"><span class="record-name">${escapeHTML(recordingName(r))}${r.metro?" · Metro":""}</span><span class="record-time">${formatDateTime(r.date)}</span></div>
         <div class="record-wave">${recordingWave()}</div>
-        <input class="record-progress" type="range" min="0" max="100" value="${activeRecordingId===r.id&&recordingAudio?.duration?((recordingAudio.currentTime/recordingAudio.duration)*100):0}" oninput="seekRecording('${r.id}',this.value)">
-        <div class="record-meta"><span>${formatPlayerTime(activeRecordingId===r.id?recordingAudio?.currentTime:r.duration)} / ${formatPlayerTime(r.duration)}</span>${cloud}<span>${state}</span></div>
+        <input class="record-progress" type="range" min="0" max="100" value="${progress}" oninput="seekRecording('${r.id}',this.value)">
+        <div class="record-meta"><span>${formatPlayerTime(loaded?recordingAudio?.currentTime:r.duration)} / ${formatPlayerTime(loaded&&recordingAudio?.duration?recordingAudio.duration:r.duration)}</span>${cloud}<span>${state}</span></div>
       </div>
-      <div class="record-actions"><button class="small-btn" onclick="deleteRecording('${r.id}')" title="Delete"><i data-lucide="trash-2"></i></button></div>`;
+      <div class="record-actions">
+        <button class="small-btn" onclick="renameRecording('${r.id}')" title="Rename"><i data-lucide="pencil"></i></button>
+        <button class="small-btn" onclick="downloadRecording('${r.id}')" title="Download"><i data-lucide="download"></i></button>
+        <button class="small-btn" onclick="deleteRecording('${r.id}')" title="Delete"><i data-lucide="trash-2"></i></button>
+      </div>
+      <div class="record-expand">
+        <div class="player-controls">
+          <button class="player-btn" onclick="seekRecordingBy('${r.id}',-10)" title="Back 10 seconds"><i data-lucide="rotate-ccw"></i><span>10s</span></button>
+          <button class="player-btn" onclick="seekRecordingBy('${r.id}',-5)" title="Back 5 seconds">−5</button>
+          <button class="player-btn primary" onclick="toggleRecordingPlayback('${r.id}')" title="Play / pause"><i data-lucide="${playing?"pause":"play"}"></i></button>
+          <button class="player-btn" onclick="seekRecordingBy('${r.id}',5)" title="Forward 5 seconds">+5</button>
+          <button class="player-btn" onclick="seekRecordingBy('${r.id}',10)" title="Forward 10 seconds"><i data-lucide="rotate-cw"></i><span>10s</span></button>
+          <button class="player-btn player-loop ${loop?"active":""}" id="loopBtn_${r.id}" onclick="toggleRecordingLoop('${r.id}')" title="Loop"><i data-lucide="repeat-2"></i></button>
+          <label class="player-control-label">Speed <input id="speed_${r.id}" class="player-speed" type="range" min=".5" max="2" step=".05" value="${speed}" oninput="setRecordingSpeed('${r.id}',this.value)"><b id="speedValue_${r.id}">${speed.toFixed(2)}×</b></label>
+          <label class="player-control-label">Vol <input id="volume_${r.id}" class="player-volume" type="range" min="0" max="1" step=".01" value="${volume}" oninput="setRecordingVolume('${r.id}',this.value)"><b id="volumeValue_${r.id}">${Math.round(volume*100)}%</b></label>
+        </div>
+        <div class="player-info"><span>Practice Take · ${formatPlayerTime(r.duration)}</span><span>10s / 5s · Loop · Speed · Volume · Download</span></div>
+      </div>`;
     e.appendChild(row);
   });
   lucide.createIcons();
@@ -1955,16 +2080,19 @@ if(!window.__mkRecordingAudioBound){
   window.__mkRecordingAudioBound=true;
   document.addEventListener("timeupdate",e=>{
     if(e.target!==recordingAudio)return;
-    renderRecordings();
+    const id=activeRecordingId;
+    const progress=document.querySelector(`.recording-card.playing .record-progress`);
+    if(progress&&Number.isFinite(recordingAudio.duration)&&recordingAudio.duration)progress.value=(recordingAudio.currentTime/recordingAudio.duration)*100;
+    const meta=document.querySelector(`.recording-card.playing .record-meta span:first-child`);
+    if(meta)meta.textContent=`${formatPlayerTime(recordingAudio.currentTime)} / ${formatPlayerTime(recordingAudio.duration)}`;
   });
   document.addEventListener("ended",e=>{
     if(e.target!==recordingAudio)return;
+    const id=activeRecordingId;
+    if(recordingAudio.loop)return;
     renderRecordings();
   });
 }
-async function deleteRecording(id){let p=currentPractice();if(!p)return;let r=(p.recordings||[]).find(x=>x.id===id);if(!r||!confirm("Delete this recording?"))return;if(r.storagePath&&sb){try{const {error}=await sb.storage.from(SUPABASE_RECORDINGS_BUCKET).remove([r.storagePath]);if(error)throw error}catch(e){console.warn("Cloud recording delete failed",e)}}try{if(r.blobUrl)URL.revokeObjectURL(r.blobUrl)}catch{}if(activeRecordingId===id){recordingAudio?.pause();activeRecordingId=null}p.recordings=p.recordings.filter(x=>x.id!==id);saveDB()}
-function playRecording(id){return toggleRecordingPlayback(id)}
-function playLastRecording(){let r=(currentPractice().recordings||[]).at(-1);if(r)toggleRecordingPlayback(r.id)}
 function formatDateTime(d){return new Date(d).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}
 
 function periodSessions(){if(period==="calendar")period="month";let now=new Date();let start=new Date(now);if(period==="week"){let day=(now.getDay()+6)%7;start.setDate(now.getDate()-day);start.setHours(0,0,0,0)}else if(period==="month"){start=new Date(now.getFullYear(),now.getMonth(),1)}else start=new Date(now.getFullYear(),0,1);return allSessions().filter(s=>new Date(s.date)>=start)}
@@ -2028,8 +2156,14 @@ function togglePanel(name,btn){let p=document.getElementById("panel-"+name),open
 function openNew(){document.getElementById("practiceModal").classList.add("open");setTimeout(()=>document.getElementById("newName").focus(),80)}
 function closeModal(){document.getElementById("practiceModal").classList.remove("open")}
 function createPractice(){let name=document.getElementById("newName").value.trim(),target=Number(document.getElementById("newTarget").value)||120,color=document.getElementById("newColor")?.value||"#00f5ff",icon=document.getElementById("newIcon")?.value||"music-2";if(!name)return;let p={id:crypto.randomUUID(),name,target,color,icon,sessions:[],settings:{},practiceDays:{},recordings:[]};db.practices.push(p);currentId=p.id;localStorage.setItem("studioMetronomeCurrent",currentId);closeModal();document.getElementById("newName").value="";saveDB()}
-async function deleteSeason(id){let p=db.practices.find(x=>x.id===id);if(!p)return;if(!confirm(`Delete season "${p.name}"? This will permanently remove its sessions, recordings, settings and statistics.`))return;const wasCurrent=id===currentId;db.practices=db.practices.filter(x=>x.id!==id);if(!db.practices.length){db=defaultDB()}if(wasCurrent||!db.practices.some(x=>x.id===currentId)){currentId=db.practices[0].id;localStorage.setItem("studioMetronomeCurrent",currentId)}loadPracticeSettings(currentPractice());saveDB(true);try{await syncNow(false)}catch{}renderAll()}
+async function deleteSeason(id){let p=db.practices.find(x=>x.id===id);if(!p)return;if(!confirm(`Delete season "${p.name}"? This will permanently remove its sessions, recordings, settings and statistics.`))return;const wasCurrent=id===currentId;db.practices=db.practices.filter(x=>x.id!==id);if(!db.practices.length){db=defaultDB()}if(wasCurrent||!db.practices.some(x=>x.id===currentId)){currentId=db.practices[0].id;localStorage.setItem("studioMetronomeCurrent",currentId)}loadPracticeSettings(currentPractice());saveDB(true);try{await syncCloudImmediately()}catch{}renderAll()}
 function renameCurrent(){openEditSeason()}
+async function deleteCurrentSeason(){
+  const p=currentPractice();
+  if(!p)return;
+  closeEditSeason();
+  await deleteSeason(p.id);
+}
 function clearCurrentHistory(){let p=currentPractice();if(!p?.sessions.length||!confirm("Clear this Season history?"))return;p.sessions=[];p.practiceDays={};saveDB()}
 function resetSeason(id=currentId){let p=db.practices.find(x=>x.id===id);if(!p)return;if(!confirm(`Reset "${p.name}"? Sessions, recordings and settings will be cleared.`))return;p.sessions=[];p.practiceDays={};p.recordings=[];p.settings={};p.target=120;if(id===currentId)loadPracticeSettings(p);saveDB()}
 async function resetAll(){
@@ -2151,7 +2285,7 @@ async function signIn(){if(!sb)return authMsg("Supabase is unavailable.");const 
 async function signUp(){if(!sb)return authMsg("Supabase is unavailable.");const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;if(!email||password.length<6)return authMsg("Use a valid email and a password of at least 6 characters.");authMsg("Creating account…");const {data,error}=await sb.auth.signUp({email,password});if(error)return authMsg(error.message);if(data.session){await loadCloudData();closeAuth()}else authMsg("Account created. Check your email if confirmation is enabled.");}
 async function signOut(){if(sb)await sb.auth.signOut();document.getElementById("authActionBtn").textContent="Sign In";loadUserEmail();setSync("Local","Signed out; local data remains available.")}
 async function loadUserEmail(){if(!sb){document.getElementById("profileEmail").textContent="Local mode";return}try{let {data}=await sb.auth.getUser();const email=data?.user?.email;document.getElementById("profileEmail").textContent=email||"Not signed in";const b=document.getElementById("authActionBtn");if(b){b.textContent=email?"Sign Out":"Sign In";b.onclick=email?signOut:openAuth}}catch{document.getElementById("profileEmail").textContent="Not signed in"}}
-let syncTimer=null;function debouncedSync(){clearTimeout(syncTimer);syncTimer=setTimeout(syncNow,900)}
+let syncTimer=null;function debouncedSync(){clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncNow(false),180)}
 async function getCloudSnapshot(user){
   if(!sb||!user)return null;
   const {data,error}=await sb.from(SUPABASE_TABLE).select("data,updated_at").eq("user_id",user.id).maybeSingle();
@@ -2162,8 +2296,14 @@ function applyRemoteSnapshot(remote,source="Realtime"){
   if(!remote?.data?.practices||realtimeApplying)return false;
   const remoteUpdatedAt=remote.updated_at||"";
   if(remoteUpdatedAt&&realtimeLastUpdatedAt&&new Date(remoteUpdatedAt)<=new Date(realtimeLastUpdatedAt))return false;
-  if(localStorage.getItem("mkStudioLocalDirtyAt")){
-    setSync("Local changes","Waiting for your latest local changes to sync.");
+  const localDirtyAt=Number(localStorage.getItem("mkStudioLocalDirtyAt")||0);
+  if(localDirtyAt && remoteUpdatedAt && new Date(remoteUpdatedAt).getTime() < localDirtyAt){
+    setSync("Local changes","Your newer local changes are being synced…");
+    debouncedSync();
+    return false;
+  }
+  if(localDirtyAt && !remoteUpdatedAt){
+    setSync("Local changes","Your latest local changes are being synced…");
     debouncedSync();
     return false;
   }
@@ -2209,6 +2349,11 @@ async function loadCloudData(){
     }
   }catch(e){console.error("Cloud load failed",e);setSync("Local","Cloud load failed; local data preserved.")}
 }
+async function syncCloudImmediately(){
+  if(!sb)return false;
+  return await syncNow(true);
+}
+
 async function syncNow(silent=false){
   if(!sb){setSync("Local","Supabase client is unavailable.");return false}
   try{
@@ -2220,6 +2365,11 @@ async function syncNow(silent=false){
     const {error}=await sb.from(SUPABASE_TABLE).upsert(payload,{onConflict:"user_id"});
     if(error)throw error;
     realtimeLastUpdatedAt=updatedAt;
+    // Push the complete metadata snapshot immediately to every other device.
+    // Recordings themselves stay in Storage; only their metadata/path is broadcast.
+    if(realtimeChannel){
+      try{await realtimeChannel.send({type:"broadcast",event:"mk_state",payload:{user_id:user.id,data:db,updated_at:updatedAt}})}catch(e){console.warn("Realtime broadcast failed",e)}
+    }
     localStorage.removeItem("mkStudioLocalDirtyAt");
     setSync("Synced","Supabase sync is active.");
     return true;
@@ -2256,7 +2406,7 @@ function startCloudPolling(user){
       const remote=await getCloudSnapshot(user);
       if(remote?.data?.practices)applyRemoteSnapshot(remote,"Cloud sync");
     }catch(e){console.warn("Cloud fallback check failed",e)}
-  },5000);
+  },1000);
 }
 function stopCloudPolling(){
   if(cloudPollTimer){clearInterval(cloudPollTimer);cloudPollTimer=null}
@@ -2267,6 +2417,12 @@ function startRealtimeSync(user){
   if(realtimeChannel)sb.removeChannel(realtimeChannel);
   realtimeUserId=user.id;
   realtimeChannel=sb.channel("mk-studio-realtime-"+user.id)
+    // Broadcast gives us instant cross-device updates even if the Supabase table
+    // is not enabled for Postgres Changes. The database row remains the durable source.
+    .on("broadcast",{event:"mk_state"},({payload})=>{
+      if(!payload||payload.user_id!==user.id)return;
+      applyRemoteSnapshot({data:payload.data,updated_at:payload.updated_at},"Realtime");
+    })
     .on("postgres_changes",{event:"*",schema:"public",table:SUPABASE_TABLE,filter:"user_id=eq."+user.id},payload=>{
       if(payload?.eventType==="DELETE")return;
       applyRemoteSnapshot(payload?.new,"Realtime");
