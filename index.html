@@ -1583,7 +1583,7 @@ let bpm=80,targetBpm=120,meterTime="4/4",meterNote="quarter",rhythmPattern=[1,0,
 let customNotes=JSON.parse(localStorage.getItem("metroCustomNotes")||"[]");
 let audioCtx=null,metroRunning=false,sessionRunning=false,sessionStartedAt=0,sessionElapsed=0,nextBeatTime=0,beatIndex=0,schedulerTimer=null,sessionRAF=null,chart=null,period="week";
 let tempoModifierTimer=null, tempoAutomationRunning=false;
-let mediaRecorder=null,mediaStream=null,recordingChunks=[],recordingStartedAt=0,recordings=[]; let calendarCursor=new Date(); calendarCursor.setDate(1);
+let mediaRecorder=null,mediaStream=null,recordingChunks=[],recordingStartedAt=0,recordings=[]; let recordingAudioCtx=null,recordingSource=null,recordingProcessor=null,recordingBuffers=[],recordingSampleRate=44100,recordingStopping=false; let calendarCursor=new Date(); calendarCursor.setDate(1);
 const noteDefs={
  quarter:{label:"Quarter",symbol:"♩",div:1},half:{label:"Half",symbol:"𝅝",div:2},dottedQuarter:{label:"Dotted Quarter",symbol:"♩.",div:1.5},
  eighth:{label:"Eighth",symbol:"♪",div:.5},sixteenth:{label:"Sixteenth",symbol:"♬",div:.25},triplet:{label:"Triplet",symbol:"♬",div:1/3},dottedEighth:{label:"Dotted Eighth",symbol:"♪.",div:.75},whole:{label:"Whole",symbol:"𝅝",div:4}
@@ -1769,18 +1769,56 @@ async function toggleRecording(){
 }
 async function startRecording(){
   try{
-    mediaStream=await navigator.mediaDevices.getUserMedia({audio:true});
-    recordingChunks=[];
-    mediaRecorder=new MediaRecorder(mediaStream);
-    mediaRecorder.ondataavailable=e=>{if(e.data.size)recordingChunks.push(e.data)};
-    mediaRecorder.onstop=finishRecording;
-    mediaRecorder.start(250);
+    mediaStream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    recordingBuffers=[];
+    recordingStopping=false;
+    // Record uncompressed WAV instead of WebM/Opus. WAV is supported by Chrome,
+    // Safari, Firefox, Android and iOS, so a take recorded on one device can
+    // also be played on another device without codec compatibility problems.
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)throw new Error("Web Audio is not supported by this browser");
+    recordingAudioCtx=new AC();
+    if(recordingAudioCtx.state==="suspended")await recordingAudioCtx.resume();
+    recordingSampleRate=recordingAudioCtx.sampleRate||44100;
+    recordingSource=recordingAudioCtx.createMediaStreamSource(mediaStream);
+    recordingProcessor=recordingAudioCtx.createScriptProcessor(4096,1,1);
+    recordingProcessor.onaudioprocess=e=>{
+      if(recordingStopping)return;
+      const input=e.inputBuffer.getChannelData(0);
+      recordingBuffers.push(new Float32Array(input));
+    };
+    const silentGain=recordingAudioCtx.createGain();
+    silentGain.gain.value=0;
+    recordingSource.connect(recordingProcessor);
+    recordingProcessor.connect(silentGain);
+    silentGain.connect(recordingAudioCtx.destination);
     recordingStartedAt=Date.now();
     updateRecordingUI(true);
     document.getElementById("recordStatus").textContent=metroRunning?"Recording with metronome":"Recording without metronome";
-  }catch(e){console.error(e);alert("Microphone permission is required for recording.");updateRecordingUI(false)}
+  }catch(e){console.error(e);mediaStream?.getTracks().forEach(t=>t.stop());mediaStream=null;updateRecordingUI(false);alert("Microphone permission is required for recording.\n\n"+(e?.message||""))}
 }
-function stopRecording(){if(mediaRecorder?.state==="recording")mediaRecorder.stop()}
+function stopRecording(){
+  if(recordingStopping)return;
+  if(recordingProcessor||mediaStream){
+    recordingStopping=true;
+    try{recordingProcessor?.disconnect();recordingSource?.disconnect()}catch(e){}
+    mediaStream?.getTracks().forEach(t=>t.stop());
+    mediaStream=null;
+    finishRecording();
+  }else if(mediaRecorder?.state==="recording"){mediaRecorder.stop()}
+}
+function encodeWav(buffers,sampleRate){
+  let length=0; for(const b of buffers)length+=b.length;
+  const buffer=new ArrayBuffer(44+length*2),view=new DataView(buffer);
+  const writeString=(o,str)=>{for(let i=0;i<str.length;i++)view.setUint8(o+i,str.charCodeAt(i))};
+  writeString(0,"RIFF"); view.setUint32(4,36+length*2,true); writeString(8,"WAVE");
+  writeString(12,"fmt "); view.setUint32(16,16,true); view.setUint16(20,1,true); view.setUint16(22,1,true);
+  view.setUint32(24,sampleRate,true); view.setUint32(28,sampleRate*2,true); view.setUint16(32,2,true); view.setUint16(34,16,true);
+  writeString(36,"data"); view.setUint32(40,length*2,true);
+  let offset=44;
+  for(const b of buffers){for(let i=0;i<b.length;i++){const sample=Math.max(-1,Math.min(1,b[i]));view.setInt16(offset,sample<0?sample*0x8000:sample*0x7FFF,true);offset+=2}}
+  return new Blob([view],{type:"audio/wav"});
+}
 function updateRecordingUI(active){
   const main=document.getElementById("mainRecordBtn"),btn=document.getElementById("recordBtn"),stop=document.getElementById("stopRecordBtn"),badge=document.getElementById("recordLiveBadge");
   if(main){main.classList.toggle("recording-active",active);main.innerHTML=active?'<i data-lucide="square"></i><span>Recording…</span>':'<i data-lucide="mic"></i><span>Record</span>'}
@@ -1793,7 +1831,7 @@ async function uploadRecordingBlob(blob,recordingId,practiceId){
   if(!sb)return null;
   const {data:{user}}=await sb.auth.getUser();
   if(!user)return null;
-  const ext=blob.type&&blob.type.includes("mp4")?"m4a":"webm";
+  const ext=blob.type&&blob.type.includes("wav")?"wav":(blob.type&&blob.type.includes("mp4")?"m4a":"webm");
   const path=`${user.id}/${practiceId}/${recordingId}.${ext}`;
   const {error}=await sb.storage.from(SUPABASE_RECORDINGS_BUCKET).upload(path,blob,{contentType:blob.type||"audio/webm",upsert:false});
   if(error)throw error;
@@ -1812,8 +1850,8 @@ function recordingWave(){
 }
 function recordingName(r){return `Take ${String(r.takeNumber||1).padStart(2,"0")}`}
 async function finishRecording(){
-  const mime=mediaRecorder?.mimeType||"audio/webm";
-  const blob=new Blob(recordingChunks,{type:mime});
+  const blob=recordingBuffers.length?encodeWav(recordingBuffers,recordingSampleRate):new Blob(recordingChunks,{type:mediaRecorder?.mimeType||"audio/webm"});
+  const mime=blob.type||"audio/wav";
   const p=currentPractice();if(!p)return;
   p.recordings=p.recordings||[];
   const id=crypto.randomUUID(), takeNumber=p.recordings.length+1;
@@ -1821,6 +1859,10 @@ async function finishRecording(){
   const rec={id,takeNumber,date:new Date().toISOString(),duration:Math.floor((Date.now()-recordingStartedAt)/1000),metro:metroRunning,mimeType:mime,size:blob.size,blobUrl:localUrl,uploading:true};
   p.recordings.push(rec); recordings=p.recordings;
   mediaStream?.getTracks().forEach(t=>t.stop()); mediaStream=null; mediaRecorder=null;
+  try{recordingProcessor?.disconnect();recordingSource?.disconnect();}catch(e){}
+  recordingProcessor=null; recordingSource=null;
+  if(recordingAudioCtx){try{recordingAudioCtx.close()}catch(e){} recordingAudioCtx=null}
+  recordingBuffers=[]; recordingStopping=false;
   updateRecordingUI(false);
   document.getElementById("recordStatus").textContent="Preparing take…";
   renderRecordings(); saveDB();
