@@ -1800,10 +1800,11 @@ async function uploadRecordingBlob(blob,recordingId,practiceId){
   return path;
 }
 async function getRecordingUrl(storagePath){
-  if(!sb||!storagePath)return null;
+  if(!sb||!storagePath)throw new Error("Cloud storage is not connected");
   const {data,error}=await sb.storage.from(SUPABASE_RECORDINGS_BUCKET).createSignedUrl(storagePath,3600);
-  if(error)throw error;
-  return data?.signedUrl||null;
+  if(error)throw new Error(`Could not create cloud audio URL: ${error.message||error}`);
+  if(!data?.signedUrl)throw new Error("Supabase returned no signed audio URL");
+  return data.signedUrl;
 }
 function recordingWave(){
   const heights=[7,13,18,10,15,21,9,16,12,19,8,14,22,11,17,9,15,20,7,13,18,10,16,8,14,21,11,17,9,15,19,8,13,18,10,16,7,14,20,11,17,9,15,21,8,13,18,10];
@@ -1835,11 +1836,37 @@ async function finishRecording(){
 }
 let recordingAudio=null,activeRecordingId=null;
 async function ensureRecordingAudio(r){
-  let url=r.blobUrl;
-  if(!url&&r.storagePath)url=await getRecordingUrl(r.storagePath);
-  if(!url)throw new Error("No audio source");
+  if(!r)throw new Error("Recording not found");
+  let url=null;
+  // Always prefer the cloud copy when storagePath exists. This makes playback
+  // independent of the device that originally made the recording.
+  if(r.storagePath){
+    url=await getRecordingUrl(r.storagePath);
+    // Download the cloud file first and play a local object URL. This is more
+    // reliable across browsers than assigning a signed Storage URL directly.
+    try{
+      const response=await fetch(url,{cache:"no-store"});
+      if(!response.ok)throw new Error(`Cloud audio download failed (${response.status})`);
+      const cloudBlob=await response.blob();
+      if(!cloudBlob.size)throw new Error("Cloud audio file is empty");
+      if(!r._cloudBlobUrl)r._cloudBlobUrl=URL.createObjectURL(cloudBlob);
+      url=r._cloudBlobUrl;
+    }catch(downloadError){
+      console.warn("Cloud audio fetch failed, trying signed URL directly",downloadError);
+      // Direct playback remains as a fallback.
+    }
+  }
+  if(!url)url=r.blobUrl;
+  if(!url)throw new Error("No audio source is available for this recording");
   if(!recordingAudio)recordingAudio=new Audio();
-  if(activeRecordingId!==r.id){recordingAudio.pause();recordingAudio.src=url;activeRecordingId=r.id}
+  recordingAudio.preload="auto";
+  if(activeRecordingId!==r.id){
+    recordingAudio.pause();
+    recordingAudio.removeAttribute("src");
+    recordingAudio.load();
+    recordingAudio.src=url;
+    activeRecordingId=r.id;
+  }
   return recordingAudio;
 }
 async function toggleRecordingPlayback(id){
@@ -1848,7 +1875,11 @@ async function toggleRecordingPlayback(id){
     const a=await ensureRecordingAudio(r);
     if(a.paused){await a.play()}else a.pause();
     activeRecordingId=r.id; renderRecordings();
-  }catch(e){console.error(e);alert("This recording could not be played.")}
+  }catch(e){
+    console.error("Recording playback error:",e);
+    const msg=e?.message||"Unknown playback error";
+    alert(`This recording could not be played.\n\n${msg}`);
+  }
 }
 function seekRecording(id,v){
   if(!recordingAudio||activeRecordingId!==id||!Number.isFinite(recordingAudio.duration))return;
