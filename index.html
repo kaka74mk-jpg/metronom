@@ -1777,8 +1777,80 @@ async function signUp(){if(!sb)return authMsg("Supabase is unavailable.");const 
 async function signOut(){if(sb)await sb.auth.signOut();document.getElementById("authActionBtn").textContent="Sign In";loadUserEmail();setSync("Local","Signed out; local data remains available.")}
 async function loadUserEmail(){if(!sb){document.getElementById("profileEmail").textContent="Local mode";return}try{let {data}=await sb.auth.getUser();const email=data?.user?.email;document.getElementById("profileEmail").textContent=email||"Not signed in";const b=document.getElementById("authActionBtn");if(b){b.textContent=email?"Sign Out":"Sign In";b.onclick=email?signOut:openAuth}}catch{document.getElementById("profileEmail").textContent="Not signed in"}}
 let syncTimer=null;function debouncedSync(){clearTimeout(syncTimer);syncTimer=setTimeout(syncNow,900)}
-async function loadCloudData(){if(!sb)return;try{const {data:{user}}=await sb.auth.getUser();if(!user)return;const localDirty=localStorage.getItem("mkStudioLocalDirtyAt");const {data,error}=await sb.from(SUPABASE_TABLE).select("data").eq("user_id",user.id).maybeSingle();if(error)throw error;if(localDirty){await syncNow(true);return}if(data?.data?.practices){db=data.data;currentId=localStorage.getItem("studioMetronomeCurrent");if(!currentId||!db.practices.some(p=>p.id===currentId))currentId=db.practices[0]?.id;localStorage.setItem(DB_KEY,JSON.stringify(db));if(currentId)localStorage.setItem("studioMetronomeCurrent",currentId);renderAll();setSync("Synced","Cloud data loaded.")}else{await syncNow(true)}}catch(e){console.error("Cloud load failed",e);setSync("Local","Cloud load failed; local data preserved.")}}
-async function syncNow(silent=false){if(!sb){setSync("Local","Supabase client is unavailable.");return false}try{let {data:{user}}=await sb.auth.getUser();if(!user){setSync("Local","Not signed in; data is local.");return false}if(!silent)setSync("Syncing…","Saving MK Studio data to Supabase");let updatedAt=new Date().toISOString();realtimeLastUpdatedAt=updatedAt;let payload={user_id:user.id,data:db,updated_at:updatedAt};let {error}=await sb.from(SUPABASE_TABLE).upsert(payload,{onConflict:"user_id"});if(error)throw error;localStorage.removeItem("mkStudioLocalDirtyAt");setSync("Synced","Supabase sync is active.");return true}catch(e){console.error("Sync failed",e);setSync("Local","Sync failed; local data was preserved.");return false}}
+async function getCloudSnapshot(user){
+  if(!sb||!user)return null;
+  const {data,error}=await sb.from(SUPABASE_TABLE).select("data,updated_at").eq("user_id",user.id).maybeSingle();
+  if(error)throw error;
+  return data||null;
+}
+function applyRemoteSnapshot(remote,source="Realtime"){
+  if(!remote?.data?.practices||realtimeApplying)return false;
+  const remoteUpdatedAt=remote.updated_at||"";
+  if(remoteUpdatedAt&&realtimeLastUpdatedAt&&new Date(remoteUpdatedAt)<=new Date(realtimeLastUpdatedAt))return false;
+  if(localStorage.getItem("mkStudioLocalDirtyAt")){
+    setSync("Local changes","Waiting for your latest local changes to sync.");
+    debouncedSync();
+    return false;
+  }
+  try{
+    realtimeApplying=true;
+    db=remote.data;
+    currentId=localStorage.getItem("studioMetronomeCurrent");
+    if(!currentId||!db.practices.some(p=>p.id===currentId))currentId=db.practices[0]?.id;
+    if(currentId)localStorage.setItem("studioMetronomeCurrent",currentId);
+    localStorage.setItem(DB_KEY,JSON.stringify(db));
+    loadPracticeSettings(currentPractice());
+    renderAll();
+    restoreSectionState();
+    realtimeLastUpdatedAt=remoteUpdatedAt||realtimeLastUpdatedAt;
+    setSync(source,"Updated from another device.");
+    return true;
+  }finally{realtimeApplying=false}
+}
+async function loadCloudData(){
+  if(!sb)return;
+  try{
+    const {data:{user}}=await sb.auth.getUser();
+    if(!user)return;
+    const localDirty=localStorage.getItem("mkStudioLocalDirtyAt");
+    const remote=await getCloudSnapshot(user);
+    if(localDirty){
+      await syncNow(true);
+      return;
+    }
+    if(remote?.data?.practices){
+      db=remote.data;
+      currentId=localStorage.getItem("studioMetronomeCurrent");
+      if(!currentId||!db.practices.some(p=>p.id===currentId))currentId=db.practices[0]?.id;
+      if(currentId)localStorage.setItem("studioMetronomeCurrent",currentId);
+      localStorage.setItem(DB_KEY,JSON.stringify(db));
+      realtimeLastUpdatedAt=remote.updated_at||"";
+      loadPracticeSettings(currentPractice());
+      renderAll();
+      restoreSectionState();
+      setSync("Synced","Cloud data loaded.");
+    }else{
+      await syncNow(true);
+    }
+  }catch(e){console.error("Cloud load failed",e);setSync("Local","Cloud load failed; local data preserved.")}
+}
+async function syncNow(silent=false){
+  if(!sb){setSync("Local","Supabase client is unavailable.");return false}
+  try{
+    const {data:{user}}=await sb.auth.getUser();
+    if(!user){setSync("Local","Not signed in; data is local.");return false}
+    if(!silent)setSync("Syncing…","Saving MK Studio data to Supabase");
+    const updatedAt=new Date().toISOString();
+    const payload={user_id:user.id,data:db,updated_at:updatedAt};
+    const {error}=await sb.from(SUPABASE_TABLE).upsert(payload,{onConflict:"user_id"});
+    if(error)throw error;
+    realtimeLastUpdatedAt=updatedAt;
+    localStorage.removeItem("mkStudioLocalDirtyAt");
+    setSync("Synced","Supabase sync is active.");
+    return true;
+  }catch(e){console.error("Sync failed",e);setSync("Local","Sync failed; local data was preserved.");return false}
+}
+
 function setSync(a,b){document.getElementById("syncStatus").textContent=a;document.getElementById("syncDetail").textContent=b}
 
 document.addEventListener("keydown",e=>{if(["INPUT","SELECT","TEXTAREA"].includes(e.target.tagName))return;if(e.code==="Space"){e.preventDefault();toggleMetro()}if(e.key==="ArrowUp")changeBpm(1);if(e.key==="ArrowDown")changeBpm(-1);if(e.key.toLowerCase()==="r")toggleRecording()});
@@ -1789,42 +1861,48 @@ let realtimeChannel=null;
 let realtimeUserId=null;
 let realtimeApplying=false;
 let realtimeLastUpdatedAt="";
+let realtimeRetryTimer=null;
+let cloudPollTimer=null;
+function startCloudPolling(user){
+  if(!sb||!user)return;
+  if(cloudPollTimer)clearInterval(cloudPollTimer);
+  cloudPollTimer=setInterval(async()=>{
+    if(document.hidden||realtimeApplying)return;
+    try{
+      if(localStorage.getItem("mkStudioLocalDirtyAt"))return;
+      const remote=await getCloudSnapshot(user);
+      if(remote?.data?.practices)applyRemoteSnapshot(remote,"Cloud sync");
+    }catch(e){console.warn("Cloud fallback check failed",e)}
+  },5000);
+}
+function stopCloudPolling(){
+  if(cloudPollTimer){clearInterval(cloudPollTimer);cloudPollTimer=null}
+}
 function startRealtimeSync(user){
   if(!sb||!user)return;
+  if(realtimeRetryTimer){clearTimeout(realtimeRetryTimer);realtimeRetryTimer=null}
   if(realtimeChannel)sb.removeChannel(realtimeChannel);
   realtimeUserId=user.id;
   realtimeChannel=sb.channel("mk-studio-realtime-"+user.id)
-    .on("postgres_changes",{event:"UPDATE",schema:"public",table:SUPABASE_TABLE,filter:"user_id=eq."+user.id},payload=>{
-      const remote=payload?.new;
-      if(!remote?.data?.practices||realtimeApplying)return;
-      if(remote.updated_at&&remote.updated_at===realtimeLastUpdatedAt)return;
-      const localDirty=localStorage.getItem("mkStudioLocalDirtyAt");
-      if(localDirty){
-        setSync("Local changes","Waiting for your latest local changes to sync.");
-        debouncedSync();
-        return;
-      }
-      try{
-        realtimeApplying=true;
-        db=remote.data;
-        currentId=localStorage.getItem("studioMetronomeCurrent");
-        if(!currentId||!db.practices.some(p=>p.id===currentId))currentId=db.practices[0]?.id;
-        if(currentId)localStorage.setItem("studioMetronomeCurrent",currentId);
-        localStorage.setItem(DB_KEY,JSON.stringify(db));
-        loadPracticeSettings(currentPractice());
-        renderAll();
-        restoreSectionState();
-        setSync("Realtime","Updated from another device.");
-        realtimeLastUpdatedAt=remote.updated_at||"";
-      }finally{realtimeApplying=false}
+    .on("postgres_changes",{event:"*",schema:"public",table:SUPABASE_TABLE,filter:"user_id=eq."+user.id},payload=>{
+      if(payload?.eventType==="DELETE")return;
+      applyRemoteSnapshot(payload?.new,"Realtime");
     })
     .subscribe(status=>{
       if(status==="SUBSCRIBED")setSync("Realtime","Live Supabase sync is connected.");
-      else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")setSync("Local","Realtime connection unavailable; normal sync remains active.");
+      else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){
+        setSync("Local","Realtime reconnecting; fallback cloud sync is active.");
+        if(realtimeUserId===user.id&&!realtimeRetryTimer){
+          realtimeRetryTimer=setTimeout(()=>{realtimeRetryTimer=null;startRealtimeSync(user)},4000);
+        }
+      }
     });
+  startCloudPolling(user);
 }
 function stopRealtimeSync(){
+  if(realtimeRetryTimer){clearTimeout(realtimeRetryTimer);realtimeRetryTimer=null}
   if(sb&&realtimeChannel){sb.removeChannel(realtimeChannel);realtimeChannel=null}
+  stopCloudPolling();
   realtimeUserId=null;
 }
 loadPracticeSettings(currentPractice());renderAll();restoreSectionState();
