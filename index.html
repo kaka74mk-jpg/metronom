@@ -1111,7 +1111,6 @@ button, input, select, textarea {
   transition:color .22s ease,border-color .22s ease,box-shadow .22s ease;
 }
 .current-name{cursor:pointer}
-.current-name::after{content:" ✎";font-size:.55em;opacity:.45;vertical-align:middle}
 .current-name:hover{color:var(--season-color)!important}
 
 .market-below-tempo{
@@ -1211,6 +1210,108 @@ button, input, select, textarea {
 .market-below-tempo{user-select:none}
 </style>
 
+
+<style id="mk-user-request-v5">
+/* ===== Season title dropdown ===== */
+.title-season-wrap{position:relative;min-width:0}
+.title-season-trigger{display:inline-flex;align-items:center;gap:7px;max-width:100%;border:0;background:transparent;color:var(--text);padding:0;font:inherit;cursor:pointer}
+.title-season-trigger .title-season-text{font-family:"Space Grotesk",Inter,sans-serif;font-size:25px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.title-season-trigger svg{width:15px;height:15px;color:var(--muted);transition:transform .2s ease;flex:0 0 auto}
+.title-season-trigger[aria-expanded="true"] svg{transform:rotate(180deg);color:var(--season-color)}
+.title-season-trigger:hover .title-season-text{color:var(--season-color)}
+.season-dropdown{display:none;position:absolute;left:0;top:calc(100% + 9px);width:min(310px,80vw);padding:6px;background:rgba(8,12,20,.97);border:1px solid color-mix(in srgb,var(--season-color) 30%,#202a3d);border-radius:14px;box-shadow:0 18px 45px rgba(0,0,0,.5),0 0 24px color-mix(in srgb,var(--season-color) 10%,transparent);backdrop-filter:blur(18px);z-index:90}
+.season-dropdown.open{display:grid;gap:3px}
+.season-option{width:100%;display:flex;align-items:center;gap:9px;padding:10px 11px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--muted);text-align:left;cursor:pointer}
+.season-option:hover{background:#111927;color:var(--text);border-color:#24314a}
+.season-option.active{background:color-mix(in srgb,var(--season-color) 9%,#0d1420);border-color:color-mix(in srgb,var(--season-color) 24%,transparent);color:var(--text)}
+.season-option-icon{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:#0a1019;border:1px solid #202b40}
+.season-option-name{font-size:10px;font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.season-option-meta{margin-left:auto;font-size:7px;color:#66728c}
+
+/* No duplicate season list in sidebar */
+.sidebar-season-hint{display:flex;align-items:center;gap:7px;padding:10px 9px;color:#65718a;font-size:8px;line-height:1.5;border:1px dashed #202a3d;border-radius:10px;background:rgba(10,15,24,.55)}
+.sidebar-season-hint svg{width:14px;height:14px;color:var(--cyan);flex:0 0 auto}
+#practiceList{display:none!important}
+
+/* ===== Recording studio ===== */
+.start.record.recording-active,.recording-primary.recording-active{background:linear-gradient(135deg,#ff4d6d,#9f1239)!important;box-shadow:0 0 28px rgba(255,77,109,.32)!important;animation:recordButtonPulse 1.15s infinite}
+@keyframes recordButtonPulse{50%{filter:brightness(1.14);box-shadow:0 0 34px rgba(255,77,109,.42)}}
+.recording-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:11px}
+.recording-subtitle{font-size:8px;color:var(--muted);margin-top:4px;line-height:1.5}
+.recording-live-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid #253149;border-radius:999px;font-size:7px;font-weight:900;letter-spacing:.12em;color:#75829b;white-space:nowrap}
+.recording-live-badge span{width:6px;height:6px;border-radius:50%;background:#58637c}
+.recording-live-badge.live{color:#ff5a70;border-color:rgba(255,77,109,.35);background:rgba(255,77,109,.07)}
+.recording-live-badge.live span{background:#ff4d6d;box-shadow:0 0 12px #ff4d6d;animation:recordDot 1s infinite}
+@keyframes recordDot{50%{transform:scale(1.45);opacity:.65}}
+.recording-console{display:grid;grid-template-columns:1.25fr .8fr .9fr 1fr;gap:6px;align-items:center;padding:9px;background:linear-gradient(145deg,#0a1019,#0e1521);border:1px solid #202b40;border-radius:13px}
+.recording-console .rec-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:35px}
+.recording-console .rec-btn svg{width:14px;height:14px}
+.recording-primary{box-shadow:0 0 20px rgba(255,38,56,.15)}
+.rec-status{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recording-list-head{display:flex;align-items:center;justify-content:space-between;margin:12px 2px 6px;font-size:7px;letter-spacing:.14em;color:#697690}
+.recording-list-head b{font-size:8px;color:var(--text);padding:3px 6px;border-radius:999px;background:#141d2b}
+.recordings{gap:7px}
+.recording-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px;background:linear-gradient(145deg,#101724,#0c121d);border:1px solid #202b40;border-radius:12px;transition:.18s ease}
+.recording-card:hover{border-color:#33435f;transform:translateY(-1px)}
+.recording-card.playing{border-color:color-mix(in srgb,var(--season-color) 45%,#24324a);box-shadow:0 0 20px color-mix(in srgb,var(--season-color) 9%,transparent)}
+.record-play{width:34px;height:34px;border:1px solid #2b3850;border-radius:10px;background:#0b111b;color:var(--text);display:grid;place-items:center}
+.record-play:hover{color:var(--season-color);border-color:color-mix(in srgb,var(--season-color) 45%,transparent)}
+.record-play svg{width:15px;height:15px}
+.record-main{min-width:0}
+.record-top{display:flex;justify-content:space-between;gap:7px;align-items:center}
+.record-name{font-size:9px;font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.record-time{font-size:7px;color:#68758e;white-space:nowrap}
+.record-wave{height:22px;display:flex;align-items:center;gap:2px;margin:5px 0 4px;overflow:hidden;opacity:.72}
+.record-wave i{display:block;width:3px;min-height:4px;border-radius:2px;background:var(--season-color);opacity:.55}
+.record-wave i:nth-child(3n){height:15px}.record-wave i:nth-child(4n){height:9px}.record-wave i:nth-child(5n){height:18px}.record-wave i:nth-child(7n){height:6px}
+.record-progress{width:100%;height:4px;appearance:none;border-radius:99px;background:#202b3d;outline:none;cursor:pointer}
+.record-progress::-webkit-slider-thumb{appearance:none;width:10px;height:10px;border-radius:50%;background:var(--season-color);box-shadow:0 0 10px color-mix(in srgb,var(--season-color) 45%,transparent)}
+.record-meta{display:flex;gap:7px;align-items:center;font-size:7px;color:#68758e}
+.record-meta .cloud{color:var(--lime)}.record-meta .local{color:var(--orange)}.record-actions{display:flex;gap:4px}
+.record-actions .small-btn{width:30px;height:30px;padding:0;display:grid;place-items:center}
+.record-actions svg{width:13px;height:13px}
+.record-empty{padding:18px 10px;text-align:center;border:1px dashed #202b40;border-radius:12px;color:#66728c;font-size:8px}
+
+/* ===== Sync status ===== */
+.sync-card{padding:13px 14px;overflow:hidden}
+.sync-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sync-title{display:flex;align-items:center;gap:9px;min-width:0}
+.sync-title b{display:block;font-size:10px}
+.sync-title small{display:block;margin-top:2px;font-size:7px;letter-spacing:.12em;color:#65718a}
+.sync-orb{width:12px;height:12px;border-radius:50%;background:#65718a;box-shadow:0 0 0 5px rgba(101,113,138,.08);flex:0 0 auto}
+.sync-card #syncStatus{font-size:8px!important;font-weight:900;letter-spacing:.08em;color:var(--muted)}
+.sync-card #syncStatus::before{display:none}
+.sync-track{height:4px;margin:11px 0 8px;background:#151e2e;border-radius:99px;overflow:hidden}
+#syncTrackFill{display:block;width:18%;height:100%;background:var(--muted);border-radius:99px;transition:width .35s ease,background .25s ease}
+.sync-detail-row{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.sync-detail-row span{font-size:7px;color:#6c7891;line-height:1.4}
+#syncLast{white-space:nowrap}
+.sync-chips{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:9px}
+.sync-chips>span{font-size:7px;color:#66728c;border:1px solid #202b40;background:#0a1019;padding:4px 6px;border-radius:999px}
+.sync-chips b{color:#ffb0bc}.sync-now-btn{margin-left:auto;border:1px solid #253149;background:#101827;color:#b7c4d8;border-radius:8px;padding:5px 8px;font-size:7px;display:inline-flex;align-items:center;gap:4px}
+.sync-now-btn:hover{color:var(--text);border-color:var(--cyan)}
+.sync-card.sync-live .sync-orb{background:var(--lime);box-shadow:0 0 0 5px rgba(184,255,61,.08),0 0 15px rgba(184,255,61,.45);animation:syncOrbPulse 1.6s infinite}
+.sync-card.sync-working .sync-orb{background:var(--cyan);box-shadow:0 0 0 5px rgba(0,245,255,.08),0 0 15px rgba(0,245,255,.35);animation:syncOrbPulse .8s infinite}
+.sync-card.sync-offline .sync-orb{background:var(--orange)}
+.sync-card.sync-live #syncTrackFill{width:100%;background:var(--lime)}
+.sync-card.sync-working #syncTrackFill{width:62%;background:var(--cyan);animation:syncTrackMove 1s infinite}
+.sync-card.sync-offline #syncTrackFill{width:25%;background:var(--orange)}
+@keyframes syncOrbPulse{50%{transform:scale(1.12);opacity:.72}}
+@keyframes syncTrackMove{50%{opacity:.55}}
+.sync-card.sync-live .sync-chips b{color:var(--lime)}
+.sync-card.sync-live #syncMode{color:var(--lime)}
+.sync-card.sync-offline #syncMode{color:var(--orange)}
+
+/* ===== Reminder settings ===== */
+.reminder-box{margin-top:11px;padding:11px;border:1px solid #202b40;border-radius:13px;background:linear-gradient(145deg,#0b111b,#101725)}
+.reminder-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.reminder-head b{display:block;font-size:10px}.reminder-head span{display:block;margin-top:3px;font-size:7px;color:var(--muted)}
+.switch{position:relative;width:36px;height:20px;display:block;flex:0 0 auto}.switch input{opacity:0;width:0;height:0}.switch span{position:absolute;inset:0;background:#202b3d;border-radius:99px;cursor:pointer;transition:.2s}.switch span:before{content:"";position:absolute;width:14px;height:14px;left:3px;top:3px;background:#8290a8;border-radius:50%;transition:.2s}.switch input:checked+span{background:rgba(0,245,255,.2);box-shadow:0 0 14px rgba(0,245,255,.1)}.switch input:checked+span:before{transform:translateX(16px);background:var(--cyan);box-shadow:0 0 10px rgba(0,245,255,.5)}
+.reminder-times{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}.reminder-times label{font-size:7px;color:var(--muted);display:grid;gap:4px}.reminder-times input{width:100%;background:#080e17;color:var(--text);border:1px solid #202b40;border-radius:8px;padding:7px;font-size:10px}
+.reminder-permission{width:100%;margin-top:8px}
+@media(max-width:760px){.title-season-trigger .title-season-text{font-size:19px}.recording-console{grid-template-columns:1fr 1fr}.recording-console .rec-status{grid-column:1/-1}.reminder-times{grid-template-columns:1fr}.sync-detail-row{align-items:flex-start;flex-direction:column;gap:2px}}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -1218,13 +1319,19 @@ button, input, select, textarea {
   <div class="logo"><i data-lucide="radio"></i> MK Studio</div>
   <button class="new-btn" onclick="openNew();toggleSidebar(false)"><i data-lucide="plus"></i> New Season</button>
   <div class="section-label">SEASONS</div>
-  <div id="practiceList"></div>
+  <div class="sidebar-season-hint"><i data-lucide="mouse-pointer-click"></i><span>Choose a season from the title bar</span></div>
 </aside>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
 
 <main class="main">
   <header class="topbar">
-    <div><div class="current-name" id="currentName">My Practice</div><div class="current-meta" id="currentMeta">Ready</div></div>
+    <div class="title-season-wrap">
+      <button class="title-season-trigger" id="currentName" onclick="toggleSeasonDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
+        <span class="title-season-text">My Practice</span><i data-lucide="chevron-down"></i>
+      </button>
+      <div class="current-meta" id="currentMeta">Ready</div>
+      <div class="season-dropdown" id="seasonDropdown" role="listbox" aria-label="Seasons"></div>
+    </div>
     <div class="actions">
       <button class="icon-btn menu-btn" title="Seasons" onclick="toggleSidebar()"><i data-lucide="menu"></i></button>
       <button class="icon-btn dashboard-menu-btn" title="All Seasons Dashboard" onclick="toggleDashboardMenu()"><i data-lucide="layout-dashboard"></i></button>
@@ -1307,7 +1414,7 @@ button, input, select, textarea {
         <div class="start-bar">
           <button id="metroBtn" class="start metro" onclick="toggleMetro()"><i data-lucide="play"></i><span>Start Metronome</span></button>
           <button id="sessionBtn" class="start session" onclick="toggleSession()"><i data-lucide="timer"></i><span>Start Practice</span></button>
-          <button class="start record" onclick="toggleRecording()"><i data-lucide="circle"></i><span>Record</span></button>
+          <button id="mainRecordBtn" class="start record" onclick="toggleRecording()"><i data-lucide="mic"></i><span>Record</span></button>
         </div>
         
         <div class="tools">
@@ -1377,10 +1484,22 @@ button, input, select, textarea {
           <div class="calendar-summary"><div><b id="calMonthSessions">0</b><span>Sessions</span></div><div><b id="calMonthTime">0m</b><span>Practice Time</span></div><div><b id="calMonthDays">0</b><span>Practice Days</span></div></div>
         </div>
         <div class="panel" id="panel-record">
-          <div class="panel-title">Simple Practice Recording — No Layers or Mixing</div>
-          <div class="simple-rec"><button id="recordBtn" class="rec-btn r" onclick="toggleRecording()">● Start Recording</button><button id="stopRecordBtn" class="rec-btn s" onclick="stopRecording()" disabled>■ Stop</button><button class="rec-btn p" onclick="playLastRecording()">▶ Play Last</button><span class="rec-status" id="recordStatus">Ready</span></div>
+          <div class="recording-head">
+            <div>
+              <div class="panel-title" style="margin:0">Recording Studio</div>
+              <div class="recording-subtitle">Capture your practice and review takes without leaving the workspace.</div>
+            </div>
+            <div class="recording-live-badge" id="recordLiveBadge"><span></span> READY</div>
+          </div>
+          <div class="recording-console">
+            <button id="recordBtn" class="rec-btn r recording-primary" onclick="toggleRecording()"><i data-lucide="mic"></i><span>Start Recording</span></button>
+            <button id="stopRecordBtn" class="rec-btn s" onclick="stopRecording()" disabled><i data-lucide="square"></i><span>Stop</span></button>
+            <button class="rec-btn p" onclick="playLastRecording()"><i data-lucide="play"></i><span>Play Last</span></button>
+            <div class="rec-status" id="recordStatus">Ready to record</div>
+          </div>
+          <div class="recording-list-head"><span>RECENT TAKES</span><b id="recordingCount">0</b></div>
           <div class="recordings" id="recordingsList"></div>
-          <div class="notice">Recording captures the current practice with or without the metronome. Cloud recordings require the Supabase Storage bucket <b>mk-studio-recordings</b>; otherwise the recording remains local to this device.</div>
+          <div class="notice">Recordings are saved to this Season. If Supabase Storage is configured, cloud copies are uploaded automatically; otherwise they remain available locally on this device.</div>
         </div>
       </div>
 
@@ -1410,9 +1529,14 @@ button, input, select, textarea {
         <div class="target-head"><span>Target BPM</span><b id="targetValue">120</b></div>
         <input class="range" id="targetRange" type="range" min="20" max="300" value="120" oninput="setTarget(this.value)">
       </div>
-      <div class="card">
-        <div class="period-head"><b>Sync Status</b><span id="syncStatus" style="font-size:8px;color:var(--muted)">Local</span></div>
-        <div class="notice" id="syncDetail">Data is currently stored locally.</div>
+      <div class="card sync-card">
+        <div class="sync-head">
+          <div class="sync-title"><span class="sync-orb" id="syncOrb"></span><div><b>Sync Status</b><small id="syncMode">LOCAL STORAGE</small></div></div>
+          <span id="syncStatus">Local</span>
+        </div>
+        <div class="sync-track"><span id="syncTrackFill"></span></div>
+        <div class="sync-detail-row"><span id="syncDetail">Data is currently stored locally.</span><span id="syncLast">Not synced yet</span></div>
+        <div class="sync-chips"><span id="syncChipCloud">Cloud <b>OFF</b></span><span id="syncChipRealtime">Realtime <b>OFF</b></span><button class="sync-now-btn" onclick="syncNow()"><i data-lucide="refresh-cw"></i> Sync now</button></div>
       </div>
     </aside>
   </section>
@@ -1421,11 +1545,28 @@ button, input, select, textarea {
 
 <div class="modal" id="practiceModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">New Season</div><button class="modal-close" onclick="closeModal()">×</button></div><div class="field"><label>Season Name</label><input id="newName" class="num" placeholder="e.g. Sonata No.1"></div><div class="field" style="margin-top:8px"><label>Target BPM</label><input id="newTarget" class="num" type="number" min="20" max="300" value="120"></div><div class="season-custom"><div class="field"><label>Season Color</label><input id="newColor" type="color" value="#00f5ff"></div><div class="field"><label>Season Icon</label><select id="newIcon" class="select"><option value="music-2">Music</option><option value="guitar">Guitar</option><option value="piano">Piano</option><option value="drum">Drums</option><option value="mic-2">Mic</option><option value="headphones">Headphones</option><option value="star">Star</option><option value="zap">Practice</option></select></div></div><div class="modal-actions"><button class="small-btn" onclick="closeModal()">Cancel</button><button class="small-btn" style="background:var(--cyan);color:#001014" onclick="createPractice()">Create</button></div></div></div>
 
+<div class="modal" id="editSeasonModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">Edit Season</div><button class="modal-close" onclick="closeEditSeason()">×</button></div>
+<div class="field"><label>Season Name</label><input id="editSeasonName" class="num" placeholder="Season name"></div>
+<div class="season-custom" style="margin-top:8px"><div class="field"><label>Season Color</label><input id="editSeasonColor" type="color" value="#00f5ff"></div><div class="field"><label>Season Icon</label><select id="editSeasonIcon" class="select"><option value="music-2">Music</option><option value="guitar">Guitar</option><option value="piano">Piano</option><option value="drum">Drums</option><option value="mic-2">Mic</option><option value="headphones">Headphones</option><option value="star">Star</option><option value="zap">Practice</option></select></div></div>
+<div class="modal-actions"><button class="small-btn" onclick="closeEditSeason()">Cancel</button><button class="small-btn" style="background:var(--cyan);color:#001014" onclick="saveSeasonEdits()">Save Changes</button></div></div></div>
+
 <div class="modal" id="profileModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">Profile</div><button class="modal-close" onclick="closeProfile()">×</button></div><div class="profile-grid"><div class="profile-item"><div class="label">Login Email</div><div class="value" id="profileEmail">—</div></div><div class="profile-item"><div class="label">Total Sessions</div><div class="value" id="profileSessions">0</div></div><div class="profile-item"><div class="label">Total Time</div><div class="value" id="profileTime">0m</div></div><div class="profile-item"><div class="label">تعداد Season</div><div class="value" id="profileSeasons">0</div></div><div class="profile-item"><div class="label">Practice Days</div><div class="value" id="profileDays">0</div></div><div class="profile-item"><div class="label">Best BPM</div><div class="value" id="profileBest">—</div></div></div><div class="modal-actions"><button class="small-btn" id="authActionBtn" onclick="openAuth()">Sign In</button><button class="small-btn" onclick="openBackup()">Backup</button><button class="small-btn" style="color:var(--danger)" onclick="resetAll()">Reset All</button></div></div></div>
 
 <div class="modal" id="authModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">MK Studio Account</div><button class="modal-close" onclick="closeAuth()">×</button></div><div class="field"><label>Email</label><input id="authEmail" class="num" type="email" autocomplete="email" placeholder="you@example.com"></div><div class="field" style="margin-top:8px"><label>Password</label><input id="authPassword" class="num" type="password" autocomplete="current-password" placeholder="••••••••"></div><div class="notice" id="authStatus">Sign in to sync your Seasons and practice history across devices.</div><div class="modal-actions"><button class="small-btn" onclick="signIn()">Sign In</button><button class="small-btn" onclick="signUp()">Create Account</button></div></div></div>
 
-<div class="modal" id="settingsModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">Settings</div><button class="modal-close" onclick="closeSettings()">×</button></div><div class="notice">Use the controls inside MK Studio for metronome settings. This area contains sync, backup, and general options.</div><div class="modal-actions"><button class="small-btn" onclick="openBackup()">Backup</button><button class="small-btn" onclick="syncNow()">Sync</button></div></div></div>
+<div class="modal" id="settingsModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">Settings</div><button class="modal-close" onclick="closeSettings()">×</button></div>
+<div class="notice">Use the controls inside MK Studio for metronome settings. Sync, backup and practice reminders live here.</div>
+<div class="reminder-box">
+  <div class="reminder-head"><div><b>Daily Practice Reminders</b><span>Get up to three reminders each day.</span></div><label class="switch"><input id="reminderEnabled" type="checkbox" onchange="saveReminderSettings()"><span></span></label></div>
+  <div class="reminder-times">
+    <label>Morning<input id="reminderTime1" type="time" value="09:00" onchange="saveReminderSettings()"></label>
+    <label>Afternoon<input id="reminderTime2" type="time" value="15:00" onchange="saveReminderSettings()"></label>
+    <label>Evening<input id="reminderTime3" type="time" value="20:00" onchange="saveReminderSettings()"></label>
+  </div>
+  <button class="small-btn reminder-permission" onclick="requestReminderPermission()">Enable browser notifications</button>
+  <div class="notice" id="reminderStatus">Reminders work while notifications are allowed. If the browser is closed, reliable background reminders require push notifications/service infrastructure.</div>
+</div>
+<div class="modal-actions"><button class="small-btn" onclick="openBackup()">Backup</button><button class="small-btn" onclick="syncNow()">Sync</button></div></div></div>
 
 <div class="modal" id="backupModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">Backup</div><button class="modal-close" onclick="closeBackup()">×</button></div><div class="modal-actions"><button class="small-btn" onclick="exportData()">Export JSON</button><button class="small-btn" onclick="document.getElementById('importFile').click()">Import JSON</button></div><input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)"></div></div>
 
@@ -1478,8 +1619,42 @@ function escapeHTML(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":
 
 function loadPracticeSettings(p){let s=p.settings||{};bpm=s.bpm||80;targetBpm=s.target||p.target||120;meterTime=s.meterTime||"4/4";meterNote=s.meterNote||"quarter";rhythmPattern=s.rhythmPattern||[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];sound=s.sound||"classic";drums=s.drums||"off";special=s.special||"normal";metroMuted=!!s.muted;customNotes=Array.isArray(s.customNotes)?s.customNotes:(JSON.parse(localStorage.getItem("metroCustomNotes")||"[]"));localStorage.setItem("metroCustomNotes",JSON.stringify(customNotes));let v=document.getElementById("bpmRange");if(v)v.value=bpm;let t=document.getElementById("targetRange");if(t)t.value=targetBpm;let ms=document.getElementById("meterSelect");if(ms){if([...ms.options].some(o=>o.value===meterTime))ms.value=meterTime;else{meterTime="4/4";ms.value="4/4"}}}
 function toggleSidebar(force){const sb=document.querySelector(".sidebar"),ov=document.getElementById("sidebarOverlay");if(!sb||!ov)return;const willOpen=typeof force==="boolean"?force:!sb.classList.contains("open");sb.classList.toggle("open",willOpen);ov.classList.toggle("open",willOpen)}
-function renderPracticeList(){let e=document.getElementById("practiceList");e.innerHTML="";db.practices.forEach(p=>{let r=document.createElement("div");r.className="item "+(p.id===currentId?"active":"");r.draggable=true;r.innerHTML=`<span class="season-icon" style="color:${p.color||"var(--cyan)"}"><i data-lucide="${p.icon||"music-2"}"></i></span><span class="season-name" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHTML(p.name)}</span><button class="season-delete" title="Delete season" aria-label="Delete ${escapeHTML(p.name)}" onclick="event.stopPropagation();deleteSeason('${p.id}')"><i data-lucide="trash-2"></i></button>`;r.onclick=()=>{currentId=p.id;localStorage.setItem("studioMetronomeCurrent",currentId);loadPracticeSettings(p);renderAll();toggleSidebar(false)};r.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",p.id);r.classList.add("dragging")});r.addEventListener("dragend",()=>r.classList.remove("dragging"));r.addEventListener("dragover",e=>e.preventDefault());r.addEventListener("drop",e=>{e.preventDefault();let from=e.dataTransfer.getData("text/plain"),to=p.id;if(from&&from!==to){let fi=db.practices.findIndex(x=>x.id===from),ti=db.practices.findIndex(x=>x.id===to);let [m]=db.practices.splice(fi,1);db.practices.splice(ti,0,m);saveDB()}});e.appendChild(r)})}
-function renderHeader(){let p=currentPractice();if(!p)return;document.getElementById("currentName").textContent=p.name;document.getElementById("currentMeta").textContent=`${p.sessions.length} sessions • Target ${p.target} BPM`;let ts=document.getElementById("tickerSeason"),tr=document.getElementById("tickerRhythm");if(ts)ts.textContent=p.name.toUpperCase();if(tr)tr.textContent=`${meterTime} • ${noteDefs[meterNote]?.symbol||customNotes.find(n=>n.id===meterNote)?.symbol||"♩"}`}
+function renderPracticeList(){/* Seasons are now selected from the title-bar dropdown. */ renderSeasonDropdown()}
+function renderSeasonDropdown(){
+  const e=document.getElementById("seasonDropdown"); if(!e)return;
+  e.innerHTML="";
+  db.practices.forEach(p=>{
+    const b=document.createElement("button");
+    b.className="season-option "+(p.id===currentId?"active":"");
+    b.type="button"; b.setAttribute("role","option"); b.setAttribute("aria-selected",p.id===currentId?"true":"false");
+    b.innerHTML=`<span class="season-option-icon" style="color:${p.color||"var(--cyan)"}"><i data-lucide="${p.icon||"music-2"}"></i></span><span class="season-option-name">${escapeHTML(p.name)}</span><span class="season-option-meta">${(p.sessions||[]).length} sessions</span>`;
+    b.onclick=()=>selectSeason(p.id);
+    e.appendChild(b);
+  });
+  lucide.createIcons();
+}
+function selectSeason(id){
+  if(!db.practices.some(x=>x.id===id))return;
+  currentId=id; localStorage.setItem("studioMetronomeCurrent",currentId);
+  loadPracticeSettings(currentPractice()); closeSeasonDropdown(); renderAll(); toggleSidebar(false);
+}
+function toggleSeasonDropdown(e){
+  e?.stopPropagation();
+  const d=document.getElementById("seasonDropdown"),t=document.getElementById("currentName"); if(!d||!t)return;
+  const open=d.classList.toggle("open"); t.setAttribute("aria-expanded",open?"true":"false");
+  if(open)renderSeasonDropdown();
+}
+function closeSeasonDropdown(){const d=document.getElementById("seasonDropdown"),t=document.getElementById("currentName");if(d)d.classList.remove("open");if(t)t.setAttribute("aria-expanded","false")}
+function renderHeader(){
+  let p=currentPractice();if(!p)return;
+  const name=document.querySelector("#currentName .title-season-text");
+  if(name)name.textContent=p.name;
+  document.getElementById("currentMeta").textContent=`${p.sessions.length} sessions • Target ${p.target} BPM`;
+  let ts=document.getElementById("tickerSeason"),tr=document.getElementById("tickerRhythm");
+  if(ts)ts.textContent=p.name.toUpperCase();
+  if(tr)tr.textContent=`${meterTime} • ${noteDefs[meterNote]?.symbol||customNotes.find(n=>n.id===meterNote)?.symbol||"♩"}`;
+  renderSeasonDropdown();
+}
 function setRangeFill(el,val,color){let min=Number(el.min),max=Number(el.max),pct=((Number(val)-min)/(max-min))*100;el.style.background=`linear-gradient(90deg,${color} 0%,${color} ${pct}%,#1b2538 ${pct}%,#1b2538 100%)`}
 function setBpm(v,persist=true){bpm=Math.max(20,Math.min(300,Math.round(Number(v))));document.getElementById("bpmRange").value=bpm;document.getElementById("bpmDisplay").textContent=bpm;document.getElementById("bpmValue").textContent=bpm;const fv=document.getElementById("focusTempoValue");if(fv)fv.textContent=bpm;const fb=document.getElementById("focusBpm");if(fb)fb.textContent=bpm;setRangeFill(document.getElementById("bpmRange"),bpm,"#00f5ff");settings().bpm=bpm;updateTarget();if(persist&&!realtimeApplying)saveDB()}
 function changeBpm(n){setBpm(bpm+n)}
@@ -1584,9 +1759,36 @@ function updateSessionTimer(){const e=document.getElementById("sessionTime"),day
 function formatDurationLong(sec){sec=Math.max(0,Math.floor(Number(sec)||0));return `${String(Math.floor(sec/3600)).padStart(2,"0")}:${String(Math.floor((sec%3600)/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`}
 function saveSession(seconds){let p=currentPractice();if(!p)return;p.sessions.push({id:crypto.randomUUID(),date:new Date().toISOString(),seconds,bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning});p.practiceDays=p.practiceDays||{};p.practiceDays[localDateKey(new Date())]=true;saveDB()}
 
-async function toggleRecording(){mediaRecorder?.state==="recording"?stopRecording():startRecording()}
-async function startRecording(){try{mediaStream=await navigator.mediaDevices.getUserMedia({audio:true});recordingChunks=[];mediaRecorder=new MediaRecorder(mediaStream);mediaRecorder.ondataavailable=e=>{if(e.data.size)recordingChunks.push(e.data)};mediaRecorder.onstop=finishRecording;mediaRecorder.start(250);recordingStartedAt=Date.now();document.getElementById("recordBtn").textContent="● Recording";document.getElementById("stopRecordBtn").disabled=false;document.getElementById("recordStatus").textContent=metroRunning?"Recording with metronome":"Recording without metronome"}catch(e){alert("Microphone permission is required for recording.")}}
+async function toggleRecording(){
+  if(mediaRecorder?.state==="recording"){stopRecording();return}
+  const panel=document.getElementById("panel-record"), tool=[...document.querySelectorAll(".tool")].find(x=>/Recordings/i.test(x.textContent||""));
+  document.querySelectorAll(".panel").forEach(x=>x.classList.remove("open"));
+  document.querySelectorAll(".tool").forEach(x=>x.classList.remove("active"));
+  if(panel){panel.classList.add("open");if(tool)tool.classList.add("active");setTimeout(()=>panel.scrollIntoView({behavior:"smooth",block:"nearest"}),30)}
+  await startRecording();
+}
+async function startRecording(){
+  try{
+    mediaStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    recordingChunks=[];
+    mediaRecorder=new MediaRecorder(mediaStream);
+    mediaRecorder.ondataavailable=e=>{if(e.data.size)recordingChunks.push(e.data)};
+    mediaRecorder.onstop=finishRecording;
+    mediaRecorder.start(250);
+    recordingStartedAt=Date.now();
+    updateRecordingUI(true);
+    document.getElementById("recordStatus").textContent=metroRunning?"Recording with metronome":"Recording without metronome";
+  }catch(e){console.error(e);alert("Microphone permission is required for recording.");updateRecordingUI(false)}
+}
 function stopRecording(){if(mediaRecorder?.state==="recording")mediaRecorder.stop()}
+function updateRecordingUI(active){
+  const main=document.getElementById("mainRecordBtn"),btn=document.getElementById("recordBtn"),stop=document.getElementById("stopRecordBtn"),badge=document.getElementById("recordLiveBadge");
+  if(main){main.classList.toggle("recording-active",active);main.innerHTML=active?'<i data-lucide="square"></i><span>Recording…</span>':'<i data-lucide="mic"></i><span>Record</span>'}
+  if(btn){btn.classList.toggle("recording-active",active);btn.innerHTML=active?'<i data-lucide="square"></i><span>Recording…</span>':'<i data-lucide="mic"></i><span>Start Recording</span>'}
+  if(stop)stop.disabled=!active;
+  if(badge){badge.classList.toggle("live",active);badge.innerHTML=active?'<span></span> RECORDING':'<span></span> READY'}
+  lucide.createIcons();
+}
 async function uploadRecordingBlob(blob,recordingId,practiceId){
   if(!sb)return null;
   const {data:{user}}=await sb.auth.getUser();
@@ -1603,44 +1805,93 @@ async function getRecordingUrl(storagePath){
   if(error)throw error;
   return data?.signedUrl||null;
 }
+function recordingWave(){
+  const heights=[7,13,18,10,15,21,9,16,12,19,8,14,22,11,17,9,15,20,7,13,18,10,16,8,14,21,11,17,9,15,19,8,13,18,10,16,7,14,20,11,17,9,15,21,8,13,18,10];
+  return heights.map(h=>`<i style="height:${h}px"></i>`).join("");
+}
+function recordingName(r){return `Take ${String(r.takeNumber||1).padStart(2,"0")}`}
 async function finishRecording(){
   const mime=mediaRecorder?.mimeType||"audio/webm";
   const blob=new Blob(recordingChunks,{type:mime});
-  const p=currentPractice();
-  if(!p)return;
+  const p=currentPractice();if(!p)return;
   p.recordings=p.recordings||[];
-  const id=crypto.randomUUID();
+  const id=crypto.randomUUID(), takeNumber=p.recordings.length+1;
   const localUrl=URL.createObjectURL(blob);
-  const rec={id,date:new Date().toISOString(),duration:Math.floor((Date.now()-recordingStartedAt)/1000),metro:metroRunning,mimeType:mime,size:blob.size,blobUrl:localUrl,uploading:true};
-  p.recordings.push(rec);
-  recordings=p.recordings;
-  mediaStream?.getTracks().forEach(t=>t.stop());
-  mediaStream=null; mediaRecorder=null;
-  document.getElementById("recordBtn").textContent="● Start Recording";
-  document.getElementById("stopRecordBtn").disabled=true;
-  document.getElementById("recordStatus").textContent="Uploading recording…";
-  renderRecordings();
-  saveDB();
+  const rec={id,takeNumber,date:new Date().toISOString(),duration:Math.floor((Date.now()-recordingStartedAt)/1000),metro:metroRunning,mimeType:mime,size:blob.size,blobUrl:localUrl,uploading:true};
+  p.recordings.push(rec); recordings=p.recordings;
+  mediaStream?.getTracks().forEach(t=>t.stop()); mediaStream=null; mediaRecorder=null;
+  updateRecordingUI(false);
+  document.getElementById("recordStatus").textContent="Preparing take…";
+  renderRecordings(); saveDB();
   try{
     const storagePath=await uploadRecordingBlob(blob,id,p.id);
-    rec.storagePath=storagePath;
-    delete rec.uploading;
-    rec.blobUrl=localUrl;
-    saveDB();
-    document.getElementById("recordStatus").textContent="Record saved to cloud";
+    rec.storagePath=storagePath; delete rec.uploading; rec.blobUrl=localUrl; saveDB();
+    document.getElementById("recordStatus").textContent="Take saved to cloud";
   }catch(e){
-    console.error("Recording upload failed",e);
-    delete rec.uploading;
-    rec.uploadError=true;
-    saveDB();
-    document.getElementById("recordStatus").textContent="Saved locally; cloud upload failed";
+    console.error("Recording upload failed",e); delete rec.uploading; rec.uploadError=true; saveDB();
+    document.getElementById("recordStatus").textContent="Take saved locally";
   }
   renderRecordings();
 }
-function renderRecordings(){let p=currentPractice(),e=document.getElementById("recordingsList");e.innerHTML="";(p?.recordings||[]).slice(-12).reverse().forEach(r=>{let row=document.createElement("div");row.className="recording";const cloud=r.storagePath?" ☁":"";const state=r.uploading?" • Uploading…":(r.uploadError?" • Local only":"");row.innerHTML=`<span>${formatDateTime(r.date)} • ${formatDuration(r.duration)} • ${r.metro?"With metronome":"Without metronome"}${cloud}${state}</span><div style="display:flex;gap:4px"><button class="small-btn" onclick="playRecording('${r.id}')">▶</button><button class="small-btn" style="color:var(--danger)" onclick="deleteRecording('${r.id}')">✕</button></div>`;e.appendChild(row)})}
-async function deleteRecording(id){let p=currentPractice();if(!p)return;let r=(p.recordings||[]).find(x=>x.id===id);if(!r||!confirm("Delete this recording?"))return;if(r.storagePath&&sb){try{const {error}=await sb.storage.from(SUPABASE_RECORDINGS_BUCKET).remove([r.storagePath]);if(error)throw error}catch(e){console.warn("Cloud recording delete failed",e)}}try{if(r.blobUrl)URL.revokeObjectURL(r.blobUrl)}catch{}p.recordings=p.recordings.filter(x=>x.id!==id);saveDB()}
-async function playRecording(id){let r=(currentPractice().recordings||[]).find(x=>x.id===id);if(!r)return;try{let url=r.blobUrl;if(!url&&r.storagePath)url=await getRecordingUrl(r.storagePath);if(!url)return;new Audio(url).play()}catch(e){console.error("Recording playback failed",e);alert("This recording could not be played. Check the cloud recording storage setup.")}}
-function playLastRecording(){let r=(currentPractice().recordings||[]).at(-1);if(r)playRecording(r.id)}
+let recordingAudio=null,activeRecordingId=null;
+async function ensureRecordingAudio(r){
+  let url=r.blobUrl;
+  if(!url&&r.storagePath)url=await getRecordingUrl(r.storagePath);
+  if(!url)throw new Error("No audio source");
+  if(!recordingAudio)recordingAudio=new Audio();
+  if(activeRecordingId!==r.id){recordingAudio.pause();recordingAudio.src=url;activeRecordingId=r.id}
+  return recordingAudio;
+}
+async function toggleRecordingPlayback(id){
+  const p=currentPractice(),r=(p?.recordings||[]).find(x=>x.id===id);if(!r)return;
+  try{
+    const a=await ensureRecordingAudio(r);
+    if(a.paused){await a.play()}else a.pause();
+    activeRecordingId=r.id; renderRecordings();
+  }catch(e){console.error(e);alert("This recording could not be played.")}
+}
+function seekRecording(id,v){
+  if(!recordingAudio||activeRecordingId!==id||!Number.isFinite(recordingAudio.duration))return;
+  recordingAudio.currentTime=(Number(v)/100)*recordingAudio.duration;
+}
+function formatPlayerTime(sec){return formatDuration(Math.max(0,Number(sec)||0))}
+function renderRecordings(){
+  const p=currentPractice(),e=document.getElementById("recordingsList"),count=document.getElementById("recordingCount");
+  if(!e)return;
+  const list=(p?.recordings||[]).slice(-12).reverse();
+  if(count)count.textContent=list.length;
+  e.innerHTML="";
+  if(!list.length){e.innerHTML='<div class="record-empty"><i data-lucide="mic-off"></i><div>No takes yet</div><span>Press Record to capture your first practice take.</span></div>';lucide.createIcons();return}
+  list.forEach(r=>{
+    const row=document.createElement("div");row.className="recording-card"+(activeRecordingId===r.id&&!recordingAudio?.paused?" playing":"");
+    const cloud=r.storagePath?'<span class="cloud">● Cloud</span>':'<span class="local">● Local</span>';
+    const state=r.uploading?'Uploading…':(r.uploadError?'Upload failed':'Saved');
+    row.innerHTML=`<button class="record-play" onclick="toggleRecordingPlayback('${r.id}')" title="Play / pause"><i data-lucide="${activeRecordingId===r.id&&!recordingAudio?.paused?"pause":"play"}"></i></button>
+      <div class="record-main">
+        <div class="record-top"><span class="record-name">${recordingName(r)}${r.metro?" · Metro":""}</span><span class="record-time">${formatDateTime(r.date)}</span></div>
+        <div class="record-wave">${recordingWave()}</div>
+        <input class="record-progress" type="range" min="0" max="100" value="${activeRecordingId===r.id&&recordingAudio?.duration?((recordingAudio.currentTime/recordingAudio.duration)*100):0}" oninput="seekRecording('${r.id}',this.value)">
+        <div class="record-meta"><span>${formatPlayerTime(activeRecordingId===r.id?recordingAudio?.currentTime:r.duration)} / ${formatPlayerTime(r.duration)}</span>${cloud}<span>${state}</span></div>
+      </div>
+      <div class="record-actions"><button class="small-btn" onclick="deleteRecording('${r.id}')" title="Delete"><i data-lucide="trash-2"></i></button></div>`;
+    e.appendChild(row);
+  });
+  lucide.createIcons();
+}
+if(!window.__mkRecordingAudioBound){
+  window.__mkRecordingAudioBound=true;
+  document.addEventListener("timeupdate",e=>{
+    if(e.target!==recordingAudio)return;
+    renderRecordings();
+  });
+  document.addEventListener("ended",e=>{
+    if(e.target!==recordingAudio)return;
+    renderRecordings();
+  });
+}
+async function deleteRecording(id){let p=currentPractice();if(!p)return;let r=(p.recordings||[]).find(x=>x.id===id);if(!r||!confirm("Delete this recording?"))return;if(r.storagePath&&sb){try{const {error}=await sb.storage.from(SUPABASE_RECORDINGS_BUCKET).remove([r.storagePath]);if(error)throw error}catch(e){console.warn("Cloud recording delete failed",e)}}try{if(r.blobUrl)URL.revokeObjectURL(r.blobUrl)}catch{}if(activeRecordingId===id){recordingAudio?.pause();activeRecordingId=null}p.recordings=p.recordings.filter(x=>x.id!==id);saveDB()}
+function playRecording(id){return toggleRecordingPlayback(id)}
+function playLastRecording(){let r=(currentPractice().recordings||[]).at(-1);if(r)toggleRecordingPlayback(r.id)}
 function formatDateTime(d){return new Date(d).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}
 
 function periodSessions(){if(period==="calendar")period="month";let now=new Date();let start=new Date(now);if(period==="week"){let day=(now.getDay()+6)%7;start.setDate(now.getDate()-day);start.setHours(0,0,0,0)}else if(period==="month"){start=new Date(now.getFullYear(),now.getMonth(),1)}else start=new Date(now.getFullYear(),0,1);return allSessions().filter(s=>new Date(s.date)>=start)}
@@ -1705,7 +1956,7 @@ function openNew(){document.getElementById("practiceModal").classList.add("open"
 function closeModal(){document.getElementById("practiceModal").classList.remove("open")}
 function createPractice(){let name=document.getElementById("newName").value.trim(),target=Number(document.getElementById("newTarget").value)||120,color=document.getElementById("newColor")?.value||"#00f5ff",icon=document.getElementById("newIcon")?.value||"music-2";if(!name)return;let p={id:crypto.randomUUID(),name,target,color,icon,sessions:[],settings:{},practiceDays:{},recordings:[]};db.practices.push(p);currentId=p.id;localStorage.setItem("studioMetronomeCurrent",currentId);closeModal();document.getElementById("newName").value="";saveDB()}
 async function deleteSeason(id){let p=db.practices.find(x=>x.id===id);if(!p)return;if(!confirm(`Delete season "${p.name}"? This will permanently remove its sessions, recordings, settings and statistics.`))return;const wasCurrent=id===currentId;db.practices=db.practices.filter(x=>x.id!==id);if(!db.practices.length){db=defaultDB()}if(wasCurrent||!db.practices.some(x=>x.id===currentId)){currentId=db.practices[0].id;localStorage.setItem("studioMetronomeCurrent",currentId)}loadPracticeSettings(currentPractice());saveDB(true);try{await syncNow(false)}catch{}renderAll()}
-function renameCurrent(){let p=currentPractice(),n=prompt("Season name:",p?.name);if(n?.trim()){p.name=n.trim();saveDB()}}
+function renameCurrent(){openEditSeason()}
 function clearCurrentHistory(){let p=currentPractice();if(!p?.sessions.length||!confirm("Clear this Season history?"))return;p.sessions=[];p.practiceDays={};saveDB()}
 function resetSeason(id=currentId){let p=db.practices.find(x=>x.id===id);if(!p)return;if(!confirm(`Reset "${p.name}"? Sessions, recordings and settings will be cleared.`))return;p.sessions=[];p.practiceDays={};p.recordings=[];p.settings={};p.target=120;if(id===currentId)loadPracticeSettings(p);saveDB()}
 async function resetAll(){
@@ -1813,7 +2064,7 @@ function toggleTechniqueTempo(){
 function applyAutoTempo(){
   return startTempoAutomation();
 }
-function openSettings(){document.getElementById("settingsModal").classList.add("open")}
+function openSettings(){document.getElementById("settingsModal").classList.add("open");loadReminderUI()}
 function closeSettings(){document.getElementById("settingsModal").classList.remove("open")}
 function openBackup(){document.getElementById("backupModal").classList.add("open")}
 function closeBackup(){document.getElementById("backupModal").classList.remove("open")}
@@ -1902,7 +2153,15 @@ async function syncNow(silent=false){
   }catch(e){console.error("Sync failed",e);setSync("Local","Sync failed; local data was preserved.");return false}
 }
 
-function setSync(a,b){document.getElementById("syncStatus").textContent=a;document.getElementById("syncDetail").textContent=b}
+function setSync(a,b){
+  const st=document.getElementById("syncStatus"),detail=document.getElementById("syncDetail"),last=document.getElementById("syncLast"),mode=document.getElementById("syncMode"),cloud=document.getElementById("syncChipCloud"),rt=document.getElementById("syncChipRealtime"),card=document.querySelector(".sync-card");
+  if(st)st.textContent=a;if(detail)detail.textContent=b;
+  if(last&&/synced|realtime/i.test(String(a)))last.textContent="Updated "+new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+  if(mode)mode.textContent=/realtime/i.test(String(a))?"REALTIME CLOUD":/synced|syncing/i.test(String(a))?"CLOUD SYNC":"LOCAL STORAGE";
+  if(cloud)cloud.innerHTML=`Cloud <b>${/synced|realtime|syncing/i.test(String(a))?"ON":"OFF"}</b>`;
+  if(rt)rt.innerHTML=`Realtime <b>${/realtime/i.test(String(a))?"ON":"OFF"}</b>`;
+  if(card){card.classList.remove("sync-live","sync-working","sync-offline");if(/realtime|synced/i.test(String(a)))card.classList.add("sync-live");else if(/syncing/i.test(String(a)))card.classList.add("sync-working");else card.classList.add("sync-offline")}
+}
 
 document.addEventListener("keydown",e=>{if(["INPUT","SELECT","TEXTAREA"].includes(e.target.tagName))return;if(e.code==="Space"){e.preventDefault();toggleMetro()}if(e.key==="ArrowUp")changeBpm(1);if(e.key==="ArrowDown")changeBpm(-1);if(e.key.toLowerCase()==="r")toggleRecording()});
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&audioCtx?.state==="suspended")audioCtx.resume()});
@@ -1956,7 +2215,7 @@ function stopRealtimeSync(){
   stopCloudPolling();
   realtimeUserId=null;
 }
-loadPracticeSettings(currentPractice());renderAll();restoreSectionState();
+loadPracticeSettings(currentPractice());renderAll();restoreSectionState();try{loadReminderUI();schedulePracticeReminders()}catch{}
 if(sb){
   sb.auth.onAuthStateChange(async (event,session)=>{
     await loadUserEmail();
@@ -2136,6 +2395,63 @@ window.addEventListener("DOMContentLoaded",()=>{
 </script>
 
 
+
+<script id="mk-request-features">
+let reminderTimers=[];
+function openEditSeason(){
+  const p=currentPractice();if(!p)return;
+  document.getElementById("editSeasonName").value=p.name||"";
+  document.getElementById("editSeasonColor").value=p.color||"#00f5ff";
+  document.getElementById("editSeasonIcon").value=p.icon||"music-2";
+  document.getElementById("editSeasonModal").classList.add("open");
+  setTimeout(()=>document.getElementById("editSeasonName").focus(),60);
+}
+function closeEditSeason(){document.getElementById("editSeasonModal").classList.remove("open")}
+function saveSeasonEdits(){
+  const p=currentPractice();if(!p)return;
+  const name=document.getElementById("editSeasonName").value.trim();
+  if(!name)return;
+  p.name=name;p.color=document.getElementById("editSeasonColor").value||"#00f5ff";p.icon=document.getElementById("editSeasonIcon").value||"music-2";
+  closeEditSeason();saveDB();
+}
+function loadReminderUI(){
+  const s=settings(),r=s.reminders||{enabled:false,times:["09:00","15:00","20:00"]};
+  const en=document.getElementById("reminderEnabled");if(en)en.checked=!!r.enabled;
+  ["1","2","3"].forEach((n,i)=>{const el=document.getElementById("reminderTime"+n);if(el)el.value=r.times?.[i]||["09:00","15:00","20:00"][i]});
+  const st=document.getElementById("reminderStatus");
+  if(st)st.textContent=("Notification" in window)?(Notification.permission==="granted"?"Notifications are enabled.":"Enable notifications to receive reminders while MK Studio is running."):"This browser does not support notifications.";
+}
+async function requestReminderPermission(){
+  if(!("Notification" in window)){alert("This browser does not support notifications.");return}
+  const permission=await Notification.requestPermission();
+  loadReminderUI();schedulePracticeReminders();
+  if(permission==="granted")new Notification("MK Studio",{body:"Practice reminders are now enabled."});
+}
+function saveReminderSettings(){
+  settings().reminders={enabled:!!document.getElementById("reminderEnabled")?.checked,times:[1,2,3].map(n=>document.getElementById("reminderTime"+n)?.value||"09:00")};
+  saveDB();loadReminderUI();schedulePracticeReminders();
+}
+function schedulePracticeReminders(){
+  reminderTimers.forEach(clearTimeout);reminderTimers=[];
+  const r=settings().reminders;if(!r?.enabled||!("Notification" in window)||Notification.permission!=="granted")return;
+  const times=r.times||["09:00","15:00","20:00"],now=new Date();
+  times.forEach(time=>{
+    const [hh,mm]=String(time).split(":").map(Number);let next=new Date();next.setHours(hh||0,mm||0,0,0);
+    if(next<=now)next.setDate(next.getDate()+1);
+    const delay=next-now;
+    const timer=setTimeout(()=>{
+      const p=currentPractice();
+      new Notification("MK Studio • Practice Reminder",{body:p?`Time to practice ${p.name}.`:"Time for a practice session.",icon:"./icons/icon-192.png",tag:"mk-studio-practice"});
+      schedulePracticeReminders();
+    },delay);
+    reminderTimers.push(timer);
+  });
+}
+function syncReminderAfterRender(){
+  try{loadReminderUI()}catch{}
+  schedulePracticeReminders();
+}
+</script>
 <script id="mk-studio-v3-js">
 (function(){
   function seasonColor(){
@@ -2162,24 +2478,11 @@ window.addEventListener("DOMContentLoaded",()=>{
     }
   }
 
-  function editSeasonName(){
-    const p=typeof currentPractice==="function"?currentPractice():null;
-    if(!p)return;
-    const next=prompt("Season name:",p.name);
-    if(next!==null && next.trim() && next.trim()!==p.name){
-      p.name=next.trim();
-      if(typeof saveDB==="function")saveDB();
-      else localStorage.setItem(DB_KEY,JSON.stringify(db));
-      applySeasonColor();
-    }
-  }
-
-  // Clickable session/season name and meter summary.
+  // The title bar now selects Seasons; the pencil in the top actions is the only rename/edit entry point.
   document.addEventListener("click",function(e){
-    const name=e.target.closest("#currentName");
-    if(name){e.preventDefault();editSeasonName();return}
     const ticker=e.target.closest("#tickerSeason,#tickerRhythm,.market-below-tempo");
-    if(ticker){e.preventDefault();openMeterEditor()}
+    if(ticker){e.preventDefault();openMeterEditor();return}
+    if(!e.target.closest(".title-season-wrap"))closeSeasonDropdown();
   });
 
   // Ensure user-driven slider changes sync to other logged-in devices.
