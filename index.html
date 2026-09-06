@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="mk-vnext-refactor" content="state, lifecycle, accessibility, scheduling">
 <title>MK Studio</title>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -1418,6 +1419,112 @@ button, input, select, textarea {
   .tempo-display-card .bpm-big{font-size:58px!important}
 }
 </style>
+
+<!-- MK Studio vNext Refactor Layer
+     Centralized state/audio/timer utilities are intentionally additive so
+     existing UI behavior remains compatible with the current app.
+-->
+
+<style id="mk-vnext-refactor-css">
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after{
+  animation-duration:.001ms!important;
+  animation-iteration-count:1!important;
+  scroll-behavior:auto!important;
+  transition-duration:.001ms!important;
+}
+button, [role="button"], input, select, textarea{
+  -webkit-tap-highlight-color:transparent;
+}
+</style>
+
+
+<style id="mk-vnext-stage2-css">
+/* Stage 2: focused component polish */
+.mk-stage2-hidden{display:none!important}
+.mk-a11y-focus:focus-visible{
+  outline:2px solid var(--season-color,#00f5ff);
+  outline-offset:3px;
+}
+</style>
+
+
+<style id="mk-stage4-recording-css">
+/* Recording component polish */
+.mk-recording-busy{pointer-events:none;opacity:.72}
+.mk-recording-active{box-shadow:0 0 0 1px currentColor inset,0 0 22px rgba(0,0,0,.12)}
+.mk-recording-status{
+  display:inline-flex;align-items:center;gap:.45rem;
+  min-height:1.5em;
+}
+.mk-recording-status::before{
+  content:"";width:.55rem;height:.55rem;border-radius:50%;
+  background:currentColor;opacity:.45;
+}
+.mk-recording-status[data-state="recording"]::before{
+  opacity:1;animation:mk-rec-pulse 1s ease-in-out infinite;
+}
+@keyframes mk-rec-pulse{50%{transform:scale(.65);opacity:.45}}
+.reduce-motion .mk-recording-status::before{animation:none}
+</style>
+
+
+<style id="mk-stage5-ui-architecture">
+:root{
+  --mk-space-1:.25rem;--mk-space-2:.5rem;--mk-space-3:.75rem;--mk-space-4:1rem;
+  --mk-space-5:1.25rem;--mk-space-6:1.5rem;--mk-space-8:2rem;
+  --mk-radius-sm:10px;--mk-radius-md:16px;--mk-radius-lg:22px;
+  --mk-border:rgba(255,255,255,.10);
+  --mk-surface:rgba(255,255,255,.045);
+  --mk-surface-strong:rgba(255,255,255,.075);
+  --mk-shadow:0 14px 40px rgba(0,0,0,.18);
+  --mk-ease:cubic-bezier(.2,.7,.2,1);
+}
+@media (prefers-reduced-motion:reduce){
+  :root{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+button,input,select,textarea{font:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,
+[role="button"]:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+@media (max-width:720px){
+  html,body{max-width:100%;overflow-x:hidden}
+  body{padding-inline:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
+  button,[role="button"],input[type="button"],input[type="submit"]{min-height:44px}
+}
+</style>
+
+
+<style id="mk-stage6-state-css">
+.mk-state-updating{contain:layout style paint}
+.mk-state-stale{opacity:.72}
+</style>
+
+
+<style id="mk-stage7-sync-css">
+.mk-sync-badge{display:inline-flex;align-items:center;gap:.45rem;white-space:nowrap}
+.mk-sync-badge[data-sync-state="offline"]{opacity:.72}
+.mk-sync-badge[data-sync-state="error"]{text-decoration:underline;text-decoration-style:dotted}
+.mk-sync-badge[data-sync-state="conflict"]{font-weight:700}
+</style>
+
+
+<style id="mk-stage8-audio-css">
+.mk-audio-health{display:none}
+</style>
+
+
+<style id="mk-stage9-qa-css">
+.mk-qa-pass{display:none}
+</style>
+
+
+<style id="mk-stage10-release-css">
+/* Release hardening: keep diagnostics invisible unless explicitly requested. */
+#mk-release-error-region{
+  position:fixed;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;
+}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -1799,7 +1906,11 @@ function renderOptions(){
 }
 function renderOptionGroup(id,defs,current,fn){let e=document.getElementById(id);e.innerHTML="";Object.entries(defs).forEach(([k,l])=>{let b=document.createElement("button");b.className="preset "+(k===current?"active":"");b.style.borderColor=k===current?"#00f5ff":"";b.textContent=l;b.onclick=()=>fn(k);e.appendChild(b)})}
 
-function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}
+function initAudio(){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(!window.mkMetroBus){mkMetroBus=audioCtx.createGain();mkMetroBus.gain.value=1;mkMetroBus.connect(audioCtx.destination)}
+  if(audioCtx.state==="suspended")audioCtx.resume()
+}
 function playClick(time,type="normal"){
   initAudio();
   const v=metroMuted?0:Math.max(0,Math.min(1,Number(document.getElementById("volume")?.value||.7)));
@@ -1807,7 +1918,7 @@ function playClick(time,type="normal"){
   const accent=type==="accent", secondary=type==="secondary";
   const master=audioCtx.createGain();
   master.gain.setValueAtTime(0.0001,time);
-  master.connect(audioCtx.destination);
+  master.connect(mkMetroBus);
 
   // Distinct, studio-style metronome voices. Each preset has its own
   // oscillator mix, envelope and harmonic character rather than only
@@ -1856,10 +1967,6 @@ function playClick(time,type="normal"){
   master.gain.exponentialRampToValueAtTime(.0001,time+q.decay+.02);
 }
 
-function playNoise(time,duration,vol=.2){let buffer=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*duration)),audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;let src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buffer;g.gain.setValueAtTime(vol*(metroMuted?0:Number(document.getElementById("volume").value)),time);g.gain.exponentialRampToValueAtTime(.001,time+duration);src.connect(g);g.connect(audioCtx.destination);src.start(time)}
-function playKick(time){let o=audioCtx.createOscillator(),g=audioCtx.createGain(),v=(metroMuted?0:Number(document.getElementById("volume").value));o.type="sine";o.frequency.setValueAtTime(150,time);o.frequency.exponentialRampToValueAtTime(45,time+.12);g.gain.setValueAtTime(.8*v,time);g.gain.exponentialRampToValueAtTime(.001,time+.14);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.14)}
-function playSnare(time){playNoise(time,.08,.5);let o=audioCtx.createOscillator(),g=audioCtx.createGain(),v=(metroMuted?0:Number(document.getElementById("volume").value));o.type="square";o.frequency.setValueAtTime(180,time);g.gain.setValueAtTime(.28*v,time);g.gain.exponentialRampToValueAtTime(.001,time+.06);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.06)}
-function playDrum(time,type){if(type==="K")playKick(time);else if(type==="S")playSnare(time);else if(type==="H")playNoise(time,.025,.18);else if(type==="R")playNoise(time,.035,.14);else if(type==="C")playClick(time,"accent");else if(type==="G")playNoise(time,.018,.08)}
 
 function syncTransportCards(){
   const card=document.getElementById("tempoDisplayCard");
@@ -1871,11 +1978,37 @@ function syncTransportCards(){
 function toggleMetro(){metroRunning?stopMetro():startMetro()}
 function startMetro(){initAudio();metroRunning=true;beatIndex=0;nextBeatTime=audioCtx.currentTime+.05;schedulerTimer=setInterval(scheduler,20);document.getElementById("metroBtn").innerHTML='<i data-lucide="square"></i><span>Stop Metronome</span>';lucide.createIcons();syncTransportCards();if(!tempoAutomationRunning&&settings().autoTempo?.change)startTempoAutomation()}
 function stopMetro(){metroRunning=false;clearInterval(schedulerTimer);schedulerTimer=null;document.getElementById("metroBtn").innerHTML='<i data-lucide="play"></i><span>Start Metronome</span>';lucide.createIcons();syncTransportCards();if(tempoAutomationRunning)stopTempoAutomation()}
-function scheduler(){if(!metroRunning)return;while(nextBeatTime<audioCtx.currentTime+.12){scheduleBeat(nextBeatTime);let pulse=getPulseSeconds();nextBeatTime+=pulse;beatIndex++}}
+function scheduler(){
+  if(!metroRunning||!audioCtx)return;
+  const lookAhead=.12;
+  while(nextBeatTime<audioCtx.currentTime+lookAhead){
+    const bar=getBeatsPerBar();
+    // Tempo changes are committed only at the beginning of a musical bar.
+    // The wall-clock timer only marks that a change is due; audio scheduling
+    // decides the exact musical boundary.
+    if(tempoAutomationRunning && beatIndex%bar===0 && ((tempoNextChangeAt && nextBeatTime>=tempoNextChangeAt) || window.__mkTempoDue)){
+      const cfg=settings().autoTempo||{};
+      const change=Number(cfg.change)||0;
+      const interval=Math.max(1,Number(cfg.interval)||5);
+      const nowAudio=audioCtx.currentTime;
+      let steps=0;
+      while(tempoNextChangeAt<=nowAudio+lookAhead && steps<16){
+        steps++;
+        tempoNextChangeAt+=interval;
+      }
+      if(change) setBpm(Math.max(20,Math.min(300,bpm+change*steps)),false);
+      saveDB();
+    }
+    scheduleBeat(nextBeatTime);
+    let pulse=getPulseSeconds();
+    nextBeatTime+=pulse;
+    beatIndex++;
+  }
+}
 function getPulseSeconds(){let n=noteDefs[meterNote]||customNotes.find(x=>x.id===meterNote);let div=n?.div||1;let den=Number(meterTime.split("/")[1])||4;let quarterSec=60/bpm;return quarterSec*div*(4/den)}
-function playNoise(time,duration,vol=.2){let buffer=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*duration)),audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;let src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buffer;g.gain.setValueAtTime(vol*(metroMuted?0:Number(document.getElementById("volume").value)),time);g.gain.exponentialRampToValueAtTime(.001,time+duration);src.connect(g);g.connect(audioCtx.destination);src.start(time)}
-function playKick(time){let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="sine";o.frequency.setValueAtTime(150,time);o.frequency.exponentialRampToValueAtTime(45,time+.12);g.gain.setValueAtTime(.75*(metroMuted?0:Number(document.getElementById("volume").value)),time);g.gain.exponentialRampToValueAtTime(.001,time+.14);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.14)}
-function playSnare(time){playNoise(time,.07,.35);let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="square";o.frequency.setValueAtTime(180,time);g.gain.setValueAtTime(.22,time);g.gain.exponentialRampToValueAtTime(.001,time+.06);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.06)}
+function playNoise(time,duration,vol=.2){let buffer=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*duration)),audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;let src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buffer;g.gain.setValueAtTime(vol*(metroMuted?0:Number(document.getElementById("volume").value)),time);g.gain.exponentialRampToValueAtTime(.001,time+duration);src.connect(g);g.connect(mkMetroBus);src.start(time)}
+function playKick(time){let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="sine";o.frequency.setValueAtTime(150,time);o.frequency.exponentialRampToValueAtTime(45,time+.12);g.gain.setValueAtTime(.75*(metroMuted?0:Number(document.getElementById("volume").value)),time);g.gain.exponentialRampToValueAtTime(.001,time+.14);o.connect(g);g.connect(mkMetroBus);o.start(time);o.stop(time+.14)}
+function playSnare(time){playNoise(time,.07,.35);let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="square";o.frequency.setValueAtTime(180,time);g.gain.setValueAtTime(.22,time);g.gain.exponentialRampToValueAtTime(.001,time+.06);o.connect(g);g.connect(mkMetroBus);o.start(time);o.stop(time+.06)}
 function playDrum(time,type){if(type==="K")playKick(time);else if(type==="S")playSnare(time);else if(type==="H")playNoise(time,.025,.12);else if(type==="R")playNoise(time,.035,.1);else if(type==="C")playClick(time,"accent");else if(type==="G")playNoise(time,.015,.05)}
 
 function scheduleBeat(t){
@@ -1913,13 +2046,13 @@ function highlightBeat(i){document.querySelectorAll(".led").forEach((x,j)=>x.cla
 function toggleSession(){sessionRunning?stopSession(true):startSession()}
 function getTodaySeasonSeconds(){const key=localDateKey(new Date()),p=currentPractice();return (p?.sessions||[]).filter(s=>localDateKey(s.date)===key).reduce((a,s)=>a+(Number(s.seconds)||0),0)}
 function startSession(){sessionRunning=true;sessionStartedAt=Date.now();sessionElapsed=0;document.getElementById("sessionBtn").innerHTML='<i data-lucide="square"></i><span>End Practice</span>';lucide.createIcons();updateSessionTimer()}
-function stopSession(save=true){if(!sessionRunning)return;sessionElapsed=Math.floor((Date.now()-sessionStartedAt)/1000);sessionRunning=false;stopMetro();document.getElementById("sessionBtn").innerHTML='<i data-lucide="timer"></i><span>Start Practice</span>';lucide.createIcons();if(save&&sessionElapsed>=1)saveSession(sessionElapsed);updateSessionTimer()}
+function stopSession(save=true){if(!sessionRunning)return;const wasMetroRunning=!!metroRunning;sessionElapsed=Math.floor((Date.now()-sessionStartedAt)/1000);sessionRunning=false;stopMetro();document.getElementById("sessionBtn").innerHTML='<i data-lucide="timer"></i><span>Start Practice</span>';lucide.createIcons();if(save&&sessionElapsed>=1)saveSession(sessionElapsed,{metro:wasMetroRunning});updateSessionTimer()}
 function updateSessionTimer(){const e=document.getElementById("sessionTime"),day=document.getElementById("daySessionTime"),card=document.getElementById("practiceTimerCard"),state=document.getElementById("sessionTimerState");const current=sessionRunning?Math.floor((Date.now()-sessionStartedAt)/1000):sessionElapsed;const todayTotal=getTodaySeasonSeconds()+(sessionRunning?current:0);e.textContent=formatDurationLong(current);if(day)day.textContent=formatDurationLong(todayTotal);if(card)card.classList.toggle("running",sessionRunning);if(state)state.textContent=sessionRunning?"● Recording practice time":"Ready";if(sessionRunning)sessionRAF=requestAnimationFrame(updateSessionTimer);if(document.getElementById("focusOverlay")?.classList.contains("open")&&typeof updateFocusUI==="function")updateFocusUI()}
 function formatDurationLong(sec){sec=Math.max(0,Math.floor(Number(sec)||0));return `${String(Math.floor(sec/3600)).padStart(2,"0")}:${String(Math.floor((sec%3600)/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`}
-function saveSession(seconds){let p=currentPractice();if(!p)return;p.sessions.push({id:crypto.randomUUID(),date:new Date().toISOString(),seconds,bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning});p.practiceDays=p.practiceDays||{};p.practiceDays[localDateKey(new Date())]=true;saveDB()}
+function saveSession(seconds,meta={}){let p=currentPractice();if(!p)return;p.sessions.push({id:crypto.randomUUID(),date:new Date().toISOString(),seconds,bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:!!meta.metro});p.practiceDays=p.practiceDays||{};p.practiceDays[localDateKey(new Date())]=true;saveDB()}
 
 async function toggleRecording(){
-  if(mediaRecorder?.state==="recording"){stopRecording();return}
+  if(recordingProcessor||mediaStream||mediaRecorder?.state==="recording"){stopRecording();return}
   const panel=document.getElementById("panel-record"), tool=[...document.querySelectorAll(".tool")].find(x=>/Recordings/i.test(x.textContent||""));
   document.querySelectorAll(".panel").forEach(x=>x.classList.remove("open"));
   document.querySelectorAll(".tool").forEach(x=>x.classList.remove("active"));
@@ -1927,6 +2060,7 @@ async function toggleRecording(){
   await startRecording();
 }
 async function startRecording(){
+  if(recordingProcessor||mediaStream||mediaRecorder?.state==="recording")return;
   try{
     mediaStream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
     recordingBuffers=[];
@@ -2387,6 +2521,8 @@ function stopTempoAutomation(){
   clearInterval(tempoModifierTimer);
   tempoModifierTimer=null;
   tempoAutomationRunning=false;
+  tempoNextChangeAt=0;
+  if(window.__mkTempoPendingSteps)window.__mkTempoPendingSteps=0;
   syncTechniqueTempoUI();
 }
 function startTempoAutomation(){
@@ -2394,15 +2530,13 @@ function startTempoAutomation(){
   const interval=Math.max(1,Number(document.getElementById("techniqueTempoInterval")?.value)||5);
   const step=Math.max(1,Math.abs(Number(document.getElementById("techniqueTempoStep")?.value)||1));
   const change=techniqueTempoDirection()*step;
-  settings().autoTempo={interval,step,change,source:"technique"};
+  settings().autoTempo={interval,step,change,source:"technique",mode:"bar-boundary"};
   clearInterval(tempoModifierTimer);
   tempoAutomationRunning=true;
   if(!metroRunning)startMetro();
-  tempoModifierTimer=setInterval(()=>{
-    if(!metroRunning)return;
-    setBpm(bpm+change,false);
-    saveDB();
-  },interval*1000);
+  initAudio();
+  tempoNextChangeAt=audioCtx.currentTime+interval;
+  // No BPM mutation occurs here. scheduler() applies it at a bar boundary.
   saveDB();
   syncTechniqueTempoUI();
   return true;
@@ -2419,7 +2553,15 @@ function closeSettings(){document.getElementById("settingsModal").classList.remo
 function openBackup(){document.getElementById("backupModal").classList.add("open")}
 function closeBackup(){document.getElementById("backupModal").classList.remove("open")}
 function exportData(){let a=document.createElement("a"),u=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:"application/json"}));a.href=u;a.download="studio-metronome-backup.json";a.click();URL.revokeObjectURL(u)}
-function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x||!Array.isArray(x.practices)||!x.practices.length)throw 0;x.version=Number(x.version)||7;x.practices=x.practices.map(p=>({...p,sessions:Array.isArray(p.sessions)?p.sessions:[],recordings:Array.isArray(p.recordings)?p.recordings:[],settings:p.settings&&typeof p.settings==="object"?p.settings:{},practiceDays:p.practiceDays&&typeof p.practiceDays==="object"?p.practiceDays:{}}));db=x;currentId=db.practices[0].id;localStorage.setItem("studioMetronomeCurrent",currentId);closeBackup();saveDB();alert("Backup imported and queued for cloud sync.")}catch{alert("Invalid backup file.")}finally{e.target.value=""}};r.readAsText(f)}
+function normalizeImportedDB(x){
+  if(!x||typeof x!=="object"||!Array.isArray(x.practices)||!x.practices.length)throw new Error("Invalid database");
+  const practices=x.practices.map(p=>{
+    if(!p||typeof p!=="object")throw new Error("Invalid season");
+    return {...p,id:String(p.id||crypto.randomUUID()),name:String(p.name||"Untitled Season").slice(0,120),target:Math.max(20,Math.min(300,Number(p.target)||120)),sessions:Array.isArray(p.sessions)?p.sessions.filter(Boolean):[],recordings:Array.isArray(p.recordings)?p.recordings.filter(Boolean):[],settings:p.settings&&typeof p.settings==="object"?p.settings:{},practiceDays:p.practiceDays&&typeof p.practiceDays==="object"?p.practiceDays:{}};
+  });
+  return {version:8,practices};
+}
+function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=normalizeImportedDB(JSON.parse(r.result));db=x;currentId=db.practices[0].id;localStorage.setItem("studioMetronomeCurrent",currentId);closeBackup();saveDB();alert("Backup imported and queued for cloud sync.")}catch(err){console.error("Backup import failed",err);alert("Invalid or incompatible backup file.")}finally{e.target.value=""}};r.readAsText(f)}
 
 function openAuth(){document.getElementById("authModal").classList.add("open");document.getElementById("authEmail").focus()}
 function closeAuth(){document.getElementById("authModal").classList.remove("open")}
@@ -2778,7 +2920,6 @@ window.addEventListener("DOMContentLoaded",()=>{
 </script>
 
 
-
 <script id="mk-request-features">
 let reminderTimers=[];
 function openEditSeason(){
@@ -2916,6 +3057,1556 @@ function syncReminderAfterRender(){
   if(document.readyState==="loading"){
     document.addEventListener("DOMContentLoaded",applySeasonColor,{once:true});
   }else applySeasonColor();
+})();
+</script>
+
+
+<!-- MK STUDIO vNext CORE STABILIZATION -->
+<style id="mk-vnext-core">
+  :root{--mk-accent:#00f5ff;--mk-green:#36e38a;--mk-bg:#07100d;--mk-surface:#0d1814;--mk-border:rgba(54,227,138,.16)}
+  /* Final interaction layer: green audio/volume controls, clearer transport hierarchy. */
+  .volume-row input[type="range"],#volume{accent-color:var(--mk-green)!important;--range-fill:var(--mk-green)}
+  .volume-row input[type="range"]::-webkit-slider-runnable-track,#volume::-webkit-slider-runnable-track{background:linear-gradient(to right,var(--mk-green) 0 var(--volume-fill,70%),rgba(255,255,255,.10) var(--volume-fill,70%) 100%)!important}
+  .volume-row input[type="range"]::-moz-range-progress,#volume::-moz-range-progress{background:var(--mk-green)!important}
+  .volume-row input[type="range"]::-moz-range-track,#volume::-moz-range-track{background:rgba(255,255,255,.10)!important}
+  #tempoDisplayCard{min-height:150px!important}
+  #tempoDisplayCard .tempo-value,.tempo-display-card .tempo-value{font-size:clamp(3.5rem,8vw,5.5rem)!important;line-height:.95!important}
+  .mk-audio-engine-ready{box-shadow:0 0 0 1px rgba(54,227,138,.10),0 16px 45px rgba(0,0,0,.18)}
+  @media(max-width:760px){#tempoDisplayCard{min-height:132px!important}#tempoDisplayCard .tempo-value,.tempo-display-card .tempo-value{font-size:clamp(3rem,18vw,4.4rem)!important}}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+<script id="mk-vnext-core-js">
+(function(){
+  'use strict';
+  /* ---------- Audio lifecycle / buses ---------- */
+  const originalInitAudio=window.initAudio;
+  let audioReady=false;
+  function ensureAudio(){
+    if(typeof originalInitAudio==='function')originalInitAudio();
+    if(!window.audioCtx)return null;
+    if(!window.mkMetroBus){window.mkMetroBus=audioCtx.createGain();mkMetroBus.gain.value=1;mkMetroBus.connect(audioCtx.destination)}
+    audioReady=true;
+    document.documentElement.classList.add('mk-audio-engine-ready');
+    if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});
+    return audioCtx;
+  }
+  window.ensureMKAudio=ensureAudio;
+  /* Keep the existing public API, but guarantee one initialized audio graph. */
+  window.initAudio=function(){return ensureAudio()};
+
+  /* Route existing gain connections through the master bus when possible. */
+  const routeNames=['playNoise','playKick','playSnare','playDrum','playClick'];
+  /* Existing functions are intentionally left intact; the bus is applied to newly-created voices
+     by wrapping destination only for the lifecycle, without changing their public signatures. */
+
+  /* ---------- Safe recording state ---------- */
+  window.isMKRecording=function(){return !!(window.recordingProcessor||window.mediaStream||(window.mediaRecorder&&mediaRecorder.state==='recording'))};
+  const oldStopRecording=window.stopRecording;
+  window.stopRecording=function(){
+    try{return oldStopRecording&&oldStopRecording.apply(this,arguments)}finally{
+      setTimeout(()=>{try{updateRecordingUI(false)}catch(e){}},0);
+    }
+  };
+
+  /* ---------- Tempo automation: beat/bar synchronized instead of wall-clock setInterval ---------- */
+  let tempoClockTimer=null;
+  let tempoLastAppliedAt=0;
+  const oldStartTempo=window.startTempoAutomation;
+  const oldStopTempo=window.stopTempoAutomation;
+  window.startTempoAutomation=function(){
+    const specialValue=(typeof special!=='undefined')?special:'';
+    if(specialValue!=='accelerando'&&specialValue!=='ritardando')return false;
+    const interval=Math.max(1,Number(document.getElementById('techniqueTempoInterval')?.value)||5);
+    const step=Math.max(1,Math.abs(Number(document.getElementById('techniqueTempoStep')?.value)||1));
+    settings().autoTempo={interval,step,change:(specialValue==='accelerando'?1:-1)*step,source:'technique',mode:'beat-sync'};
+    if(typeof metroRunning!=='undefined'&&!metroRunning)startMetro();
+    clearInterval(tempoClockTimer);
+    tempoAutomationRunning=true;
+    tempoLastAppliedAt=performance.now();
+    tempoClockTimer=setInterval(()=>{
+      if(!tempoAutomationRunning||!metroRunning)return;
+      const now=performance.now();
+      if(now-tempoLastAppliedAt<interval*1000)return;
+      /* Apply on the next scheduler cycle; never force a BPM change between audio events. */
+      window.__mkTempoDue=true;
+    },200);
+    syncTechniqueTempoUI();
+    saveDB();
+    return true;
+  };
+  window.stopTempoAutomation=function(){
+    clearInterval(tempoClockTimer);tempoClockTimer=null;window.__mkTempoPendingSteps=0;tempoAutomationRunning=false;
+    if(typeof syncTechniqueTempoUI==='function')syncTechniqueTempoUI();
+  };
+  const oldScheduler=window.scheduler;
+  if(typeof oldScheduler==='function'){
+    window.scheduler=function(){
+      const beforeBeat=(typeof beatIndex==='number')?beatIndex:0;
+      const r=oldScheduler.apply(this,arguments);
+      if(tempoAutomationRunning&&typeof metroRunning!=='undefined'&&metroRunning){
+        const bar=(typeof getBeatsPerBar==='function')?getBeatsPerBar():4;
+        const afterBeat=(typeof beatIndex==='number')?beatIndex:beforeBeat;
+        if(afterBeat!==beforeBeat && afterBeat%bar===0 && (window.__mkTempoPendingSteps||0)>0){
+          const cfg=settings().autoTempo||{};
+          const steps=Math.min(20,window.__mkTempoPendingSteps||0);
+          for(let i=0;i<steps;i++)setBpm(bpm+Number(cfg.change||0),false);
+          window.__mkTempoPendingSteps=0;
+          tempoLastAppliedAt=performance.now();
+          saveDB();
+        }
+      }
+      return r;
+    };
+  }
+
+  /* ---------- UI state synchronization ---------- */
+  const oldUpdateVolume=window.updateVolumeUI;
+  window.updateVolumeUI=function(persist=false){
+    const r=oldUpdateVolume.apply(this,arguments);
+    const e=document.getElementById('volume');
+    if(e){const v=Math.max(0,Math.min(1,Number(e.value)||0));e.style.setProperty('--volume-fill',(v*100)+'%');}
+    return r;
+  };
+  const oldSetBpm=window.setBpm;
+  window.setBpm=function(value,persist=true){
+    const r=oldSetBpm.apply(this,arguments);
+    const e=document.getElementById('bpmRange');
+    if(e){const min=Number(e.min||20),max=Number(e.max||300),pct=((Number(e.value)-min)/(max-min))*100;e.style.setProperty('--bpm-fill',Math.max(0,Math.min(100,pct))+'%');}
+    return r;
+  };
+
+  /* ---------- Keyboard + lifecycle safety ---------- */
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      document.querySelectorAll('.modal.open,.mk-pro-modal.open,.mk-pro-panel.open').forEach(el=>{
+        if(el.id==='focusOverlay'&&typeof toggleFocusMode==='function')toggleFocusMode();
+        else el.classList.remove('open');
+      });
+    }
+  });
+  window.addEventListener('pagehide',()=>{
+    try{if(typeof tempoAutomationRunning!=='undefined'&&tempoAutomationRunning)stopTempoAutomation()}catch(e){}
+    try{if(typeof schedulerTimer!=='undefined'&&schedulerTimer){clearInterval(schedulerTimer);schedulerTimer=null}}catch(e){}
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden&&window.audioCtx?.state==='suspended')audioCtx.resume().catch(()=>{});
+  });
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{try{updateVolumeUI(false)}catch(e){}} ,{once:true});
+  else {try{updateVolumeUI(false)}catch(e){}}
+})();
+</script>
+
+
+<script id="mk-vnext-refactor-core">
+(function(){
+  'use strict';
+
+  const MK = window.MK = window.MK || {};
+  MK.version = 'vNext-refactor-1';
+
+  // ---------- Safe scheduling / cleanup ----------
+  const timers = MK.timers = MK.timers || new Set();
+  const intervals = MK.intervals = MK.intervals || new Set();
+  MK.setTimeout = function(fn, ms){
+    const id = setTimeout(() => { timers.delete(id); fn(); }, ms);
+    timers.add(id);
+    return id;
+  };
+  MK.clearTimeout = function(id){
+    clearTimeout(id); timers.delete(id);
+  };
+  MK.setInterval = function(fn, ms){
+    const id = setInterval(fn, ms);
+    intervals.add(id);
+    return id;
+  };
+  MK.clearInterval = function(id){
+    clearInterval(id); intervals.delete(id);
+  };
+  MK.cleanupTimers = function(){
+    timers.forEach(clearTimeout);
+    intervals.forEach(clearInterval);
+    timers.clear(); intervals.clear();
+  };
+
+  // ---------- Centralized application state ----------
+  MK.state = MK.state || {
+    ui: { focus:false, activePanel:null },
+    audio: { metro:false, recording:false },
+    practice: { session:false }
+  };
+
+  MK.setState = function(path, value){
+    const parts = String(path).split('.');
+    let node = MK.state;
+    for(let i=0;i<parts.length-1;i++){
+      node = node[parts[i]] || (node[parts[i]] = {});
+    }
+    node[parts[parts.length-1]] = value;
+  };
+
+  MK.getState = function(path){
+    return String(path).split('.').reduce((o,k)=>o == null ? undefined : o[k], MK.state);
+  };
+
+  // ---------- DOM helpers ----------
+  MK.$ = (sel, root=document) => root.querySelector(sel);
+  MK.$$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  MK.on = (el, event, fn, opts) => el && el.addEventListener(event, fn, opts);
+
+  // ---------- Visibility / modal safety ----------
+  MK.closeTransientUI = function(){
+    MK.$$('.mk-pro-panel.open, .modal.open, [role="dialog"].open')
+      .forEach(el => el.classList.remove('open'));
+    MK.setState('ui.activePanel', null);
+  };
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') MK.closeTransientUI();
+  });
+
+  // ---------- Motion accessibility ----------
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduceMotion) document.documentElement.classList.add('reduce-motion');
+
+  // ---------- Audio cleanup ----------
+  MK.revokeBlobUrl = function(url){
+    if(typeof url === 'string' && url.startsWith('blob:')){
+      try { URL.revokeObjectURL(url); } catch(_){}
+    }
+  };
+
+  window.addEventListener('beforeunload', MK.cleanupTimers);
+
+  // ---------- Debug health snapshot ----------
+  MK.health = function(){
+    return {
+      version: MK.version,
+      metroRunning: !!window.metroRunning,
+      recording: !!window.recordingProcessor,
+      focus: !!MK.getState('ui.focus'),
+      timers: timers.size,
+      intervals: intervals.size,
+      audioContext: !!window.audioCtx
+    };
+  };
+})();
+</script>
+
+
+<script id="mk-vnext-stage2-core">
+(function(){
+  'use strict';
+  const MK = window.MK = window.MK || {};
+  MK.modules = MK.modules || {};
+
+  /* ---------------- STORE ---------------- */
+  MK.modules.store = {
+    get(){
+      try { return typeof window.db === 'object' && window.db ? window.db : null; }
+      catch(_) { return null; }
+    },
+    currentSeason(){
+      try { return typeof currentPractice === 'function' ? currentPractice() : null; }
+      catch(_) { return null; }
+    },
+    persist(){
+      try {
+        if(typeof saveDB === 'function') saveDB();
+        return true;
+      } catch(err) {
+        console.error('[MK Store] persist failed', err);
+        return false;
+      }
+    }
+  };
+
+  /* ---------------- AUDIO ---------------- */
+  MK.modules.audio = {
+    getContext(){
+      try { return window.audioCtx || null; } catch(_) { return null; }
+    },
+    isRunning(){
+      try { return !!window.metroRunning; } catch(_) { return false; }
+    },
+    async resume(){
+      const ctx=this.getContext();
+      if(ctx && ctx.state==='suspended'){
+        try { await ctx.resume(); } catch(err){ console.warn('[MK Audio] resume failed',err); }
+      }
+      return ctx;
+    },
+    stop(){
+      try {
+        if(typeof stopMetro === 'function') stopMetro();
+        return true;
+      } catch(err) {
+        console.error('[MK Audio] stop failed',err);
+        return false;
+      }
+    },
+    health(){
+      const ctx=this.getContext();
+      return {
+        context: !!ctx,
+        state: ctx?.state || 'unavailable',
+        metro: this.isRunning()
+      };
+    }
+  };
+
+  /* ---------------- SCHEDULER ---------------- */
+  MK.modules.scheduler = {
+    raf:null,
+    cancelled:false,
+    cancel(){
+      this.cancelled=true;
+      if(this.raf!=null) cancelAnimationFrame(this.raf);
+      this.raf=null;
+    }
+  };
+
+  /* ---------------- RECORDING ---------------- */
+  MK.modules.recording = {
+    isActive(){
+      return !!(window.recordingProcessor || window.recordingStream || window.recordingAudioCtx);
+    },
+    stop(){
+      try {
+        if(typeof stopRecording === 'function') {
+          stopRecording();
+          return true;
+        }
+      } catch(err) {
+        console.error('[MK Recording] stop failed',err);
+      }
+      return false;
+    },
+    health(){
+      return {
+        active:this.isActive(),
+        processor:!!window.recordingProcessor,
+        stream:!!window.recordingStream,
+        context:!!window.recordingAudioCtx
+      };
+    }
+  };
+
+  /* ---------------- PRACTICE ---------------- */
+  MK.modules.practice = {
+    isSessionActive(){
+      try { return !!window.sessionRunning; } catch(_) { return false; }
+    },
+    isMetroActive(){
+      try { return !!window.metroRunning; } catch(_) { return false; }
+    },
+    stopMetroBeforeSessionEnd(){
+      try {
+        const wasMetro=this.isMetroActive();
+        if(wasMetro) this._wasMetroActive=true;
+        if(wasMetro && typeof stopMetro==='function') stopMetro();
+        return wasMetro;
+      } catch(err) {
+        console.error('[MK Practice] stop metro failed',err);
+        return false;
+      }
+    }
+  };
+
+  /* ---------------- SYNC ---------------- */
+  MK.modules.sync = {
+    status(){
+      const el=document.getElementById('syncStatus');
+      return el ? el.textContent.trim() : '';
+    },
+    request(){
+      try {
+        if(typeof syncNow==='function') {
+          syncNow();
+          return true;
+        }
+      } catch(err) {
+        console.error('[MK Sync] request failed',err);
+      }
+      return false;
+    }
+  };
+
+  /* ---------------- UI ---------------- */
+  MK.modules.ui = {
+    setPressed(el, pressed){
+      if(!el) return;
+      el.setAttribute('aria-pressed', String(!!pressed));
+      el.classList.toggle('is-active', !!pressed);
+    },
+    focus(el){
+      try { el?.focus({preventScroll:true}); } catch(_) { el?.focus(); }
+    }
+  };
+
+  /* Give important interactive elements consistent keyboard focus. */
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.querySelectorAll('button,[role="button"],input,select,textarea')
+      .forEach(el=>el.classList.add('mk-a11y-focus'));
+  });
+
+  /* Protect against accidental page-exit while a recording is active. */
+  window.addEventListener('beforeunload',(e)=>{
+    if(MK.modules.recording.isActive()){
+      e.preventDefault();
+      e.returnValue='';
+    }
+  });
+
+  MK.stage2Health = function(){
+    return {
+      store:!!MK.modules.store.get(),
+      audio:MK.modules.audio.health(),
+      recording:MK.modules.recording.health(),
+      practice:{
+        session:MK.modules.practice.isSessionActive(),
+        metro:MK.modules.practice.isMetroActive()
+      },
+      sync:MK.modules.sync.status()
+    };
+  };
+})();
+</script>
+
+
+<script id="mk-vnext-stage3-audio-data">
+(function(){
+  'use strict';
+  const MK=window.MK=window.MK||{};
+  MK.stage='audio-data-hardening';
+
+  // Central audio bus controls. The existing UI/API stays unchanged.
+  MK.audioBus={
+    setGain(v){
+      if(window.mkMetroBus)mkMetroBus.gain.setTargetAtTime(Math.max(0,Math.min(1,Number(v)||0)),audioCtx.currentTime,.01);
+    },
+    mute(){this.setGain(0)},
+    unmute(){this.setGain(1)},
+    health(){return {exists:!!window.mkMetroBus,state:window.audioCtx?.state||'unavailable'}}
+  };
+
+  // Release cloud/local object URLs when a recording is permanently deleted.
+  const oldDelete=window.deleteRecording;
+  if(typeof oldDelete==='function'&&!window.__mkDeleteWrapped){
+    window.__mkDeleteWrapped=true;
+    window.deleteRecording=function(id){
+      const p=typeof currentPractice==='function'?currentPractice():null;
+      const r=p?.recordings?.find(x=>x.id===id);
+      const urls=[r?.blobUrl,r?._cloudBlobUrl].filter(Boolean);
+      const result=oldDelete.apply(this,arguments);
+      urls.forEach(u=>{try{if(String(u).startsWith('blob:'))URL.revokeObjectURL(u)}catch(_){}});
+      return result;
+    };
+  }
+
+  MK.diagnostics=function(){
+    return {
+      stage:MK.stage,
+      audio:MK.audioBus.health(),
+      metro:!!window.metroRunning,
+      recording:!!(window.recordingProcessor||window.mediaStream),
+      tempoAutomation:!!window.tempoAutomationRunning,
+      bpm:Number(window.bpm)||0,
+      seasons:Array.isArray(window.db?.practices)?window.db.practices.length:0,
+      localDirty:!!localStorage.getItem('mkStudioLocalDirtyAt')
+    };
+  };
+})();
+</script>\n
+<script id="mk-vnext-stage3-final-tempo">
+(function(){
+  'use strict';
+  let clock=null;
+  window.startTempoAutomation=function(){
+    if(!(typeof special!=='undefined'&&(special==='accelerando'||special==='ritardando')))return false;
+    const interval=Math.max(1,Number(document.getElementById('techniqueTempoInterval')?.value)||5);
+    const step=Math.max(1,Math.abs(Number(document.getElementById('techniqueTempoStep')?.value)||1));
+    const change=(special==='accelerando'?1:-1)*step;
+    settings().autoTempo={interval,step,change,source:'technique',mode:'bar-boundary'};
+    clearInterval(clock);
+    if(!metroRunning)startMetro();
+    initAudio();
+    tempoAutomationRunning=true;
+    tempoNextChangeAt=audioCtx.currentTime+interval;
+    // A tiny clock only marks due time. It never changes BPM itself.
+    clock=setInterval(()=>{
+      if(!tempoAutomationRunning||!audioCtx)return;
+      if(audioCtx.currentTime>=tempoNextChangeAt){window.__mkTempoDue=true;}
+    },100);
+    saveDB();
+    if(typeof syncTechniqueTempoUI==='function')syncTechniqueTempoUI();
+    return true;
+  };
+  window.stopTempoAutomation=function(){
+    clearInterval(clock);clock=null;
+    tempoAutomationRunning=false;
+    tempoNextChangeAt=0;
+    window.__mkTempoDue=false;
+    if(typeof syncTechniqueTempoUI==='function')syncTechniqueTempoUI();
+  };
+  window.mkTempoState=function(){return {running:!!tempoAutomationRunning,nextChangeAt:tempoNextChangeAt,due:!!window.__mkTempoDue}};
+})();
+</script>
+
+<script id="mk-stage4-recording-core">
+(function(){
+  'use strict';
+  const MK = window.MK = window.MK || {};
+  MK.modules = MK.modules || {};
+
+  const R = MK.modules.recording = Object.assign(MK.modules.recording || {}, {
+    state: 'idle',
+    startedAt: 0,
+    busy: false,
+
+    _detect(){
+      return !!(
+        window.recordingProcessor ||
+        window.recordingStream ||
+        window.recordingAudioCtx ||
+        window.recordingChunks?.length
+      );
+    },
+
+    refresh(){
+      const active = this._detect();
+      this.state = active ? 'recording' : (this.busy ? 'processing' : 'idle');
+      MK.setState?.('audio.recording', active);
+      this._paint();
+      return this.state;
+    },
+
+    _paint(){
+      const candidates = document.querySelectorAll(
+        '#recordBtn,[data-action="record"],.record-btn,.record-button'
+      );
+      candidates.forEach(el=>{
+        const active=this.state==='recording';
+        el.classList.toggle('mk-recording-active',active);
+        el.classList.toggle('mk-recording-busy',this.busy);
+        el.setAttribute('aria-pressed',String(active));
+      });
+
+      const status = document.querySelectorAll(
+        '#recordingStatus,.recording-status,.mk-recording-status'
+      );
+      status.forEach(el=>{
+        el.dataset.state=this.state;
+        el.setAttribute('aria-live','polite');
+      });
+    },
+
+    async start(){
+      if(this.busy || this._detect()) return false;
+      this.busy=true;
+      this.state='processing';
+      this.startedAt=performance.now();
+      this._paint();
+
+      try{
+        if(typeof startRecording!=='function') throw new Error('Recording engine unavailable');
+        const result=await Promise.resolve(startRecording());
+        this.busy=false;
+        this.refresh();
+        return result;
+      }catch(err){
+        this.busy=false;
+        this.state='idle';
+        this._paint();
+        console.error('[MK Recording] start failed',err);
+        return false;
+      }
+    },
+
+    async stop(){
+      if(this.busy || !this._detect()) return false;
+      this.busy=true;
+      this.state='processing';
+      this._paint();
+
+      try{
+        if(typeof stopRecording!=='function') throw new Error('Recording engine unavailable');
+        const result=await Promise.resolve(stopRecording());
+        this.busy=false;
+        this.refresh();
+        return result;
+      }catch(err){
+        this.busy=false;
+        this.state='idle';
+        this._paint();
+        console.error('[MK Recording] stop failed',err);
+        return false;
+      }
+    },
+
+    toggle(){
+      if(this._detect()) return this.stop();
+      return this.start();
+    },
+
+    health(){
+      return {
+        state:this.state,
+        busy:this.busy,
+        active:this._detect(),
+        durationMs:this.startedAt ? Math.max(0,performance.now()-this.startedAt) : 0,
+        processor:!!window.recordingProcessor,
+        stream:!!window.recordingStream,
+        context:!!window.recordingAudioCtx
+      };
+    }
+  });
+
+  // Keep controller state synchronized with the existing engine.
+  const oldStart = window.startRecording;
+  if(typeof oldStart==='function' && !oldStart.__mkStage4Wrapped){
+    const wrappedStart = function(){
+      try{
+        R.busy=false;
+        R.state='recording';
+        R.startedAt=performance.now();
+        MK.setState?.('audio.recording',true);
+        R._paint();
+      }catch(_){}
+      return oldStart.apply(this,arguments);
+    };
+    wrappedStart.__mkStage4Wrapped=true;
+    window.startRecording=wrappedStart;
+  }
+
+  const oldStop = window.stopRecording;
+  if(typeof oldStop==='function' && !oldStop.__mkStage4Wrapped){
+    const wrappedStop = function(){
+      try{
+        R.state='processing';
+        R.busy=true;
+        R._paint();
+      }catch(_){}
+      try{
+        return oldStop.apply(this,arguments);
+      }finally{
+        // The engine may finish asynchronously; refresh again shortly.
+        MK.setTimeout?.(()=>{R.busy=false;R.refresh()},120);
+      }
+    };
+    wrappedStop.__mkStage4Wrapped=true;
+    window.stopRecording=wrappedStop;
+  }
+
+  // Fix the toggle path without assuming a particular button implementation.
+  const oldToggle = window.toggleRecording;
+  if(typeof oldToggle==='function' && !oldToggle.__mkStage4Wrapped){
+    const wrappedToggle=function(){
+      if(R._detect()) return R.stop();
+      return R.start();
+    };
+    wrappedToggle.__mkStage4Wrapped=true;
+    window.toggleRecording=wrappedToggle;
+  }
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden && R._detect()){
+      // Do not stop a live take merely because the tab is backgrounded.
+      // The state is refreshed so the UI cannot drift silently.
+      R.refresh();
+    }
+  });
+
+  window.addEventListener('pagehide',()=>{
+    // Release any object URLs that the current recording layer exposes.
+    try{
+      if(Array.isArray(window.recordingObjectUrls)){
+        window.recordingObjectUrls.forEach(u=>MK.revokeBlobUrl?.(u));
+        window.recordingObjectUrls.length=0;
+      }
+    }catch(_){}
+  });
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>R.refresh(),{once:true});
+  }else{
+    R.refresh();
+  }
+})();
+</script>
+
+
+<script id="mk-stage5-ui-core">
+(function(){
+  'use strict';
+  const MK=window.MK=window.MK||{};
+  MK.modules=MK.modules||{};
+
+  MK.modules.uiArchitecture={
+    version:'stage5',
+    tokens:{
+      spacing:['.25rem','.5rem','.75rem','1rem','1.25rem','1.5rem','2rem'],
+      radii:['10px','16px','22px']
+    },
+    makeButtonState(el, state){
+      if(!el) return;
+      const active=state==='active';
+      const disabled=state==='disabled';
+      el.classList.toggle('is-active',active);
+      el.classList.toggle('is-disabled',disabled);
+      el.setAttribute('aria-pressed',String(active));
+      el.setAttribute('aria-disabled',String(disabled));
+    },
+    setBusy(el,busy){
+      if(!el)return;
+      el.classList.toggle('mk-busy',!!busy);
+      el.setAttribute('aria-busy',String(!!busy));
+    },
+    announce(message){
+      let live=document.getElementById('mkLiveRegion');
+      if(!live){
+        live=document.createElement('div');
+        live.id='mkLiveRegion';
+        live.setAttribute('aria-live','polite');
+        live.setAttribute('aria-atomic','true');
+        live.style.cssText='position:fixed;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap';
+        document.body.appendChild(live);
+      }
+      live.textContent='';
+      requestAnimationFrame(()=>live.textContent=String(message||''));
+    }
+  };
+
+  // Normalize common interactive controls without changing their visual design.
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.querySelectorAll('button,[role="button"]').forEach(el=>{
+      if(!el.hasAttribute('type') && el.tagName==='BUTTON') el.type='button';
+    });
+  });
+
+  // Avoid accidental double-submit/double-click on destructive actions.
+  document.addEventListener('click',(e)=>{
+    const el=e.target.closest?.('[data-single-action]');
+    if(!el || el.dataset.locked==='1') return;
+    el.dataset.locked='1';
+    MK.setTimeout?.(()=>{delete el.dataset.locked},500);
+  },true);
+})();
+</script>
+
+
+<script id="mk-stage6-state-render">
+(function(){
+  'use strict';
+  const MK=window.MK=window.MK||{};
+  MK.modules=MK.modules||{};
+
+  /*
+   * Stage 6: targeted state/render infrastructure.
+   * This is deliberately additive: legacy renderAll() remains available,
+   * while new code can subscribe to precise state slices.
+   */
+  const subscribers = new Map();
+  let renderQueued = false;
+  const pending = new Set();
+
+  function readPath(obj,path){
+    return String(path).split('.').reduce((v,k)=>v==null?undefined:v[k],obj);
+  }
+
+  function emit(path){
+    const set=subscribers.get(path);
+    if(set) set.forEach(fn=>{
+      try{ fn(readPath(MK.state,path),path); }
+      catch(err){ console.error('[MK State] subscriber failed',err); }
+    });
+  }
+
+  MK.modules.stateRender = {
+    subscribe(path,fn){
+      if(typeof fn!=='function') return ()=>{};
+      if(!subscribers.has(path)) subscribers.set(path,new Set());
+      subscribers.get(path).add(fn);
+      return ()=>subscribers.get(path)?.delete(fn);
+    },
+
+    invalidate(path){
+      pending.add(path);
+      if(renderQueued) return;
+      renderQueued=true;
+      requestAnimationFrame(()=>{
+        renderQueued=false;
+        const paths=[...pending];
+        pending.clear();
+        paths.forEach(emit);
+      });
+    },
+
+    set(path,value){
+      MK.setState(path,value);
+      this.invalidate(path);
+    },
+
+    batch(fn){
+      const before=renderQueued;
+      try{ fn?.(); }
+      finally{
+        if(!before && pending.size){
+          renderQueued=true;
+          requestAnimationFrame(()=>{
+            renderQueued=false;
+            const paths=[...pending];
+            pending.clear();
+            paths.forEach(emit);
+          });
+        }
+      }
+    },
+
+    pending(){ return [...pending]; }
+  };
+
+  /*
+   * Component render registry. Each component owns its render callback.
+   * The registry prevents future feature work from depending on one giant renderAll().
+   */
+  const components = new Map();
+
+  MK.modules.components = {
+    register(name,{paths=[],render}={}){
+      if(!name || typeof render!=='function') return false;
+      const deps=Array.isArray(paths)?paths:[paths];
+      const unsub=deps.map(path=>
+        MK.modules.stateRender.subscribe(path, state=>{
+          try{ render(state,path); }
+          catch(err){ console.error('[MK Component:'+name+']',err); }
+        })
+      );
+      components.set(name,{deps,render,unsub});
+      return true;
+    },
+    unregister(name){
+      const c=components.get(name);
+      c?.unsub?.forEach(fn=>fn());
+      return components.delete(name);
+    },
+    list(){ return [...components.keys()]; }
+  };
+
+  /*
+   * Safe wrappers for the most frequently changed UI state.
+   * Existing application functions remain authoritative.
+   */
+  MK.modules.uiBindings = {
+    bpm(value){
+      const n=Number(value);
+      if(Number.isFinite(n)) MK.modules.stateRender.set('audio.bpm',n);
+    },
+    volume(value){
+      const n=Number(value);
+      if(Number.isFinite(n)) MK.modules.stateRender.set('audio.volume',Math.max(0,Math.min(1,n)));
+    },
+    focus(value){ MK.modules.stateRender.set('ui.focus',!!value); },
+    recording(value){ MK.modules.stateRender.set('audio.recording',!!value); },
+    practice(value){ MK.modules.stateRender.set('practice.session',!!value); }
+  };
+
+  MK.modules.renderDiagnostics=function(){
+    return {
+      components:MK.modules.components.list(),
+      pending:MK.modules.stateRender.pending(),
+      legacyRenderAll:typeof window.renderAll==='function'
+    };
+  };
+})();
+</script>
+
+
+<script id="mk-stage7-production-sync">
+(function(){
+  'use strict';
+  const MK=window.MK=window.MK||{};
+  MK.modules=MK.modules||{};
+
+  const KEY='mk_studio_sync_queue_v1';
+  const META='mk_studio_sync_meta_v1';
+
+  function loadJSON(key,fallback){
+    try{
+      const raw=localStorage.getItem(key);
+      return raw?JSON.parse(raw):fallback;
+    }catch(_){ return fallback; }
+  }
+  function saveJSON(key,value){
+    try{ localStorage.setItem(key,JSON.stringify(value)); return true; }
+    catch(err){ console.warn('[MK Sync] local persistence failed',err); return false; }
+  }
+
+  const state={
+    status:navigator.onLine?'idle':'offline',
+    queue:loadJSON(KEY,[]),
+    meta:loadJSON(META,{revision:0,clientId:(crypto?.randomUUID?.()||('mk-'+Date.now()+'-'+Math.random().toString(36).slice(2))) }),
+    busy:false,
+    retryTimer:null,
+    retryAttempt:0,
+    lastError:null,
+    lastSyncAt:0
+  };
+
+  function setStatus(status,error){
+    state.status=status;
+    state.lastError=error||null;
+    const el=document.getElementById('syncStatus');
+    if(el){
+      el.dataset.syncState=status;
+      el.classList.add('mk-sync-badge');
+      const labels={
+        idle:'Ready',syncing:'Syncing…',synced:'Synced',
+        offline:'Offline',queued:'Changes queued',conflict:'Conflict',
+        error:'Sync error'
+      };
+      el.textContent=labels[status]||status;
+      el.setAttribute('aria-live','polite');
+    }
+  }
+
+  function persist(){
+    saveJSON(KEY,state.queue);
+    saveJSON(META,state.meta);
+  }
+
+  function fingerprint(value){
+    try{
+      const s=JSON.stringify(value,(k,v)=>{
+        if(v && typeof v==='object' && !Array.isArray(v)){
+          return Object.keys(v).sort().reduce((o,key)=>(o[key]=v[key],o),{});
+        }
+        return v;
+      });
+      let h=2166136261;
+      for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+      return (h>>>0).toString(16);
+    }catch(_){return String(Date.now());}
+  }
+
+  function snapshot(){
+    try{
+      return typeof window.db==='object' && window.db ? structuredClone(window.db) : null;
+    }catch(_){
+      try{return JSON.parse(JSON.stringify(window.db));}catch(__){return null;}
+    }
+  }
+
+  function enqueue(reason='local-change'){
+    const snap=snapshot();
+    if(!snap)return false;
+
+    const item={
+      id:crypto?.randomUUID?.()||('sync-'+Date.now()+'-'+Math.random().toString(36).slice(2)),
+      clientId:state.meta.clientId,
+      baseRevision:Number(state.meta.revision)||0,
+      revision:(Number(state.meta.revision)||0)+1,
+      reason,
+      fingerprint:fingerprint(snap),
+      createdAt:new Date().toISOString(),
+      payload:snap
+    };
+
+    // Coalesce identical newest snapshots.
+    const last=state.queue[state.queue.length-1];
+    if(last?.fingerprint===item.fingerprint)return false;
+
+    state.meta.revision=item.revision;
+    state.queue.push(item);
+    // Keep the queue bounded; the newest complete snapshot is authoritative locally.
+    if(state.queue.length>20) state.queue=state.queue.slice(-20);
+    persist();
+
+    if(!navigator.onLine) setStatus('queued');
+    return true;
+  }
+
+  function backoffMs(){
+    return Math.min(30000,1000*Math.pow(2,Math.min(state.retryAttempt,5)))+
+      Math.floor(Math.random()*350);
+  }
+
+  function scheduleRetry(){
+    clearTimeout(state.retryTimer);
+    state.retryTimer=setTimeout(()=>flush(),backoffMs());
+  }
+
+  async function sendItem(item){
+    /*
+     * Delegate to the app's existing sync function when available.
+     * We deliberately do not fabricate a Supabase API call here:
+     * the existing authenticated connector remains the authority.
+     */
+    if(typeof window.syncNow!=='function'){
+      throw new Error('Existing sync adapter is unavailable');
+    }
+
+    const result=await Promise.resolve(window.syncNow());
+    return result;
+  }
+
+  async function flush(){
+    if(state.busy)return false;
+    if(!navigator.onLine){
+      setStatus('offline');
+      return false;
+    }
+    if(!state.queue.length){
+      setStatus(state.lastSyncAt?'synced':'idle');
+      return true;
+    }
+
+    state.busy=true;
+    setStatus('syncing');
+
+    try{
+      // Process the newest snapshot first. Older snapshots are superseded by it.
+      const newest=state.queue[state.queue.length-1];
+      await sendItem(newest);
+
+      state.queue=[];
+      state.retryAttempt=0;
+      state.lastSyncAt=Date.now();
+      state.lastError=null;
+      persist();
+      setStatus('synced');
+      return true;
+    }catch(err){
+      state.retryAttempt++;
+      setStatus('error',err);
+      persist();
+      scheduleRetry();
+      console.error('[MK Sync] flush failed',err);
+      return false;
+    }finally{
+      state.busy=false;
+    }
+  }
+
+  MK.modules.productionSync={
+    state,
+    enqueue,
+    flush,
+    status:()=>state.status,
+    queueSize:()=>state.queue.length,
+    revision:()=>state.meta.revision,
+    health:()=>({
+      status:state.status,
+      online:navigator.onLine,
+      queueSize:state.queue.length,
+      revision:state.meta.revision,
+      busy:state.busy,
+      lastSyncAt:state.lastSyncAt||null,
+      lastError:state.lastError?.message||null
+    })
+  };
+
+  // Online/offline lifecycle.
+  window.addEventListener('online',()=>{
+    state.retryAttempt=0;
+    setStatus(state.queue.length?'queued':'idle');
+    MK.setTimeout?.(()=>flush(),50);
+  });
+  window.addEventListener('offline',()=>setStatus('offline'));
+
+  // Listen to the app's save path without replacing it.
+  const oldSave=window.saveDB;
+  if(typeof oldSave==='function' && !oldSave.__mkStage7Wrapped){
+    const wrappedSave=function(){
+      const result=oldSave.apply(this,arguments);
+      try{
+        // Queue after the existing local save completes.
+        enqueue('saveDB');
+        if(navigator.onLine) MK.setTimeout?.(()=>flush(),250);
+      }catch(err){console.warn('[MK Sync] enqueue failed',err)}
+      return result;
+    };
+    wrappedSave.__mkStage7Wrapped=true;
+    window.saveDB=wrappedSave;
+  }
+
+  // Prevent Realtime/local-sync loops from recursively generating work.
+  let applyingRemote=false;
+  MK.modules.productionSync.setApplyingRemote=function(v){applyingRemote=!!v};
+  MK.modules.productionSync.isApplyingRemote=()=>applyingRemote;
+
+  // Expose a conservative conflict classifier for future Realtime handlers.
+  MK.modules.productionSync.classifyRemote=function(remote){
+    const local=snapshot();
+    if(!remote || !local) return 'unknown';
+    const localHash=fingerprint(local);
+    const remoteHash=fingerprint(remote);
+    return localHash===remoteHash?'same':'different';
+  };
+
+  if(!navigator.onLine)setStatus('offline');
+  else if(state.queue.length)setStatus('queued');
+  else setStatus('idle');
+
+  if(state.queue.length && navigator.onLine) MK.setTimeout?.(()=>flush(),800);
+})();
+</script>
+
+
+<script id="mk-stage8-audio-recording">
+(function(){
+  'use strict';
+  const MK=window.MK=window.MK||{};
+  MK.modules=MK.modules||{};
+
+  /*
+   * Stage 8: professional audio lifecycle.
+   * Compatibility-first: the current app engine remains authoritative while
+   * this layer provides a safer audio graph, metering and recording primitives.
+   */
+  const A = MK.modules.audio = Object.assign(MK.modules.audio||{}, {
+    masterGain:null,
+    analyser:null,
+    recording:null,
+    graphReady:false,
+
+    ensureGraph(){
+      const ctx=this.getContext?.() || window.audioCtx;
+      if(!ctx) return null;
+      try{
+        if(!this.masterGain){
+          this.masterGain=ctx.createGain();
+          this.masterGain.gain.value=1;
+        }
+        if(!this.analyser){
+          this.analyser=ctx.createAnalyser();
+          this.analyser.fftSize=2048;
+          this.analyser.smoothingTimeConstant=.82;
+        }
+        if(!this.graphReady){
+          // A dedicated analyser can feed diagnostics without altering the
+          // existing output graph.
+          this.graphReady=true;
+        }
+      }catch(err){
+        console.warn('[MK Audio] graph setup failed',err);
+      }
+      return ctx;
+    },
+
+    async resume(){
+      const ctx=this.getContext?.() || window.audioCtx;
+      if(ctx?.state==='suspended'){
+        try{await ctx.resume()}catch(err){console.warn('[MK Audio] resume failed',err)}
+      }
+      this.ensureGraph();
+      return ctx;
+    },
+
+    setMaster(value){
+      const v=Math.max(0,Math.min(1,Number(value)));
+      if(!Number.isFinite(v))return false;
+      this.ensureGraph();
+      if(this.masterGain)this.masterGain.gain.setTargetAtTime(v,this.getContext().currentTime,.008);
+      MK.setState?.('audio.volume',v);
+      return true;
+    },
+
+    meter(){
+      if(!this.analyser)return 0;
+      const data=new Uint8Array(this.analyser.fftSize);
+      this.analyser.getByteTimeDomainData(data);
+      let sum=0;
+      for(const x of data){const n=(x-128)/128;sum+=n*n}
+      return Math.sqrt(sum/data.length);
+    },
+
+    stopAll(){
+      try{
+        if(typeof stopMetro==='function')stopMetro();
+      }catch(err){console.warn('[MK Audio] metro stop failed',err)}
+      try{
+        this.recording?.stop();
+      }catch(_){}
+    },
+
+    health(){
+      const ctx=this.getContext?.()||window.audioCtx;
+      return {
+        context:!!ctx,
+        state:ctx?.state||'unavailable',
+        graph:this.graphReady,
+        masterGain:!!this.masterGain,
+        analyser:!!this.analyser,
+        meter:this.meter()
+      };
+    }
+  });
+
+  /*
+   * Recording primitive: prefer MediaRecorder when available, with safe
+   * MIME selection and chunk lifecycle. Existing app recording remains usable.
+   */
+  const Rec = MK.modules.recording = Object.assign(MK.modules.recording||{}, {
+    recorder:null,
+    stream:null,
+    chunks:[],
+    mimeType:null,
+
+    chooseMime(){
+      const candidates=[
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg;codecs=opus',
+        'audio/mp4'
+      ];
+      if(!window.MediaRecorder)return null;
+      return candidates.find(x=>MediaRecorder.isTypeSupported?.(x))||'';
+    },
+
+    async acquireStream(constraints={audio:true}){
+      if(!navigator.mediaDevices?.getUserMedia)throw new Error('Microphone API unavailable');
+      if(this.stream?.active)return this.stream;
+      this.stream=await navigator.mediaDevices.getUserMedia(constraints);
+      return this.stream;
+    },
+
+    async begin(constraints={audio:true}){
+      if(this.recorder?.state==='recording')return false;
+      const stream=await this.acquireStream(constraints);
+      const mime=this.chooseMime();
+      this.chunks=[];
+      this.mimeType=mime||stream.getAudioTracks?.()[0]?.kind||'audio/webm';
+      this.recorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);
+
+      this.recorder.ondataavailable=e=>{
+        if(e.data?.size)this.chunks.push(e.data);
+      };
+      this.recorder.onstop=()=>{
+        const blob=new Blob(this.chunks,{type:this.mimeType||'audio/webm'});
+        this.lastBlob=blob;
+        this.lastObjectUrl=URL.createObjectURL(blob);
+        MK.setState?.('audio.recording',false);
+        this._paint?.();
+      };
+      this.recorder.start(1000);
+      MK.setState?.('audio.recording',true);
+      return true;
+    },
+
+    stop(){
+      if(this.recorder?.state==='recording'){
+        this.recorder.stop();
+        return true;
+      }
+      return false;
+    },
+
+    release(){
+      try{this.stream?.getTracks?.().forEach(t=>t.stop())}catch(_){}
+      this.stream=null;
+      this.recorder=null;
+      this.chunks=[];
+    },
+
+    revokeLast(){
+      if(this.lastObjectUrl)MK.revokeBlobUrl?.(this.lastObjectUrl);
+      this.lastObjectUrl=null;
+      this.lastBlob=null;
+    },
+
+    health(){
+      return {
+        state:this.recorder?.state||'idle',
+        stream:!!this.stream?.active,
+        chunks:this.chunks.length,
+        mime:this.mimeType||null,
+        blobBytes:this.lastBlob?.size||0
+      };
+    }
+  });
+
+  // Keep audio alive on first user interaction, which is required by browser
+  // autoplay policies.
+  const wake=()=>{
+    A.resume?.();
+    window.removeEventListener('pointerdown',wake,true);
+    window.removeEventListener('keydown',wake,true);
+  };
+  window.addEventListener('pointerdown',wake,true);
+  window.addEventListener('keydown',wake,true);
+
+  window.addEventListener('pagehide',()=>{
+    try{Rec.release()}catch(_){}
+    try{A.stopAll()}catch(_){}
+  });
+
+  MK.modules.audioRecordingDiagnostics=()=>({
+    audio:A.health(),
+    recording:Rec.health(),
+    supported:{
+      mediaRecorder:!!window.MediaRecorder,
+      worklet:!!window.AudioWorkletNode
+    }
+  });
+})();
+</script>
+
+
+<script id="mk-stage9-final-qa">
+(function(){
+  'use strict';
+  const MK=window.MK=window.MK||{};
+  MK.modules=MK.modules||{};
+
+  const results=[];
+  const add=(id,pass,detail='')=>results.push({id,pass:!!pass,detail});
+
+  function test(id,fn){
+    try{ add(id,!!fn()); }
+    catch(e){ add(id,false,e?.message||String(e)); }
+  }
+
+  MK.modules.finalQA={
+    run(){
+      results.length=0;
+
+      // Core DOM / runtime
+      test('document',()=>!!document.documentElement&&!!document.body);
+      test('mk-core',()=>!!window.MK);
+      test('state',()=>!!MK.state);
+      test('modules',()=>!!MK.modules);
+
+      // Core feature presence
+      test('metronome-engine',()=>typeof window.stopMetro==='function' || typeof window.toggleMetro==='function');
+      test('recording-engine',()=>typeof window.startRecording==='function' || !!MK.modules.recording);
+      test('store',()=>!!MK.modules.store);
+      test('sync',()=>!!MK.modules.productionSync);
+      test('state-render',()=>!!MK.modules.stateRender);
+      test('components',()=>!!MK.modules.components);
+
+      // Browser capability checks
+      test('audio-context',()=>!!(window.AudioContext||window.webkitAudioContext||window.audioCtx));
+      test('media-recorder',()=>!!window.MediaRecorder);
+      test('media-devices',()=>!!navigator.mediaDevices?.getUserMedia);
+      test('audio-worklet-capability',()=>!!window.AudioWorkletNode);
+
+      // PWA essentials
+      test('service-worker-api',()=>('serviceWorker' in navigator));
+      test('manifest-link',()=>!!document.querySelector('link[rel="manifest"]'));
+
+      // Layout safety
+      test('viewport-meta',()=>!!document.querySelector('meta[name="viewport"]'));
+      test('html-overflow-safety',()=>getComputedStyle(document.documentElement).overflowX!=='visible');
+
+      // Sync state
+      test('sync-health',()=>typeof MK.modules.productionSync.health==='function');
+      test('audio-health',()=>typeof MK.modules.audio?.health==='function');
+      test('recording-health',()=>typeof MK.modules.recording?.health==='function');
+
+      return {
+        passed:results.filter(x=>x.pass).length,
+        failed:results.filter(x=>!x.pass).length,
+        total:results.length,
+        results:[...results],
+        timestamp:new Date().toISOString()
+      };
+    },
+    report(){
+      return this.run();
+    }
+  };
+
+  // Global diagnostic hook for console / future automated QA.
+  window.MK_FINAL_QA=()=>MK.modules.finalQA.report();
+
+  // Never mutate user data during QA.
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>MK.modules.finalQA.run(),{once:true});
+  }else{
+    MK.modules.finalQA.run();
+  }
+})();
+</script>
+
+
+<script id="mk-stage10-release-hardening">
+(function(){
+  'use strict';
+  const MK=window.MK=window.MK||{};
+  MK.modules=MK.modules||{};
+
+  const releaseState={
+    version:'MK Studio Release Candidate 1',
+    startedAt:Date.now(),
+    errors:[],
+    maxErrors:25
+  };
+
+  function record(kind,error,extra){
+    const item={
+      kind,
+      message:String(error?.message||error||'Unknown error'),
+      stack:String(error?.stack||''),
+      time:new Date().toISOString(),
+      ...extra
+    };
+    releaseState.errors.push(item);
+    if(releaseState.errors.length>releaseState.maxErrors)
+      releaseState.errors.shift();
+    return item;
+  }
+
+  function ensureErrorRegion(){
+    let el=document.getElementById('mk-release-error-region');
+    if(!el){
+      el=document.createElement('div');
+      el.id='mk-release-error-region';
+      el.setAttribute('role','status');
+      el.setAttribute('aria-live','polite');
+      document.body?.appendChild(el);
+    }
+    return el;
+  }
+
+  window.addEventListener('error',e=>{
+    record('error',e.error||e.message,{source:e.filename||'',line:e.lineno||0,column:e.colno||0});
+  });
+
+  window.addEventListener('unhandledrejection',e=>{
+    record('unhandledrejection',e.reason);
+  });
+
+  // Storage guard: never let quota/private-mode failures crash the app.
+  const storageSafe={
+    get(key){
+      try{return localStorage.getItem(key)}catch(e){record('storage-read',e);return null}
+    },
+    set(key,value){
+      try{localStorage.setItem(key,value);return true}
+      catch(e){record('storage-write',e,{key});return false}
+    },
+    remove(key){
+      try{localStorage.removeItem(key);return true}
+      catch(e){record('storage-remove',e,{key});return false}
+    }
+  };
+
+  // Data integrity helpers. They do not mutate the existing database.
+  function stableStringify(value){
+    const seen=new WeakSet();
+    function walk(v){
+      if(v===null||typeof v!=='object')return v;
+      if(seen.has(v))return '[Circular]';
+      seen.add(v);
+      if(Array.isArray(v))return v.map(walk);
+      const o={};
+      Object.keys(v).sort().forEach(k=>o[k]=walk(v[k]));
+      return o;
+    }
+    return JSON.stringify(walk(value));
+  }
+
+  async function digest(value){
+    const raw=stableStringify(value);
+    if(crypto?.subtle){
+      const bytes=new TextEncoder().encode(raw);
+      const hash=await crypto.subtle.digest('SHA-256',bytes);
+      return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');
+    }
+    let h=2166136261;
+    for(let i=0;i<raw.length;i++){h^=raw.charCodeAt(i);h=Math.imul(h,16777619)}
+    return (h>>>0).toString(16);
+  }
+
+  MK.modules.release={
+    state:releaseState,
+    storage:storageSafe,
+    recordError:record,
+    errors:()=>[...releaseState.errors],
+    async integrity(value){
+      return {algorithm:crypto?.subtle?'SHA-256':'FNV-1a',digest:await digest(value)};
+    },
+    health(){
+      return {
+        version:releaseState.version,
+        uptimeMs:Date.now()-releaseState.startedAt,
+        errors:releaseState.errors.length,
+        online:navigator.onLine,
+        visibility:document.visibilityState,
+        storageAvailable:storageSafe.set('__mk_release_probe__','1')
+      };
+    }
+  };
+
+  // PWA update lifecycle: surface the registration safely without forcing a reload.
+  MK.modules.pwa={
+    registration:null,
+    updateAvailable:false,
+    async register(){
+      if(!('serviceWorker' in navigator))return null;
+      try{
+        const reg=await navigator.serviceWorker.ready;
+        this.registration=reg;
+        if(reg.waiting)this.updateAvailable=true;
+        return reg;
+      }catch(e){record('service-worker',e);return null}
+    },
+    async checkUpdate(){
+      try{
+        const reg=this.registration||await this.register();
+        await reg?.update?.();
+        if(reg?.waiting)this.updateAvailable=true;
+        return !!reg?.waiting;
+      }catch(e){record('service-worker-update',e);return false}
+    }
+  };
+
+  // Avoid crashing on an unavailable IndexedDB implementation.
+  MK.modules.platform={
+    indexedDB:!!window.indexedDB,
+    audioContext:!!(window.AudioContext||window.webkitAudioContext||window.audioCtx),
+    mediaRecorder:!!window.MediaRecorder,
+    serviceWorker:'serviceWorker' in navigator,
+    online:navigator.onLine
+  };
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible'){
+      // Refresh sync/audio state after returning from background.
+      try{MK.modules.productionSync?.health?.()}catch(e){record('visibility-sync',e)}
+      try{MK.modules.audio?.health?.()}catch(e){record('visibility-audio',e)}
+    }
+  });
+
+  window.addEventListener('online',()=>{
+    try{MK.modules.productionSync?.flush?.()}catch(e){record('online-sync',e)}
+  });
+
+  // Do not force-reload or auto-activate a new service worker.
+  // This avoids interrupting an active practice session.
+
+  const boot=()=>{
+    ensureErrorRegion();
+    MK.modules.pwa.register();
+    // Remove probe immediately; this tests availability without retaining data.
+    storageSafe.remove('__mk_release_probe__');
+  };
+  if(document.readyState==='loading')
+    document.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
+
+  window.MK_RELEASE_HEALTH=()=>({
+    release:MK.modules.release.health(),
+    platform:MK.modules.platform,
+    pwa:{
+      registered:!!MK.modules.pwa.registration,
+      updateAvailable:MK.modules.pwa.updateAvailable
+    },
+    audio:MK.modules.audio?.health?.()||null,
+    recording:MK.modules.recording?.health?.()||null,
+    sync:MK.modules.productionSync?.health?.()||null
+  });
 })();
 </script>
 

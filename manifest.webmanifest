@@ -1,12 +1,22 @@
 {
+  "id": "./",
   "name": "MK Studio",
   "short_name": "MK Studio",
   "description": "Piano Practice Studio & Metronome",
+  "lang": "en",
+  "dir": "ltr",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#05060b",
   "theme_color": "#05060b",
   "orientation": "portrait-primary",
+  "categories": [
+    "music",
+    "productivity",
+    "utilities"
+  ],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "./icon-192.png",
