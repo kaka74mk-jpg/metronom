@@ -1327,6 +1327,20 @@ button, input, select, textarea {
 @media(max-width:760px){.title-season-trigger .title-season-text{font-size:19px}.recording-console{grid-template-columns:1fr 1fr}.recording-console .rec-status{grid-column:1/-1}.reminder-times{grid-template-columns:1fr}.sync-detail-row{align-items:flex-start;flex-direction:column;gap:2px}}
 </style>
 
+<style id="mkstudio-v2-cockpit">
+/* MK Studio v2 — Practice Cockpit */
+.practice-timer-card{background:linear-gradient(145deg,rgba(18,26,39,.96),rgba(8,13,22,.98))!important;border:1px solid rgba(0,245,255,.18)!important;border-radius:18px!important;box-shadow:0 12px 36px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.04)!important;padding:14px!important;margin:12px auto 0!important}
+.practice-timer-card .timer-grid{gap:10px!important}
+.practice-timer-card .timer-box{min-height:88px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;padding:12px 10px!important;border-radius:14px!important;background:rgba(255,255,255,.045)!important;border:1px solid rgba(255,255,255,.08)!important}
+.practice-timer-card .timer-box.current{background:linear-gradient(145deg,rgba(0,245,255,.10),rgba(0,245,255,.025))!important;border-color:rgba(0,245,255,.28)!important}
+.practice-timer-card .timer-label{font-size:11px!important;line-height:1.3!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:var(--text-secondary,#9ca8b8)!important;margin-bottom:7px!important}
+.practice-timer-card .timer-value{font-size:clamp(27px,6vw,42px)!important;line-height:1!important;font-weight:800!important;letter-spacing:.025em!important;color:#f4fbff!important;text-shadow:0 0 20px rgba(0,245,255,.16)!important;overflow:visible!important}
+.practice-timer-card .timer-box.current .timer-value{color:#dfffff!important;text-shadow:0 0 24px rgba(0,245,255,.28)!important}
+.practice-timer-card .timer-state{margin-top:11px!important;font-size:12px!important;font-weight:700!important;letter-spacing:.06em!important;text-align:center!important;color:var(--text-secondary,#9ca8b8)!important}
+.mk-pro-tools{gap:10px!important;margin:12px 0 5px!important;flex-wrap:wrap!important}
+.mk-pro-tools button{min-height:36px!important;padding:8px 13px!important;border-radius:10px!important;font-size:12px!important;font-weight:700!important;color:var(--text-primary,#fff)!important;background:rgba(255,255,255,.055)!important;border-color:rgba(255,255,255,.11)!important}
+@media(max-width:520px){.practice-timer-card{padding:12px!important;border-radius:16px!important}.practice-timer-card .timer-box{min-height:82px!important;padding:10px 7px!important}.practice-timer-card .timer-value{font-size:clamp(24px,8vw,34px)!important}.practice-timer-card .timer-label{font-size:10px!important}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -1771,7 +1785,7 @@ function toggleSession(){sessionRunning?stopSession(true):startSession()}
 function getTodaySeasonSeconds(){const key=localDateKey(new Date()),p=currentPractice();return (p?.sessions||[]).filter(s=>localDateKey(s.date)===key).reduce((a,s)=>a+(Number(s.seconds)||0),0)}
 function startSession(){sessionRunning=true;sessionStartedAt=Date.now();sessionElapsed=0;document.getElementById("sessionBtn").innerHTML='<i data-lucide="square"></i><span>End Practice</span>';lucide.createIcons();updateSessionTimer()}
 function stopSession(save=true){if(!sessionRunning)return;sessionElapsed=Math.floor((Date.now()-sessionStartedAt)/1000);sessionRunning=false;stopMetro();document.getElementById("sessionBtn").innerHTML='<i data-lucide="timer"></i><span>Start Practice</span>';lucide.createIcons();if(save&&sessionElapsed>=1)saveSession(sessionElapsed);updateSessionTimer()}
-function updateSessionTimer(){const e=document.getElementById("sessionTime"),day=document.getElementById("daySessionTime"),card=document.getElementById("practiceTimerCard"),state=document.getElementById("sessionTimerState");const current=sessionRunning?Math.floor((Date.now()-sessionStartedAt)/1000):sessionElapsed;const todayTotal=getTodaySeasonSeconds()+current;e.textContent=formatDurationLong(current);if(day)day.textContent=formatDurationLong(todayTotal);if(card)card.classList.toggle("running",sessionRunning);if(state)state.textContent=sessionRunning?"● Recording practice time":"Ready";if(sessionRunning)sessionRAF=requestAnimationFrame(updateSessionTimer);if(document.getElementById("focusOverlay")?.classList.contains("open")&&typeof updateFocusUI==="function")updateFocusUI()}
+function updateSessionTimer(){const e=document.getElementById("sessionTime"),day=document.getElementById("daySessionTime"),card=document.getElementById("practiceTimerCard"),state=document.getElementById("sessionTimerState");const current=sessionRunning?Math.floor((Date.now()-sessionStartedAt)/1000):sessionElapsed;const todayTotal=getTodaySeasonSeconds()+(sessionRunning?current:0);e.textContent=formatDurationLong(current);if(day)day.textContent=formatDurationLong(todayTotal);if(card)card.classList.toggle("running",sessionRunning);if(state)state.textContent=sessionRunning?"● Recording practice time":"Ready";if(sessionRunning)sessionRAF=requestAnimationFrame(updateSessionTimer);if(document.getElementById("focusOverlay")?.classList.contains("open")&&typeof updateFocusUI==="function")updateFocusUI()}
 function formatDurationLong(sec){sec=Math.max(0,Math.floor(Number(sec)||0));return `${String(Math.floor(sec/3600)).padStart(2,"0")}:${String(Math.floor((sec%3600)/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`}
 function saveSession(seconds){let p=currentPractice();if(!p)return;p.sessions.push({id:crypto.randomUUID(),date:new Date().toISOString(),seconds,bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning});p.practiceDays=p.practiceDays||{};p.practiceDays[localDateKey(new Date())]=true;saveDB()}
 
@@ -2526,7 +2540,7 @@ function updateFocusUI(){
   try{
     const secs=(typeof sessionRunning!=="undefined"&&sessionRunning&&typeof sessionStartedAt!=="undefined"&&sessionStartedAt)?Math.max(0,Math.floor((Date.now()-sessionStartedAt)/1000)):(typeof sessionElapsed!=="undefined"?Math.max(0,sessionElapsed):0);
     if(timerEl)timerEl.textContent=(typeof formatDurationLong==="function")?formatDurationLong(secs):new Date(secs*1000).toISOString().slice(11,19);
-    if(dayTimerEl){const total=(typeof getTodaySeasonSeconds==="function"?getTodaySeasonSeconds():0)+(sessionRunning?secs:0);dayTimerEl.textContent=(typeof formatDurationLong==="function")?formatDurationLong(total):new Date(total*1000).toISOString().slice(11,19)}
+    if(dayTimerEl){const saved=(typeof getTodaySeasonSeconds==="function"?Math.max(0,getTodaySeasonSeconds()):0);const total=saved+(sessionRunning?secs:0);dayTimerEl.textContent=(typeof formatDurationLong==="function")?formatDurationLong(total):new Date(total*1000).toISOString().slice(11,19)}
   }catch(e){}
   if(tempoValue)tempoValue.textContent=String(bpm);
   if(btn)btn.textContent=metroRunning?"■ Stop Metronome":"▶ Start Metronome";
