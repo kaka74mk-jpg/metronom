@@ -412,6 +412,49 @@ button,input,select{font:inherit}button{cursor:pointer}
 </style>
 
 <style>
+/* Clickable transport cards: the visual BPM card controls the metronome,
+   and both practice timer cards control the current season/session. */
+.tempo-display-card{
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  transition:transform .12s ease,filter .12s ease,box-shadow .12s ease,border-color .12s ease;
+}
+.tempo-display-card:hover{
+  filter:brightness(1.06);
+}
+.tempo-display-card:active{
+  transform:scale(.985);
+}
+.tempo-display-card:focus-visible{
+  outline:2px solid var(--cyan);
+  outline-offset:2px;
+}
+.tempo-display-card.is-running{
+  border-color:rgba(0,245,255,.7)!important;
+  box-shadow:0 0 30px rgba(0,245,255,.16),inset 0 0 24px rgba(0,245,255,.05);
+}
+.timer-box.season-toggle{
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  transition:transform .12s ease,background .12s ease,border-color .12s ease,box-shadow .12s ease;
+}
+.timer-box.season-toggle:hover{
+  background:#131c2b;
+  border-color:rgba(184,255,61,.35);
+}
+.timer-box.season-toggle:active{
+  transform:scale(.985);
+}
+.timer-box.season-toggle:focus-visible{
+  outline:2px solid var(--lime);
+  outline-offset:2px;
+}
+.practice-timer-card.running .timer-box.season-toggle{
+  border-color:rgba(184,255,61,.38);
+  box-shadow:inset 0 0 18px rgba(184,255,61,.035);
+}
 /* Final tempo + volume sizing */
 .tempo-display-card{box-sizing:border-box;min-height:82px;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .tempo-display-card .bpm-big{font-size:clamp(44px,13vw,54px)!important;line-height:.92!important;letter-spacing:-.045em!important;max-width:100%;white-space:nowrap}
@@ -1412,13 +1455,13 @@ button, input, select, textarea {
   <section class="layout">
     <div>
       <div class="metro-card">
-        <div class="metro-visual"><div class="visual-studio tempo-display-card">
+        <div class="metro-visual"><div class="visual-studio tempo-display-card" id="tempoDisplayCard" onclick="toggleMetro()" role="button" tabindex="0" aria-label="Start or stop metronome" title="Click to start / stop metronome">
           <div class="bpm-big" id="bpmDisplay">80</div>
           <div class="leds" id="leds"></div>
         </div></div>
         <div class="practice-timer-card" id="practiceTimerCard">
           <div class="tempo-status-row"><div class="tempo-direction-indicator" id="tempoDirectionIndicator" aria-live="polite"><span class="tempo-arrow" id="tempoArrow">•</span><span id="tempoDirectionText">STEADY</span></div></div>
-          <div class="timer-grid"><div class="timer-box"><span class="timer-label">Today in Season</span><span class="timer-value" id="daySessionTime">00:00:00</span></div><div class="timer-box current"><span class="timer-label">Current Session</span><span class="timer-value" id="sessionTime">00:00:00</span></div></div><div class="timer-state" id="sessionTimerState">Ready</div>
+          <div class="timer-grid"><div class="timer-box season-toggle" onclick="toggleSession()" role="button" tabindex="0" aria-label="Start or stop season" title="Click to start / stop season"><span class="timer-label">Today in Season</span><span class="timer-value" id="daySessionTime">00:00:00</span></div><div class="timer-box current season-toggle" onclick="toggleSession()" role="button" tabindex="0" aria-label="Start or stop season" title="Click to start / stop season"><span class="timer-label">Current Session</span><span class="timer-value" id="sessionTime">00:00:00</span></div></div><div class="timer-state" id="sessionTimerState">Ready</div>
         </div>
         <div class="market-ticker market-below-tempo"><i data-lucide="store"></i><span id="tickerSeason">MY PRACTICE</span><b id="tickerRhythm">4/4 • ♩</b></div>
 
@@ -1739,9 +1782,16 @@ function playKick(time){let o=audioCtx.createOscillator(),g=audioCtx.createGain(
 function playSnare(time){playNoise(time,.08,.5);let o=audioCtx.createOscillator(),g=audioCtx.createGain(),v=(metroMuted?0:Number(document.getElementById("volume").value));o.type="square";o.frequency.setValueAtTime(180,time);g.gain.setValueAtTime(.28*v,time);g.gain.exponentialRampToValueAtTime(.001,time+.06);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.06)}
 function playDrum(time,type){if(type==="K")playKick(time);else if(type==="S")playSnare(time);else if(type==="H")playNoise(time,.025,.18);else if(type==="R")playNoise(time,.035,.14);else if(type==="C")playClick(time,"accent");else if(type==="G")playNoise(time,.018,.08)}
 
+function syncTransportCards(){
+  const card=document.getElementById("tempoDisplayCard");
+  if(card){
+    card.classList.toggle("is-running",!!metroRunning);
+    card.setAttribute("aria-pressed",metroRunning?"true":"false");
+  }
+}
 function toggleMetro(){metroRunning?stopMetro():startMetro()}
-function startMetro(){initAudio();metroRunning=true;beatIndex=0;nextBeatTime=audioCtx.currentTime+.05;schedulerTimer=setInterval(scheduler,20);document.getElementById("metroBtn").innerHTML='<i data-lucide="square"></i><span>Stop Metronome</span>';lucide.createIcons();if(!tempoAutomationRunning&&settings().autoTempo?.change)startTempoAutomation()}
-function stopMetro(){metroRunning=false;clearInterval(schedulerTimer);schedulerTimer=null;document.getElementById("metroBtn").innerHTML='<i data-lucide="play"></i><span>Start Metronome</span>';lucide.createIcons();if(tempoAutomationRunning)stopTempoAutomation()}
+function startMetro(){initAudio();metroRunning=true;beatIndex=0;nextBeatTime=audioCtx.currentTime+.05;schedulerTimer=setInterval(scheduler,20);document.getElementById("metroBtn").innerHTML='<i data-lucide="square"></i><span>Stop Metronome</span>';lucide.createIcons();syncTransportCards();if(!tempoAutomationRunning&&settings().autoTempo?.change)startTempoAutomation()}
+function stopMetro(){metroRunning=false;clearInterval(schedulerTimer);schedulerTimer=null;document.getElementById("metroBtn").innerHTML='<i data-lucide="play"></i><span>Start Metronome</span>';lucide.createIcons();syncTransportCards();if(tempoAutomationRunning)stopTempoAutomation()}
 function scheduler(){if(!metroRunning)return;while(nextBeatTime<audioCtx.currentTime+.12){scheduleBeat(nextBeatTime);let pulse=getPulseSeconds();nextBeatTime+=pulse;beatIndex++}}
 function getPulseSeconds(){let n=noteDefs[meterNote]||customNotes.find(x=>x.id===meterNote);let div=n?.div||1;let den=Number(meterTime.split("/")[1])||4;let quarterSec=60/bpm;return quarterSec*div*(4/den)}
 function playNoise(time,duration,vol=.2){let buffer=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*duration)),audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;let src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buffer;g.gain.setValueAtTime(vol*(metroMuted?0:Number(document.getElementById("volume").value)),time);g.gain.exponentialRampToValueAtTime(.001,time+duration);src.connect(g);g.connect(audioCtx.destination);src.start(time)}
@@ -2573,6 +2623,17 @@ function togglePracticeFromFocus(){
   },500);
 })();
 
+
+document.addEventListener("keydown",(e)=>{
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  const el=e.target;
+  if(el?.id==="tempoDisplayCard"||el?.classList?.contains("season-toggle")){
+    e.preventDefault();
+    if(el.id==="tempoDisplayCard")toggleMetro();
+    else toggleSession();
+  }
+});
+syncTransportCards();
 
 window.addEventListener("DOMContentLoaded",()=>{
   document.querySelectorAll(".panel").forEach(x=>x.classList.remove("open"));
