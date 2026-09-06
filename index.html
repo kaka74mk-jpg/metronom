@@ -58,7 +58,7 @@ button,input,select{font:inherit}button{cursor:pointer}
 .range{direction:rtl;width:100%;height:6px;appearance:none;border-radius:99px;outline:none;background:linear-gradient(90deg,var(--cyan) 0%,var(--cyan) 50%,#1b2538 50%,#1b2538 100%)}
 .range::-webkit-slider-thumb{appearance:none;width:17px;height:17px;border-radius:50%;background:var(--cyan);box-shadow:0 0 18px rgba(0,245,255,.65)}
 .volume-row{display:grid;grid-template-columns:72px minmax(0,1fr) 40px auto;gap:8px;align-items:center;margin-top:8px;padding:8px 10px;background:#0b101a;border-radius:11px;border:1px solid #182237}
-.volume-row label{font-size:9px;color:var(--muted);display:flex;gap:5px;align-items:center}.volume-range{background:linear-gradient(90deg,var(--pink) 0%,var(--pink) 70%,#1b2538 70%,#1b2538 100%)}.volume-range::-webkit-slider-thumb{background:var(--pink);box-shadow:0 0 18px rgba(255,43,214,.6)}
+.volume-row label{font-size:9px;color:var(--muted);display:flex;gap:5px;align-items:center}.volume-range{background:linear-gradient(90deg,#22c55e 0%,#22c55e var(--volume-fill,70%),#1b2538 var(--volume-fill,70%),#1b2538 100%)}.volume-range::-webkit-slider-thumb{background:var(--pink);box-shadow:0 0 18px rgba(255,43,214,.6)}
 .vol-val{font-size:9px;color:var(--pink);text-align:center}
 .quick-bpm{display:flex;gap:4px;overflow:auto;padding:8px 0}.quick-bpm button{flex:0 0 auto;border:1px solid var(--line);background:var(--card2);color:var(--muted);border-radius:8px;padding:5px 9px;font-size:9px}
 .start-bar{display:grid;grid-template-columns:1fr 1fr 80px;gap:6px}.start{border:0;border-radius:11px;padding:11px;font-weight:850}.start.metro{background:linear-gradient(90deg,var(--cyan),#3cf7d2);color:#041013}.start.session{background:#151d2d;color:var(--text);border:1px solid var(--line)}.start.record{background:linear-gradient(90deg,var(--pink),#ff6a8b);color:#fff}
@@ -1192,9 +1192,13 @@ button, input, select, textarea {
 }
 .start.session:hover{filter:brightness(1.08);transform:translateY(-1px)}
 
-/* Green volume slider */
+/* Green volume section — same structure, refreshed visual */
+.volume-row{
+  border-color:rgba(34,197,94,.22)!important;
+  background:linear-gradient(135deg,rgba(34,197,94,.055),#0b101a)!important;
+}
 .volume-range{
-  background:#1b2538;
+  background:linear-gradient(90deg,#22c55e 0%,#22c55e var(--volume-fill,70%),#1b2538 var(--volume-fill,70%),#1b2538 100%)!important;
 }
 .volume-range::-webkit-slider-thumb{
   background:#22c55e!important;
@@ -1383,6 +1387,36 @@ button, input, select, textarea {
 .mk-pro-tools{gap:10px!important;margin:12px 0 5px!important;flex-wrap:wrap!important}
 .mk-pro-tools button{min-height:36px!important;padding:8px 13px!important;border-radius:10px!important;font-size:12px!important;font-weight:700!important;color:var(--text-primary,#fff)!important;background:rgba(255,255,255,.055)!important;border-color:rgba(255,255,255,.11)!important}
 @media(max-width:520px){.practice-timer-card{padding:12px!important;border-radius:16px!important}.practice-timer-card .timer-box{min-height:82px!important;padding:10px 7px!important}.practice-timer-card .timer-value{font-size:clamp(24px,8vw,34px)!important}.practice-timer-card .timer-label{font-size:10px!important}}
+</style>
+
+<style>
+/* Final requested polish: larger, more prominent BPM card */
+.tempo-display-card{
+  width:min(400px,94%)!important;
+  min-height:104px!important;
+  padding:15px 20px!important;
+  border-radius:17px!important;
+}
+.tempo-display-card .bpm-big{
+  font-size:clamp(64px,9vw,78px)!important;
+  font-weight:950!important;
+  letter-spacing:-.055em!important;
+}
+.volume-row{
+  border-color:rgba(34,197,94,.25)!important;
+  box-shadow:inset 0 0 18px rgba(34,197,94,.025);
+}
+.volume-range::-webkit-slider-thumb{background:#22c55e!important;box-shadow:0 0 18px rgba(34,197,94,.65)!important}
+.volume-range::-moz-range-thumb{background:#22c55e!important;box-shadow:0 0 18px rgba(34,197,94,.65)!important}
+.vol-val{color:#22c55e!important}
+@media(max-width:760px){
+  .tempo-display-card{width:min(100%,380px)!important;min-height:94px!important;padding:13px 16px!important}
+  .tempo-display-card .bpm-big{font-size:clamp(58px,16vw,70px)!important}
+}
+@media(max-width:430px){
+  .tempo-display-card{min-height:88px!important}
+  .tempo-display-card .bpm-big{font-size:58px!important}
+}
 </style>
 </head>
 <body>
@@ -1731,7 +1765,7 @@ function renderHeader(){
 function setRangeFill(el,val,color){let min=Number(el.min),max=Number(el.max),pct=((Number(val)-min)/(max-min))*100;el.style.background=`linear-gradient(90deg,${color} 0%,${color} ${pct}%,#1b2538 ${pct}%,#1b2538 100%)`}
 function setBpm(v,persist=true){bpm=Math.max(20,Math.min(300,Math.round(Number(v))));document.getElementById("bpmRange").value=bpm;document.getElementById("bpmDisplay").textContent=bpm;document.getElementById("bpmValue").textContent=bpm;const fv=document.getElementById("focusTempoValue");if(fv)fv.textContent=bpm;const fb=document.getElementById("focusBpm");if(fb)fb.textContent=bpm;setRangeFill(document.getElementById("bpmRange"),bpm,"#00f5ff");settings().bpm=bpm;updateTarget();if(persist&&!realtimeApplying)saveDB()}
 function changeBpm(n){setBpm(bpm+n)}
-function updateVolumeUI(persist=false){let e=document.getElementById("volume"),v=Number(e.value);document.getElementById("volumeValue").textContent=Math.round(v*100)+"%";setRangeFill(e,v,"#ff2bd6");settings().volume=v;if(persist&&!realtimeApplying)saveDB()}
+function updateVolumeUI(persist=false){let e=document.getElementById("volume"),v=Number(e.value);let pct=Math.max(0,Math.min(100,v*100));document.getElementById("volumeValue").textContent=Math.round(pct)+"%";e.style.setProperty("--volume-fill",pct+"%");settings().volume=v;if(persist&&!realtimeApplying)saveDB()}
 function setTarget(v,persist=true){targetBpm=Math.max(20,Math.min(300,Math.round(Number(v)||120)));let p=currentPractice();if(p)p.target=targetBpm;document.getElementById("targetValue").textContent=targetBpm;document.getElementById("targetRange").value=targetBpm;setRangeFill(document.getElementById("targetRange"),targetBpm,"#b8ff3d");if(persist&&!realtimeApplying)saveDB()}
 function updateTarget(){let p=currentPractice();if(!p)return;targetBpm=p.target||120;document.getElementById("targetValue").textContent=targetBpm;document.getElementById("targetRange").value=targetBpm;setRangeFill(document.getElementById("targetRange"),targetBpm,"#b8ff3d")}
 function renderVisual(){let n=Math.max(4,getRhythmPattern().length);document.getElementById("leds").innerHTML=Array.from({length:Math.min(n,16)},(_,i)=>`<span class="led ${i===0?"first":""}" id="led-${i}"></span>`).join("")}
@@ -1768,15 +1802,60 @@ function renderOptionGroup(id,defs,current,fn){let e=document.getElementById(id)
 function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}
 function playClick(time,type="normal"){
   initAudio();
-  const gain=audioCtx.createGain(),osc=audioCtx.createOscillator(),v=(metroMuted?0:Number(document.getElementById("volume").value));
-  let freq=type==="accent"?1200:800,d=.055;
-  if(type==="secondary") freq=1500,d=.035;
-  if(sound==="soft")freq=650;if(sound==="sharp")freq=2200;if(sound==="beep"){freq=900;d=.09}if(sound==="digital")freq=1600;if(sound==="wood")freq=420;
-  if(special==="marcato"){freq=1450;d=.09}if(special==="staccato")d=.018;
-  osc.type=special==="tremolo4"?"square":"sine";osc.frequency.setValueAtTime(freq,time);
-  gain.gain.setValueAtTime(Math.min(1,v*(type==="accent"?1.25:type==="secondary"?.55:.75)),time);gain.gain.exponentialRampToValueAtTime(.001,time+d);
-  osc.connect(gain);gain.connect(audioCtx.destination);osc.start(time);osc.stop(time+d);
+  const v=metroMuted?0:Math.max(0,Math.min(1,Number(document.getElementById("volume")?.value||.7)));
+  if(v<=0)return;
+  const accent=type==="accent", secondary=type==="secondary";
+  const master=audioCtx.createGain();
+  master.gain.setValueAtTime(0.0001,time);
+  master.connect(audioCtx.destination);
+
+  // Distinct, studio-style metronome voices. Each preset has its own
+  // oscillator mix, envelope and harmonic character rather than only
+  // changing pitch.
+  const presets={
+    classic:{freq:1450,wave:"triangle",attack:.001,decay:accent?.075:.052,level:accent?.78:secondary?.30:.55,harm:1.00,noise:accent?.16:.10},
+    soft:{freq:720,wave:"sine",attack:.003,decay:accent?.105:.075,level:accent?.55:secondary?.20:.38,harm:.55,noise:.025},
+    sharp:{freq:2450,wave:"square",attack:.0005,decay:accent?.045:.028,level:accent?.72:secondary?.25:.58,harm:1.25,noise:accent?.20:.15},
+    beep:{freq:980,wave:"sine",attack:.002,decay:accent?.13:.09,level:accent?.68:secondary?.24:.48,harm:.72,noise:0},
+    digital:{freq:1800,wave:"square",attack:.0005,decay:accent?.060:.040,level:accent?.62:secondary?.22:.50,harm:1.45,noise:.055},
+    wood:{freq:430,wave:"triangle",attack:.001,decay:accent?.115:.085,level:accent?.82:secondary?.32:.62,harm:.95,noise:accent?.24:.18}
+  };
+  const q=presets[sound]||presets.classic;
+  const level=v*q.level;
+  const body=audioCtx.createOscillator(), bg=audioCtx.createGain();
+  body.type=q.wave;
+  body.frequency.setValueAtTime(q.freq*(accent?1.08:1),time);
+  body.frequency.exponentialRampToValueAtTime(q.freq*q.harm,time+q.decay);
+  bg.gain.setValueAtTime(.0001,time);
+  bg.gain.linearRampToValueAtTime(level,time+q.attack);
+  bg.gain.exponentialRampToValueAtTime(.0001,time+q.decay);
+  body.connect(bg);bg.connect(master);body.start(time);body.stop(time+q.decay+.015);
+
+  // Harmonic overtone makes the click read clearly on phone speakers.
+  if(sound!=="soft"&&sound!=="beep"){
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type=sound==="digital"?"square":"sine";
+    o.frequency.setValueAtTime(q.freq*(sound==="wood"?2.15:2.45),time);
+    o.frequency.exponentialRampToValueAtTime(q.freq*(sound==="wood"?1.5:1.65),time+Math.min(.035,q.decay));
+    g.gain.setValueAtTime(level*(accent?.24:.13),time);
+    g.gain.exponentialRampToValueAtTime(.0001,time+Math.min(.035,q.decay));
+    o.connect(g);g.connect(master);o.start(time);o.stop(time+.045);
+  }
+
+  if(q.noise>0){
+    const duration=sound==="wood"?.028:.014;
+    const buffer=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*duration)),audioCtx.sampleRate);
+    const data=buffer.getChannelData(0);
+    for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/data.length,2.4);
+    const src=audioCtx.createBufferSource(),ng=audioCtx.createGain(),filter=audioCtx.createBiquadFilter();
+    filter.type="bandpass";filter.frequency.value=sound==="wood"?1900:4300;filter.Q.value=sound==="wood"?1.4:1.8;
+    ng.gain.setValueAtTime(level*q.noise,time);ng.gain.exponentialRampToValueAtTime(.0001,time+duration);
+    src.buffer=buffer;src.connect(filter);filter.connect(ng);ng.connect(master);src.start(time);
+  }
+  master.gain.setValueAtTime(1,time);
+  master.gain.exponentialRampToValueAtTime(.0001,time+q.decay+.02);
 }
+
 function playNoise(time,duration,vol=.2){let buffer=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*duration)),audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;let src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buffer;g.gain.setValueAtTime(vol*(metroMuted?0:Number(document.getElementById("volume").value)),time);g.gain.exponentialRampToValueAtTime(.001,time+duration);src.connect(g);g.connect(audioCtx.destination);src.start(time)}
 function playKick(time){let o=audioCtx.createOscillator(),g=audioCtx.createGain(),v=(metroMuted?0:Number(document.getElementById("volume").value));o.type="sine";o.frequency.setValueAtTime(150,time);o.frequency.exponentialRampToValueAtTime(45,time+.12);g.gain.setValueAtTime(.8*v,time);g.gain.exponentialRampToValueAtTime(.001,time+.14);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.14)}
 function playSnare(time){playNoise(time,.08,.5);let o=audioCtx.createOscillator(),g=audioCtx.createGain(),v=(metroMuted?0:Number(document.getElementById("volume").value));o.type="square";o.frequency.setValueAtTime(180,time);g.gain.setValueAtTime(.28*v,time);g.gain.exponentialRampToValueAtTime(.001,time+.06);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.06)}
