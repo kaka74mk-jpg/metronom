@@ -2511,6 +2511,276 @@ body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",san
 .mk-mobile-nav,.mk-mobile-fab{display:none!important}
 </style>
 
+
+<style id="mk-mobile-clean-v6">
+/* =========================================================
+   MOBILE V6 — "Practice first"
+   Hide secondary information from the home screen and move
+   it behind compact drawers/modals. Desktop remains unchanged.
+   ========================================================= */
+@media(max-width:760px){
+
+  body{overflow-x:hidden}
+  .main{padding:8px 8px 24px}
+
+  /* Top bar: only identity + essential account/settings */
+  .topbar{
+    margin-bottom:8px!important;
+    padding:8px 9px!important;
+    min-height:52px!important;
+  }
+  .title-season-trigger{font-size:16px!important}
+  .current-meta{display:none!important}
+  .actions .icon-btn[title="New Season"]{display:none!important}
+  .actions .icon-btn[title="Rename"]{display:none!important}
+  .actions .icon-btn[title="All Seasons Dashboard"]{display:none!important}
+  .actions .icon-btn{width:33px!important;height:33px!important}
+
+  /* The overview is useful, but it does not belong above the
+     instrument. Put it behind a compact expandable header. */
+  .practice-overview{
+    margin:0 0 8px!important;
+    background:#0c121a!important;
+    border:1px solid #1d2734!important;
+    border-radius:13px!important;
+    padding:0!important;
+  }
+  .practice-overview .section-head{
+    display:flex!important;
+    margin:0!important;
+  }
+  .practice-overview .section-collapse{
+    width:100%;
+    min-height:42px;
+    padding:0 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .practice-overview .section-collapse b{
+    font-size:9px!important;
+    text-transform:uppercase;
+    letter-spacing:.09em;
+    color:#9ca8b9;
+  }
+  .practice-overview .section-body{
+    display:none!important;
+    padding:0 8px 8px!important;
+  }
+  .practice-overview.open .section-body,
+  .practice-overview:not(.collapsed) .section-body{
+    display:block!important;
+  }
+  .practice-overview .overview{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  .practice-overview .kpi{
+    min-height:55px!important;
+    padding:8px!important;
+  }
+  .practice-overview .kpi .v{font-size:14px!important}
+  .practice-overview .kpi .l{font-size:6px!important}
+
+  /* Dashboard is not part of the home workspace on mobile.
+     It is opened only when explicitly requested. */
+  .dashboard-menu{display:none!important}
+
+  /* MAIN = instrument only */
+  .layout{display:block!important;margin:0!important}
+  .metro-card{
+    margin:0!important;
+    padding:9px!important;
+    border-radius:18px!important;
+  }
+
+  /* Hero becomes shorter: no wasted vertical space */
+  .metro-visual{
+    height:184px!important;
+    border-radius:14px!important;
+  }
+  .visual-studio{padding:7px!important}
+  .tempo-display-card{
+    min-height:120px!important;
+    border-radius:16px!important;
+  }
+  .tempo-display-card .bpm-big{
+    font-size:58px!important;
+  }
+
+  /* Timers are secondary: one compact strip */
+  .practice-timer-card{
+    margin-top:7px!important;
+  }
+  .practice-timer-card .timer-grid{grid-template-columns:1fr 1fr!important;gap:5px!important}
+  .practice-timer-card .timer-box{
+    padding:7px 5px!important;
+    border-radius:10px!important;
+  }
+  .practice-timer-card .timer-label{font-size:6px!important}
+  .practice-timer-card .timer-value{font-size:14px!important}
+  .practice-timer-card .timer-state{
+    font-size:7px!important;
+    margin-top:4px!important;
+  }
+
+  /* Identity row: only tiny status, Focus and Tap */
+  .metro-header-row{
+    margin:8px 0 6px!important;
+  }
+  .metro-header-row .market-below-tempo{
+    max-width:55%!important;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+  }
+
+  /* Tempo controls stay visible because they are the app's core */
+  .slider-row{margin-top:7px!important}
+  .volume-row{padding:6px 8px!important;margin-top:5px!important}
+  .quick-bpm{padding:7px 0 5px!important}
+  .quick-bpm button{padding:6px 9px!important}
+
+  /* Main actions: two primary buttons, recording becomes a small
+     icon-like secondary action instead of a giant third button. */
+  .start-bar{
+    grid-template-columns:1fr 1fr!important;
+    gap:5px!important;
+    margin-top:2px!important;
+  }
+  .start-bar .record{
+    grid-column:auto!important;
+    min-width:0!important;
+    padding:0 8px!important;
+  }
+  .start{min-height:40px!important}
+  .start.record span{display:none!important}
+  .start.record{
+    width:42px!important;
+    justify-self:end;
+    margin-left:auto;
+  }
+
+  /* Tools are now the only gateway to advanced controls.
+     Show icon + short label, no giant panels on initial load. */
+  .tools{
+    margin-top:8px!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:4px!important;
+    padding:5px!important;
+    border-radius:12px!important;
+  }
+  .tool{
+    min-height:43px!important;
+    padding:4px 2px!important;
+    font-size:6.5px!important;
+  }
+  .tool svg{width:15px!important;height:15px!important}
+
+  /* Any open tool panel occupies the page below the shelf,
+     never overlaps the controls. */
+  .panel{
+    position:relative!important;
+    z-index:2!important;
+    margin-top:5px!important;
+    max-height:58vh!important;
+    overflow:auto!important;
+    padding:10px!important;
+    border-radius:12px!important;
+  }
+
+  /* The right rail is moved behind one "More" section. */
+  .right{
+    display:block!important;
+    margin-top:8px!important;
+  }
+  .right .card{
+    display:none!important;
+  }
+  .right .card.sync-card{
+    display:block!important;
+  }
+  .right .sync-card{
+    padding:10px!important;
+    border-radius:13px!important;
+  }
+  .right .sync-card .sync-detail-row,
+  .right .sync-card .app-update-box{
+    display:none!important;
+  }
+
+  /* History becomes a collapsed section, not a long feed. */
+  .history{
+    margin-top:8px!important;
+    padding:0!important;
+    border-radius:13px!important;
+    background:#0c121a!important;
+  }
+  .history .section-head{margin:0!important}
+  .history .section-collapse{
+    min-height:42px;
+    padding:0 12px;
+  }
+  .history .section-body{display:none!important;padding:0 8px 8px!important}
+  .history.open .section-body,
+  .history:not(.collapsed) .section-body{display:block!important}
+
+  /* Desktop-only detail elements are intentionally absent. */
+  .history-row{font-size:8px!important}
+
+  /* Make every modal a single, clean sheet with internal scroll.
+     Nothing else should remain visually active behind it. */
+  .modal{
+    z-index:9000!important;
+    align-items:flex-end!important;
+    padding:0!important;
+  }
+  .modal-box{
+    width:100%!important;
+    max-height:82vh!important;
+    overflow-y:auto!important;
+    border-radius:18px 18px 0 0!important;
+    padding:15px!important;
+  }
+  .modal-head{
+    position:sticky!important;
+    top:-15px!important;
+    margin:-15px -15px 12px!important;
+    padding:12px 15px!important;
+    z-index:5!important;
+  }
+
+  /* Hide accidental desktop side/duplicate overlays if any old
+     styles try to show them. */
+  .season-dropdown{
+    max-width:calc(100vw - 16px)!important;
+  }
+}
+
+@media(max-width:390px){
+  .main{padding-left:6px!important;padding-right:6px!important}
+  .tempo-display-card .bpm-big{font-size:54px!important}
+  .metro-visual{height:174px!important}
+  .tool{font-size:6px!important}
+}
+</style>
+
+<style id="mk-mobile-more-css">
+@media(max-width:760px){
+  .mk-mobile-more{margin-top:8px}
+  .mk-mobile-more>button{
+    width:100%;min-height:42px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 12px;border-radius:13px;
+    background:#0c121a;border:1px solid #1d2734;
+    color:#9ca8b9;font-size:8px;
+  }
+  .mk-mobile-more-body{display:none;padding-top:6px}
+  .mk-mobile-more.open .mk-mobile-more-body{display:block}
+  .mk-mobile-more-body .card{display:block!important;margin-bottom:6px}
+}
+@media(min-width:761px){.mk-mobile-more{display:none!important}}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -2740,6 +3010,17 @@ body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",san
       </div>
     </aside>
   </section>
+
+<div class="mk-mobile-more" id="mkMobileMore">
+  <button type="button" onclick="toggleMkMobileMore()">
+    <span><i data-lucide="ellipsis"></i> More</span>
+    <i data-lucide="chevron-down"></i>
+  </button>
+  <div class="mk-mobile-more-body">
+    <div class="mk-mobile-more-slot"></div>
+  </div>
+</div>
+
 </main>
 </div>
 
@@ -4322,6 +4603,39 @@ function syncReminderAfterRender(){
     if(e.key==="Escape"){
       document.querySelectorAll(".modal.open,.mk-pro-panel.open").forEach(x=>x.classList.remove("open"));
     }
+  });
+})();
+</script>
+
+
+<script id="mk-mobile-clean-js">
+(function(){
+  function setupMore(){
+    const rail=document.querySelector(".right");
+    const moreBody=document.querySelector(".mk-mobile-more-slot");
+    if(!rail||!moreBody||moreBody.dataset.ready)return;
+    [...rail.children].forEach(el=>{
+      if(el.classList.contains("sync-card")) return;
+      moreBody.appendChild(el);
+    });
+    const sync=rail.querySelector(".sync-card");
+    if(sync && !sync.dataset.moved){
+      moreBody.appendChild(sync);
+      sync.dataset.moved="1";
+    }
+    rail.style.display="none";
+    moreBody.dataset.ready="1";
+    if(window.lucide) lucide.createIcons();
+  }
+
+  window.toggleMkMobileMore=function(){
+    setupMore();
+    document.getElementById("mkMobileMore")?.classList.toggle("open");
+  };
+
+  window.addEventListener("load",()=>setTimeout(setupMore,80));
+  window.addEventListener("resize",()=>{
+    if(window.innerWidth<=760) setupMore();
   });
 })();
 </script>
