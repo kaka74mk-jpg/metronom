@@ -3788,6 +3788,156 @@ function syncReminderAfterRender(){
   });
 })();
 </script>
+
+
+<style id="mk-mobile-final-repair">
+@media (max-width:760px){
+  /* Crystal transport controls */
+  .start-bar .start.metro,.start-bar .start.session,.start-bar .start.record{
+    position:relative!important;overflow:hidden!important;
+    min-height:52px!important;border-radius:17px!important;
+    border:1px solid rgba(255,255,255,.28)!important;
+    color:#f7fbff!important;
+    background:linear-gradient(135deg,rgba(255,255,255,.20),rgba(255,255,255,.055))!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -1px 0 rgba(255,255,255,.06),0 10px 28px rgba(0,0,0,.28),0 0 24px rgba(120,220,255,.08)!important;
+    backdrop-filter:blur(18px) saturate(145%)!important;-webkit-backdrop-filter:blur(18px) saturate(145%)!important;
+  }
+  .start-bar .start.metro:before,.start-bar .start.session:before,.start-bar .start.record:before{
+    content:"";position:absolute;inset:1px;border-radius:16px;pointer-events:none;
+    background:linear-gradient(120deg,rgba(255,255,255,.24),transparent 38%,rgba(255,255,255,.08) 65%,transparent);
+  }
+  .start-bar .start.metro{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 10px 28px rgba(0,245,255,.12)!important}
+  .start-bar .start.session{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 10px 28px rgba(184,255,61,.10)!important}
+  .start-bar .start.record{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 10px 28px rgba(255,77,216,.11)!important}
+  .start-bar .start svg,.start-bar .start span{position:relative;z-index:1;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+
+  /* Review sheet: show ALL review workspaces, including recordings + calendar. */
+  .mk-review-sheet .mk-review-content{display:block!important;overflow:visible!important}
+  .mk-review-sheet .mk-review-source,
+  .mk-review-sheet #panel-record,.mk-review-sheet #panel-calendar{
+    display:block!important;visibility:visible!important;opacity:1!important;
+    position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+    width:auto!important;max-height:none!important;margin:0 0 10px!important;
+    overflow:visible!important;transform:none!important;animation:none!important;
+  }
+  .mk-review-sheet #panel-record,.mk-review-sheet #panel-calendar{
+    padding:14px!important;border:1px solid rgba(255,255,255,.10)!important;
+    border-radius:16px!important;background:rgba(9,15,25,.82)!important;
+  }
+  .mk-review-sheet .recordings{max-height:none!important;overflow:visible!important}
+  .mk-review-sheet .calendar-grid-full{overflow:visible!important}
+
+  /* Prevent the page behind a mobile sheet from scrolling. The sheet itself remains scrollable. */
+  html.mk-mobile-locked,body.mk-mobile-locked{overscroll-behavior:none!important}
+  body.mk-mobile-locked{position:fixed!important;left:0!important;right:0!important;width:100%!important;overflow:hidden!important}
+  .mk-review-sheet-box,.mk-tools-sheet-box,.mk-mobile-category-sheet,.mk-mobile-panel-sheet,
+  .metro-card>.panel.open,.dashboard-menu.open .period-card{overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+
+  /* Dashboard must have a real canvas height on phones. */
+  .dashboard-menu.open .chart-wrap{height:180px!important;min-height:180px!important;position:relative!important}
+  .dashboard-menu.open #overviewChart{display:block!important;width:100%!important;height:100%!important;min-height:160px!important}
+  .dashboard-menu.open .period-card{max-height:calc(100vh - 120px)!important;overflow:auto!important}
+}
+</style>
+
+
+<script id="mk-mobile-final-repair-js">
+(function(){
+  const isMob=()=>window.matchMedia('(max-width:760px)').matches;
+  let lockedY=0;
+  function lockPage(){
+    if(!isMob()||document.documentElement.classList.contains('mk-mobile-locked'))return;
+    lockedY=window.scrollY||document.documentElement.scrollTop||0;
+    document.documentElement.classList.add('mk-mobile-locked');
+    document.body.classList.add('mk-mobile-locked');
+    document.body.style.top=(-lockedY)+'px';
+  }
+  function unlockPage(){
+    if(!document.documentElement.classList.contains('mk-mobile-locked'))return;
+    document.documentElement.classList.remove('mk-mobile-locked');
+    document.body.classList.remove('mk-mobile-locked');
+    document.body.style.removeProperty('top');
+    window.scrollTo(0,lockedY);
+  }
+  function anySurfaceOpen(){
+    return !!document.querySelector('.mk-review-sheet.open,.mk-tools-sheet.open,.mk-mobile-category-sheet.open,.metro-card>.panel.open,.dashboard-menu.open,.modal.open,#focusOverlay.open');
+  }
+  const syncLock=()=>anySurfaceOpen()?lockPage():unlockPage();
+  new MutationObserver(syncLock).observe(document.body,{attributes:true,attributeFilter:['class'],subtree:true});
+
+  function refresh(){try{window.lucide&&lucide.createIcons()}catch(e){}}
+  function openReviewFixed(){
+    if(!isMob())return;
+    document.querySelectorAll('.mk-review-sheet.open,.mk-mobile-category-sheet.open,.mk-tools-sheet.open,.metro-card>.panel.open,.dashboard-menu.open').forEach(x=>x.classList.remove('open'));
+    let rs=document.getElementById('mkReviewSheet');
+    if(!rs){
+      rs=document.createElement('div');rs.id='mkReviewSheet';rs.className='mk-review-sheet';
+      rs.innerHTML='<div class="mk-review-sheet-box"><div class="mk-review-handle"></div><div class="mk-review-title">Review</div><div class="mk-review-content"></div></div>';
+      document.body.appendChild(rs);
+    }
+    const content=rs.querySelector('.mk-review-content');
+    ['statsCard','historyCard','panel-calendar','panel-record'].forEach(id=>{
+      const el=document.getElementById(id);if(!el)return;
+      if(!el.dataset.mkRepairParent)el.dataset.mkRepairParent=el.parentElement?.id||'metro-card';
+      content.appendChild(el);
+      el.classList.add('open');el.classList.remove('collapsed');
+      el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity');
+    });
+    rs.classList.add('open');
+    document.getElementById('mkMobileBackdrop')?.classList.add('open');
+    document.body.classList.add('mk-mobile-sheet-open');
+    refresh();
+    requestAnimationFrame(()=>{try{window.renderCalendar?.()}catch(e){};refresh()});
+  }
+  function closeReviewFixed(){
+    const rs=document.getElementById('mkReviewSheet');if(rs)rs.classList.remove('open');
+    document.getElementById('mkMobileBackdrop')?.classList.remove('open');
+    document.body.classList.remove('mk-mobile-sheet-open');
+  }
+  window.openReview=openReviewFixed;window.mkOpenMobileReviewFinal=openReviewFixed;
+
+  function redrawDashboard(){
+    if(!isMob())return;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      try{window.renderOverview?.()}catch(e){}
+      try{window.chart?.resize?.()}catch(e){}
+      const c=document.getElementById('overviewChart');if(c){c.style.width='100%';c.style.height='100%'}
+    }));
+  }
+  const oldDash=window.toggleDashboardMenu;
+  window.toggleDashboardMenu=function(){
+    if(!isMob()){if(typeof oldDash==='function')return oldDash.apply(this,arguments);return;}
+    const d=document.getElementById('dashboardMenu');if(!d)return;
+    const opening=!d.classList.contains('open');
+    d.classList.toggle('open',opening);
+    const bd=document.getElementById('mkMobileBackdrop');bd?.classList.toggle('open',opening);
+    document.body.classList.toggle('mk-mobile-sheet-open',opening);
+    if(opening){lockPage();redrawDashboard()}else unlockPage();
+  };
+  document.addEventListener('click',function(e){
+    if(!isMob())return;
+    const cat=e.target.closest('.mk-mobile-category');
+    if(cat&&cat.dataset.category==='review'){e.preventDefault();e.stopImmediatePropagation();openReviewFixed();return;}
+    const reviewBtn=e.target.closest('[data-category="review"]');
+    if(reviewBtn){e.preventDefault();e.stopImmediatePropagation();openReviewFixed();}
+    const tab=e.target.closest('.dashboard-menu .tab');
+    if(tab)setTimeout(redrawDashboard,30);
+  },true);
+
+  /* Backdrop closes only the surface, never the page behind it. */
+  document.addEventListener('touchmove',function(e){
+    if(!isMob()||!anySurfaceOpen())return;
+    const scrollBox=e.target.closest('.mk-review-sheet-box,.mk-tools-sheet-box,.mk-mobile-category-sheet,.metro-card>.panel.open,.dashboard-menu.open .period-card');
+    if(!scrollBox){e.preventDefault();return;}
+    const canScroll=scrollBox.scrollHeight>scrollBox.clientHeight+1;
+    if(!canScroll)e.preventDefault();
+  },{passive:false});
+
+  window.addEventListener('resize',()=>{if(!isMob()){unlockPage()}else if(document.querySelector('.dashboard-menu.open'))redrawDashboard()},{passive:true});
+  document.addEventListener('DOMContentLoaded',()=>{refresh();if(isMob()&&document.querySelector('.dashboard-menu.open'))redrawDashboard()});
+})();
+</script>
+
 </body></html>
 <!-- Mobile polish: category contents, no Tools sheet, focus-style home tempo -->
 <style id="mk-round4-fixes">
