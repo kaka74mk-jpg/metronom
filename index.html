@@ -1620,7 +1620,7 @@ button, input, select, textarea {
     </div>
     <div class="actions">
       <button class="icon-btn" title="New Season" onclick="openNew()"><i data-lucide="plus"></i></button>
-      <button class="icon-btn dashboard-menu-btn" title="All Seasons Dashboard" onclick="mkOpenDashboardFinal()"><i data-lucide="layout-dashboard"></i></button>
+      <button class="icon-btn dashboard-menu-btn" title="All Seasons Dashboard" onclick="mkOpenDashboardV7()"><i data-lucide="layout-dashboard"></i></button>
       <button class="icon-btn" title="Profile" onclick="openProfile()"><i data-lucide="user-round"></i></button>
       <button class="icon-btn" title="Settings" onclick="openSettings()"><i data-lucide="settings-2"></i></button>
       <button class="icon-btn" title="Rename" onclick="renameCurrent()"><i data-lucide="pencil"></i></button>
@@ -2074,11 +2074,6 @@ function playClick(time,type="normal"){
   master.gain.setValueAtTime(1.18,time);
   master.gain.exponentialRampToValueAtTime(.0001,time+q.decay+.02);
 }
-
-function playNoise(time,duration,vol=.2){let buffer=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*duration)),audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;let src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buffer;g.gain.setValueAtTime(vol*(metroMuted?0:Number(document.getElementById("volume").value)),time);g.gain.exponentialRampToValueAtTime(.001,time+duration);src.connect(g);g.connect(audioCtx.destination);src.start(time)}
-function playKick(time){let o=audioCtx.createOscillator(),g=audioCtx.createGain(),v=(metroMuted?0:Number(document.getElementById("volume").value));o.type="sine";o.frequency.setValueAtTime(150,time);o.frequency.exponentialRampToValueAtTime(45,time+.12);g.gain.setValueAtTime(.8*v,time);g.gain.exponentialRampToValueAtTime(.001,time+.14);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.14)}
-function playSnare(time){playNoise(time,.08,.5);let o=audioCtx.createOscillator(),g=audioCtx.createGain(),v=(metroMuted?0:Number(document.getElementById("volume").value));o.type="square";o.frequency.setValueAtTime(180,time);g.gain.setValueAtTime(.28*v,time);g.gain.exponentialRampToValueAtTime(.001,time+.06);o.connect(g);g.connect(audioCtx.destination);o.start(time);o.stop(time+.06)}
-function playDrum(time,type){if(type==="K")playKick(time);else if(type==="S")playSnare(time);else if(type==="H")playNoise(time,.025,.18);else if(type==="R")playNoise(time,.035,.14);else if(type==="C")playClick(time,"accent");else if(type==="G")playNoise(time,.018,.08)}
 
 function syncTransportCards(){
   const card=document.getElementById("tempoDisplayCard");
@@ -3125,7 +3120,6 @@ loadUserEmail();
 
 /* MK Studio Pro additions */
 let mkTapTimes=[];
-let mkFocusWasRunning=false;
 
 function openProPanel(id){
   const e=document.getElementById(id); if(e)e.classList.add("open");
@@ -3154,7 +3148,6 @@ function toggleFocusMode(){
   overlay.classList.toggle("open",opening);
   overlay.setAttribute("aria-hidden",opening?"false":"true");
   if(opening){
-    mkFocusWasRunning=!!metroRunning;
     updateFocusUI();
   }
 }
@@ -3340,10 +3333,6 @@ function schedulePracticeReminders(){
     },delay);
     reminderTimers.push(timer);
   });
-}
-function syncReminderAfterRender(){
-  try{loadReminderUI()}catch{}
-  schedulePracticeReminders();
 }
 </script>
 <script id="mk-studio-v3-js">
@@ -3583,36 +3572,7 @@ function syncReminderAfterRender(){
 </script>
 
 
-<style id="mk-round3-fixes">
-@media(max-width:760px){
-  /* Only one mobile surface may exist at a time. */
-  .mk-mobile-backdrop{z-index:10000!important}
-  .mk-tools-sheet{z-index:10020!important}
-  .mk-review-sheet{z-index:10020!important}
-  .mk-mobile-category-sheet{z-index:10021!important}
-  .modal{z-index:10030!important}
-  #focusOverlay{z-index:10040!important}
 
-  /* Focus: fill the screen and make the two main transport cards feel alive. */
-  #focusOverlay .focus-main{position:relative;display:flex!important;flex:1 1 auto!important;min-height:0!important;width:100%!important;align-items:center!important;justify-content:center!important;flex-direction:column!important;overflow:visible!important}
-  #focusOverlay .focus-bpm{position:relative;z-index:2;font-size:clamp(88px,27vw,150px)!important;font-weight:1000!important;line-height:.9!important;letter-spacing:-.06em!important;text-shadow:0 0 24px rgba(0,245,255,.35),0 0 70px rgba(0,245,255,.18)!important;transition:transform .2s ease,text-shadow .2s ease}
-  #focusOverlay .focus-beat{position:absolute!important;z-index:1;width:clamp(150px,45vw,280px)!important;height:clamp(150px,45vw,280px)!important;border-radius:50%!important;display:grid!important;place-items:center!important;color:transparent!important;background:radial-gradient(circle,rgba(0,245,255,.16) 0 18%,rgba(0,245,255,.07) 36%,transparent 68%)!important;box-shadow:0 0 35px rgba(0,245,255,.12),inset 0 0 35px rgba(0,245,255,.08)!important;opacity:.75!important}
-  #focusOverlay .focus-main:after{content:"";position:absolute;width:72%;aspect-ratio:1;border-radius:50%;border:1px solid rgba(0,245,255,.12);box-shadow:0 0 55px rgba(0,245,255,.10),inset 0 0 55px rgba(255,43,214,.05);animation:mkFocusAura 3.2s ease-in-out infinite;pointer-events:none}
-  #focusOverlay .focus-main.mk-transport-pulse .focus-bpm{transform:scale(1.08);text-shadow:0 0 28px rgba(0,245,255,.7),0 0 90px rgba(0,245,255,.35)!important}
-  #focusOverlay .focus-main.mk-transport-pulse .focus-beat{animation:mkMagicOrb .7s cubic-bezier(.2,.8,.2,1)}
-  #focusOverlay .focus-timers{flex:0 0 auto!important;width:min(92vw,680px)!important;grid-template-columns:1fr 1fr!important;gap:12px!important;margin-top:auto!important;margin-bottom:18px!important}
-  #focusOverlay .focus-timer{min-height:108px!important;padding:18px 14px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;border-radius:20px!important;background:linear-gradient(145deg,rgba(12,24,36,.96),rgba(7,11,19,.98))!important;cursor:pointer!important;box-shadow:0 12px 35px rgba(0,0,0,.25),inset 0 0 28px rgba(0,245,255,.035)!important;transition:transform .16s ease,border-color .2s ease,box-shadow .2s ease!important}
-  #focusOverlay .focus-timer:active{transform:scale(.97)!important}
-  #focusOverlay .focus-timer svg{width:22px!important;height:22px!important}
-  #focusOverlay .focus-timer-label{text-align:center!important;font-size:9px!important}
-  #focusOverlay .focus-timer-value{font-size:clamp(26px,7vw,42px)!important;text-align:center!important}
-  #focusOverlay .focus-timer.mk-running{border-color:rgba(184,255,61,.65)!important;box-shadow:0 0 34px rgba(184,255,61,.16),inset 0 0 30px rgba(184,255,61,.05)!important}
-  #focusOverlay .focus-timer.mk-running .focus-timer-value{color:var(--lime)!important;text-shadow:0 0 22px rgba(184,255,61,.55)!important}
-  @keyframes mkMagicOrb{0%{transform:scale(.55);opacity:.25}45%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:.78}}
-  @keyframes mkFocusAura{0%,100%{transform:scale(.92);opacity:.45}50%{transform:scale(1.04);opacity:.9}}
-  @media(max-width:520px){#focusOverlay .focus-timers{grid-template-columns:1fr!important;margin-bottom:12px!important}#focusOverlay .focus-timer{min-height:92px!important}}
-}
-</style>
 <script id="mk-round3-js">
 (function(){
   const mobile=()=>window.matchMedia('(max-width:760px)').matches;
@@ -3704,335 +3664,18 @@ function syncReminderAfterRender(){
 })();
 </script>
 
-<style id="mk-round4-fixes">
-@media(max-width:760px){
-  .mk-review-sheet-content,.mk-review-content{max-height:72vh!important;overflow:auto!important;display:flex!important;flex-direction:column!important;gap:12px!important;padding-bottom:8px!important}
-  .mk-review-content .section-card,.mk-review-content .history{width:100%!important;box-sizing:border-box!important}
-  .mk-review-content .section-card.collapsed,.mk-review-content .history.collapsed{display:block!important}
-  .mk-mobile-category-sheet .mk-cat-action-icon{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:10px;background:rgba(0,245,255,.08);color:var(--cyan)}
-  .mk-mobile-category-sheet .mk-cat-action-icon svg{width:17px;height:17px}
-  .mk-mobile-category-sheet .mk-cat-action-copy{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left}
-  .mk-mobile-category-sheet .mk-cat-action-copy b{font-size:11px;color:#f2f6ff}
-  .mk-mobile-category-sheet .mk-cat-action-copy small{font-size:8px;color:var(--muted);font-weight:650}
-}
-</style>
-<script id="mk-mobile-category-final-fix">
-(function(){
-  const isMobile=()=>window.matchMedia('(max-width:760px)').matches;
-  function refreshIcons(){try{if(window.lucide)lucide.createIcons()}catch(e){}}
-  function closeCategoryChooser(){const c=document.getElementById('mkCategoryChooser');if(c)c.classList.remove('open')}
-  function openPanelFinal(name){
-    if(!isMobile()) return;
-    closeCategoryChooser();
-    document.querySelectorAll('.metro-card>.panel.open').forEach(p=>p.classList.remove('open'));
-    document.querySelectorAll('.tool.active').forEach(b=>b.classList.remove('active'));
-    const p=document.getElementById('panel-'+name);
-    if(!p) return;
-    p.classList.add('open');
-    const btn=[...document.querySelectorAll('.tool')].find(b=>{const t=(b.textContent||'').trim().toLowerCase();return t===name.toLowerCase()});
-    if(btn)btn.classList.add('active');
-    const bd=document.getElementById('mkMobileBackdrop');if(bd)bd.classList.add('open');
-    document.body.classList.add('mk-mobile-sheet-open');
-    refreshIcons();
-  }
-  function openReviewFinal(){
-    if(!isMobile())return;
-    document.querySelectorAll('.metro-card>.panel.open,.mk-mobile-category-sheet.open,.dashboard-menu.open,.modal.open').forEach(x=>x.classList.remove('open'));
-    document.querySelectorAll('.tool.active').forEach(x=>x.classList.remove('active'));
-    let rs=document.getElementById('mkReviewSheet');
-    if(!rs){
-      rs=document.createElement('div');rs.id='mkReviewSheet';rs.className='mk-review-sheet';
-      rs.innerHTML='<div class="mk-review-sheet-box"><div class="mk-review-handle"></div><div class="mk-review-title">Review</div><div class="mk-review-content"></div></div>';
-      document.body.appendChild(rs);
-    }
-    const content=rs.querySelector('.mk-review-content');
-    ['statsCard','historyCard'].map(id=>document.getElementById(id)).filter(Boolean).forEach(card=>{
-      card.classList.remove('collapsed');card.style.display='block';card.style.visibility='visible';card.style.opacity='1';
-      if(card.parentElement!==content)content.appendChild(card);
-    });
-    rs.classList.add('open');
-    const bd=document.getElementById('mkMobileBackdrop');if(bd)bd.classList.add('open');
-    document.body.classList.add('mk-mobile-sheet-open');
-    refreshIcons();
-  }
-  function buildChooser(cat){
-    if(!isMobile())return;
-    const data={
-      rhythm:[['meter','music-2','Meter','Time signature & note values'],['rhythm','grid-2x2','Rhythm','Build and edit rhythm patterns']],
-      sound:[['sound','audio-lines','Sound','Metronome sound & voice'],['drums','drum','Drums','Practice drum patterns']],
-      technique:[['special','sparkles','Techniques','Special practice techniques']],
-      review:[['record','mic','Recordings','Capture and review practice takes'],['calendar','calendar-days','Calendar','Practice calendar & monthly summary']]
-    };
-    if(cat==='review'){openReviewFinal();return}
-    let sh=document.getElementById('mkCategoryChooser');
-    if(!sh){sh=document.createElement('div');sh.id='mkCategoryChooser';sh.className='mk-mobile-category-sheet';document.body.appendChild(sh)}
-    const title={rhythm:'Rhythm',sound:'Sound',technique:'Technique'}[cat]||cat;
-    sh.innerHTML='<div class="mk-category-sheet-handle"></div><div class="mk-category-sheet-title">'+title+'</div><div class="mk-category-sheet-subtitle">Choose a workspace</div><div class="mk-category-sheet-list">'+(data[cat]||[]).map(x=>'<button type="button" data-final-panel="'+x[0]+'"><span class="mk-cat-action-icon"><i data-lucide="'+x[1]+'"></i></span><span class="mk-cat-action-copy"><b>'+x[2]+'</b><small>'+x[3]+'</small></span><i data-lucide="chevron-right"></i></button>').join('')+'</div>';
-    sh.classList.add('open');
-    const bd=document.getElementById('mkMobileBackdrop');if(bd)bd.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');
-    sh.querySelectorAll('[data-final-panel]').forEach(b=>b.addEventListener('click',()=>openPanelFinal(b.dataset.finalPanel),{once:true}));
-    refreshIcons();
-  }
-  document.addEventListener('click',e=>{
-    if(!isMobile())return;
-    const c=e.target.closest('.mk-mobile-category');
-    if(c){e.preventDefault();e.stopImmediatePropagation();buildChooser(c.dataset.category);return;}
-  },true);
-  window.mkOpenMobilePanelFinal=openPanelFinal;window.mkOpenMobileReviewFinal=openReviewFinal;
-  document.addEventListener('DOMContentLoaded',()=>{
-    if(!isMobile())return;
-    // If an older handler created the Review sheet, make its cards visible.
-    const rs=document.getElementById('mkReviewSheet');
-    if(rs){rs.querySelectorAll('#historyCard,#statsCard').forEach(x=>{x.style.display='block';x.style.visibility='visible'})}
-    refreshIcons();
-  });
-})();
-</script>
 
 
-<style id="mk-mobile-final-repair">
-@media (max-width:760px){
-  /* Crystal transport controls */
-  .start-bar .start.metro,.start-bar .start.session,.start-bar .start.record{
-    position:relative!important;overflow:hidden!important;
-    min-height:52px!important;border-radius:17px!important;
-    border:1px solid rgba(255,255,255,.28)!important;
-    color:#f7fbff!important;
-    background:linear-gradient(135deg,rgba(255,255,255,.20),rgba(255,255,255,.055))!important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -1px 0 rgba(255,255,255,.06),0 10px 28px rgba(0,0,0,.28),0 0 24px rgba(120,220,255,.08)!important;
-    backdrop-filter:blur(18px) saturate(145%)!important;-webkit-backdrop-filter:blur(18px) saturate(145%)!important;
-  }
-  .start-bar .start.metro:before,.start-bar .start.session:before,.start-bar .start.record:before{
-    content:"";position:absolute;inset:1px;border-radius:16px;pointer-events:none;
-    background:linear-gradient(120deg,rgba(255,255,255,.24),transparent 38%,rgba(255,255,255,.08) 65%,transparent);
-  }
-  .start-bar .start.metro{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 10px 28px rgba(0,245,255,.12)!important}
-  .start-bar .start.session{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 10px 28px rgba(184,255,61,.10)!important}
-  .start-bar .start.record{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 10px 28px rgba(255,77,216,.11)!important}
-  .start-bar .start svg,.start-bar .start span{position:relative;z-index:1;text-shadow:0 1px 8px rgba(0,0,0,.35)}
-
-  /* Review sheet: show ALL review workspaces, including recordings + calendar. */
-  .mk-review-sheet .mk-review-content{display:block!important;overflow:visible!important}
-  .mk-review-sheet .mk-review-source,
-  .mk-review-sheet #panel-record,.mk-review-sheet #panel-calendar{
-    display:block!important;visibility:visible!important;opacity:1!important;
-    position:relative!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
-    width:auto!important;max-height:none!important;margin:0 0 10px!important;
-    overflow:visible!important;transform:none!important;animation:none!important;
-  }
-  .mk-review-sheet #panel-record,.mk-review-sheet #panel-calendar{
-    padding:14px!important;border:1px solid rgba(255,255,255,.10)!important;
-    border-radius:16px!important;background:rgba(9,15,25,.82)!important;
-  }
-  .mk-review-sheet .recordings{max-height:none!important;overflow:visible!important}
-  .mk-review-sheet .calendar-grid-full{overflow:visible!important}
-
-  /* Prevent the page behind a mobile sheet from scrolling. The sheet itself remains scrollable. */
-  html.mk-mobile-locked,body.mk-mobile-locked{overscroll-behavior:none!important}
-  body.mk-mobile-locked{position:fixed!important;left:0!important;right:0!important;width:100%!important;overflow:hidden!important}
-  .mk-review-sheet-box,.mk-tools-sheet-box,.mk-mobile-category-sheet,.mk-mobile-panel-sheet,
-  .metro-card>.panel.open,.dashboard-menu.open .period-card{overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
-
-  /* Dashboard must have a real canvas height on phones. */
-  .dashboard-menu.open .chart-wrap{height:180px!important;min-height:180px!important;position:relative!important}
-  .dashboard-menu.open #overviewChart{display:block!important;width:100%!important;height:100%!important;min-height:160px!important}
-  .dashboard-menu.open .period-card{max-height:calc(100vh - 120px)!important;overflow:auto!important}
-}
-</style>
 
 
-<script id="mk-mobile-final-repair-js">
-(function(){
-  const isMob=()=>window.matchMedia('(max-width:760px)').matches;
-  let lockedY=0;
-  function lockPage(){
-    if(!isMob()||document.documentElement.classList.contains('mk-mobile-locked'))return;
-    lockedY=window.scrollY||document.documentElement.scrollTop||0;
-    document.documentElement.classList.add('mk-mobile-locked');
-    document.body.classList.add('mk-mobile-locked');
-    document.body.style.top=(-lockedY)+'px';
-  }
-  function unlockPage(){
-    if(!document.documentElement.classList.contains('mk-mobile-locked'))return;
-    document.documentElement.classList.remove('mk-mobile-locked');
-    document.body.classList.remove('mk-mobile-locked');
-    document.body.style.removeProperty('top');
-    window.scrollTo(0,lockedY);
-  }
-  function anySurfaceOpen(){
-    return !!document.querySelector('.mk-review-sheet.open,.mk-tools-sheet.open,.mk-mobile-category-sheet.open,.metro-card>.panel.open,.dashboard-menu.open,.modal.open,#focusOverlay.open');
-  }
-  const syncLock=()=>anySurfaceOpen()?lockPage():unlockPage();
-  new MutationObserver(syncLock).observe(document.body,{attributes:true,attributeFilter:['class'],subtree:true});
-
-  function refresh(){try{window.lucide&&lucide.createIcons()}catch(e){}}
-  function openReviewFixed(){
-    if(!isMob())return;
-    document.querySelectorAll('.mk-review-sheet.open,.mk-mobile-category-sheet.open,.mk-tools-sheet.open,.metro-card>.panel.open,.dashboard-menu.open').forEach(x=>x.classList.remove('open'));
-    let rs=document.getElementById('mkReviewSheet');
-    if(!rs){
-      rs=document.createElement('div');rs.id='mkReviewSheet';rs.className='mk-review-sheet';
-      rs.innerHTML='<div class="mk-review-sheet-box"><div class="mk-review-handle"></div><div class="mk-review-title">Review</div><div class="mk-review-content"></div></div>';
-      document.body.appendChild(rs);
-    }
-    const content=rs.querySelector('.mk-review-content');
-    ['statsCard','historyCard','panel-calendar','panel-record'].forEach(id=>{
-      const el=document.getElementById(id);if(!el)return;
-      if(!el.dataset.mkRepairParent)el.dataset.mkRepairParent=el.parentElement?.id||'metro-card';
-      content.appendChild(el);
-      el.classList.add('open');el.classList.remove('collapsed');
-      el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity');
-    });
-    rs.classList.add('open');
-    document.getElementById('mkMobileBackdrop')?.classList.add('open');
-    document.body.classList.add('mk-mobile-sheet-open');
-    refresh();
-    requestAnimationFrame(()=>{try{window.renderCalendar?.()}catch(e){};refresh()});
-  }
-  function closeReviewFixed(){
-    const rs=document.getElementById('mkReviewSheet');if(rs)rs.classList.remove('open');
-    document.getElementById('mkMobileBackdrop')?.classList.remove('open');
-    document.body.classList.remove('mk-mobile-sheet-open');
-  }
-  window.openReview=openReviewFixed;window.mkOpenMobileReviewFinal=openReviewFixed;
-
-  function redrawDashboard(){
-    if(!isMob())return;
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      try{window.renderOverview?.()}catch(e){}
-      try{window.chart?.resize?.()}catch(e){}
-      const c=document.getElementById('overviewChart');if(c){c.style.width='100%';c.style.height='100%'}
-    }));
-  }
-  const oldDash=window.toggleDashboardMenu;
-  window.toggleDashboardMenu=function(){
-    if(!isMob()){if(typeof oldDash==='function')return oldDash.apply(this,arguments);return;}
-    const d=document.getElementById('dashboardMenu');if(!d)return;
-    const opening=!d.classList.contains('open');
-    d.classList.toggle('open',opening);
-    const bd=document.getElementById('mkMobileBackdrop');bd?.classList.toggle('open',opening);
-    document.body.classList.toggle('mk-mobile-sheet-open',opening);
-    if(opening){lockPage();redrawDashboard()}else unlockPage();
-  };
-  document.addEventListener('click',function(e){
-    if(!isMob())return;
-    const cat=e.target.closest('.mk-mobile-category');
-    if(cat&&cat.dataset.category==='review'){e.preventDefault();e.stopImmediatePropagation();openReviewFixed();return;}
-    const reviewBtn=e.target.closest('[data-category="review"]');
-    if(reviewBtn){e.preventDefault();e.stopImmediatePropagation();openReviewFixed();}
-    const tab=e.target.closest('.dashboard-menu .tab');
-    if(tab)setTimeout(redrawDashboard,30);
-  },true);
-
-  /* Backdrop closes only the surface, never the page behind it. */
-  document.addEventListener('touchmove',function(e){
-    if(!isMob()||!anySurfaceOpen())return;
-    const scrollBox=e.target.closest('.mk-review-sheet-box,.mk-tools-sheet-box,.mk-mobile-category-sheet,.metro-card>.panel.open,.dashboard-menu.open .period-card');
-    if(!scrollBox){e.preventDefault();return;}
-    const canScroll=scrollBox.scrollHeight>scrollBox.clientHeight+1;
-    if(!canScroll)e.preventDefault();
-  },{passive:false});
-
-  window.addEventListener('resize',()=>{if(!isMob()){unlockPage()}else if(document.querySelector('.dashboard-menu.open'))redrawDashboard()},{passive:true});
-  document.addEventListener('DOMContentLoaded',()=>{refresh();if(isMob()&&document.querySelector('.dashboard-menu.open'))redrawDashboard()});
-})();
-</script>
 
 
-<style id="mk-mobile-final-v8">
-@media(max-width:760px){
-  /* Review v8: keep the full review stack visible and independently scrollable. */
-  #mkReviewSheet.mk-review-sheet-final .mk-review-sheet-box{max-height:88dvh!important;overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
-  #mkReviewSheet.mk-review-sheet-final .mk-review-content{display:flex!important;flex-direction:column!important;gap:12px!important}
-  #mkReviewSheet.mk-review-sheet-final #practiceOverview,
-  #mkReviewSheet.mk-review-sheet-final #historyCard,
-  #mkReviewSheet.mk-review-sheet-final #statsCard,
-  #mkReviewSheet.mk-review-sheet-final #panel-record,
-  #mkReviewSheet.mk-review-sheet-final #panel-calendar{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;inset:auto!important;transform:none!important;width:100%!important;max-width:none!important;max-height:none!important;overflow:visible!important;margin:0!important}
-  #mkReviewSheet.mk-review-sheet-final #practiceOverview .section-body,
-  #mkReviewSheet.mk-review-sheet-final #historyCard .section-body,
-  #mkReviewSheet.mk-review-sheet-final #statsCard .section-body{display:block!important;visibility:visible!important;opacity:1!important}
-  #mkReviewSheet.mk-review-sheet-final #practiceOverview .overview{display:grid!important;visibility:visible!important;opacity:1!important}
-  #mkReviewSheet.mk-review-sheet-final #historyList{display:block!important;visibility:visible!important;opacity:1!important;min-height:24px!important}
-  #mkReviewSheet.mk-review-sheet-final #historyList .history-row{display:grid!important;visibility:visible!important;opacity:1!important}
-}
-</style>
-<script id="mk-mobile-final-v8-js">
-(function(){
-  const mobile=()=>window.matchMedia('(max-width:760px)').matches;
-  let lockY=0;
-  function finalSurfacesOpen(){return !!document.querySelector('#mkReviewSheet.mk-review-sheet-final.open,#dashboardMenu.open,#focusOverlay.open,.mk-tools-sheet.open,.mk-mobile-category-sheet.open,.mk-mobile-panel-sheet');}
-  function forceUnlock(){
-    if(document.body.dataset.mkV8Lock==='1'){
-      delete document.body.dataset.mkV8Lock;
-      ['position','top','left','right','width','overflow'].forEach(p=>document.body.style.removeProperty(p));
-      requestAnimationFrame(()=>window.scrollTo(0,lockY));
-    }
-    if(!finalSurfacesOpen()) document.body.classList.remove('mk-mobile-sheet-open','mk-mobile-locked');
-  }
-  function safeLock(){
-    if(!mobile())return;
-    if(document.body.dataset.mkV8Lock!=='1'){
-      lockY=window.scrollY||window.pageYOffset||0;
-      document.body.dataset.mkV8Lock='1';
-    }
-    document.body.style.position='fixed';document.body.style.top=(-lockY)+'px';document.body.style.left='0';document.body.style.right='0';document.body.style.width='100%';document.body.style.overflow='hidden';
-  }
-  /* If an older patch removes a surface without calling its matching unlock, recover automatically. */
-  setInterval(()=>{if(!mobile()){forceUnlock();return;} if(finalSurfacesOpen())safeLock(); else forceUnlock();},250);
 
-  function ensureReviewV8(){
-    let rs=document.getElementById('mkReviewSheet');
-    if(!rs){rs=document.createElement('div');rs.id='mkReviewSheet';document.body.appendChild(rs)}
-    rs.className='mk-review-sheet mk-review-sheet-final';
-    rs.innerHTML='<div class="mk-review-sheet-box"><div class="mk-review-handle"></div><div class="mk-review-title">Review</div><div class="mk-review-content"></div></div>';
-    return rs;
-  }
-  function restoreMoved(){
-    const items=window.__mkReviewV8Moved||[];
-    for(let i=items.length-1;i>=0;i--){const x=items[i];try{if(x.placeholder.parentNode)x.placeholder.parentNode.insertBefore(x.el,x.placeholder.nextSibling);x.placeholder.remove()}catch(e){}}
-    window.__mkReviewV8Moved=[];
-  }
-  function openReviewV8(){
-    if(!mobile())return;
-    restoreMoved();
-    const rs=ensureReviewV8(),box=rs.querySelector('.mk-review-content');
-    const moved=[];
-    ['practiceOverview','historyCard','statsCard','panel-record','panel-calendar'].forEach(id=>{
-      const el=document.getElementById(id);if(!el||el.parentNode===box)return;
-      const ph=document.createComment('mk-v8-'+id);el.parentNode.insertBefore(ph,el);moved.push({el,placeholder:ph});box.appendChild(el);
-      el.classList.remove('collapsed');el.classList.add('open');
-      el.style.setProperty('display','block','important');el.style.setProperty('visibility','visible','important');el.style.setProperty('opacity','1','important');
-    });
-    window.__mkReviewV8Moved=moved;
-    try{typeof renderStats==='function'&&renderStats()}catch(e){}
-    try{typeof renderHistory==='function'&&renderHistory()}catch(e){}
-    try{typeof renderRecordings==='function'&&renderRecordings()}catch(e){}
-    try{typeof renderCalendar==='function'&&renderCalendar()}catch(e){}
-    rs.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');safeLock();
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{try{window.lucide&&lucide.createIcons()}catch(e){}}));
-  }
-  function closeReviewV8(){
-    const rs=document.getElementById('mkReviewSheet');if(rs)rs.classList.remove('open');
-    restoreMoved();
-    document.body.classList.remove('mk-mobile-sheet-open');forceUnlock();
-  }
-  window.openReview=openReviewV8;window.mkOpenReviewV8=openReviewV8;window.mkCloseReviewV8=closeReviewV8;
-  document.addEventListener('click',e=>{
-    if(!mobile())return;
-    const r=e.target.closest('.mk-review-final-trigger,[data-category="review"]');
-    if(r){e.preventDefault();e.stopImmediatePropagation();openReviewV8();return;}
-    const rs=document.getElementById('mkReviewSheet');if(rs?.classList.contains('open')&&e.target===rs){e.preventDefault();e.stopImmediatePropagation();closeReviewV8();}
-  },true);
-  document.addEventListener('touchmove',e=>{
-    if(!mobile()||!document.body.dataset.mkV8Lock)return;
-    const allowed=e.target.closest('#mkReviewSheet .mk-review-sheet-box,#dashboardMenu #allSeasonsCard,#focusOverlay .focus-shell,.mk-tools-sheet-box,.mk-mobile-category-sheet,.mk-mobile-panel-sheet');
-    if(!allowed)e.preventDefault();
-  },{passive:false});
-  window.addEventListener('pageshow',forceUnlock);
-  window.addEventListener('pagehide',forceUnlock);
-})();
-</script>
+
+
+
+
+
 </body></html>
 <!-- Mobile polish: category contents, no Tools sheet, focus-style home tempo -->
 <style id="mk-round4-fixes">
@@ -4250,64 +3893,7 @@ function syncReminderAfterRender(){
   #dashboardMenu.dashboard-menu.open #overviewChart{display:block!important;width:100%!important;height:220px!important;min-height:220px!important;max-height:220px!important;visibility:visible!important;opacity:1!important}
 }
 </style>
-<script id="mk-mobile-definitive-fix-v6-js">
-(function(){
-  const mobile=()=>window.matchMedia('(max-width:760px)').matches;
-  let savedY=0;
-  function hardLock(){if(!mobile())return;if(!document.body.dataset.mkHardLocked){savedY=window.scrollY||0;document.body.dataset.mkHardLocked='1';document.body.style.position='fixed';document.body.style.top=(-savedY)+'px';document.body.style.left='0';document.body.style.right='0';document.body.style.width='100%';document.body.style.overflow='hidden';}}
-  function hardUnlock(){if(!document.body.dataset.mkHardLocked)return;delete document.body.dataset.mkHardLocked;document.body.style.removeProperty('position');document.body.style.removeProperty('top');document.body.style.removeProperty('left');document.body.style.removeProperty('right');document.body.style.removeProperty('width');document.body.style.removeProperty('overflow');window.scrollTo(0,savedY);}
-  function hideOther(){document.querySelectorAll('.mk-mobile-category-sheet.open,.mk-tools-sheet.open,.mk-mobile-panel-sheet,.modal.open,#focusOverlay.open').forEach(x=>x.classList.remove('open'));document.getElementById('dashboardMenu')?.classList.remove('open');}
-  function ensureReview(){
-    let rs=document.getElementById('mkReviewSheet');
-    if(!rs){rs=document.createElement('div');rs.id='mkReviewSheet';document.body.appendChild(rs)}
-    rs.className='mk-review-sheet mk-review-sheet-final';
-    rs.innerHTML='<div class="mk-review-sheet-box"><div class="mk-review-handle"></div><div class="mk-review-title">Review</div><div class="mk-review-content"></div></div>';
-    rs.addEventListener('click',e=>{if(e.target===rs)closeReview()});
-    return rs;
-  }
-  function openReview(){
-    if(!mobile())return;
-    hideOther();
-    const rs=ensureReview(), content=rs.querySelector('.mk-review-content');
-    try{typeof renderRecordings==='function'&&renderRecordings()}catch(e){console.warn(e)}
-    try{typeof renderCalendar==='function'&&renderCalendar()}catch(e){console.warn(e)}
-    ['statsCard','historyCard','panel-record','panel-calendar'].forEach(id=>{
-      const el=document.getElementById(id);if(!el)return;
-      content.appendChild(el);el.classList.add('open');el.classList.remove('collapsed');
-      el.style.setProperty('display','block','important');el.style.setProperty('visibility','visible','important');el.style.setProperty('opacity','1','important');
-    });
-    rs.classList.add('open');document.getElementById('mkMobileBackdrop')?.classList.remove('open');document.body.classList.add('mk-mobile-sheet-open');hardLock();
-    requestAnimationFrame(()=>{try{typeof renderRecordings==='function'&&renderRecordings();typeof renderCalendar==='function'&&renderCalendar();typeof renderStats==='function'&&renderStats();typeof renderHistory==='function'&&renderHistory();window.lucide&&lucide.createIcons()}catch(e){console.warn(e)}});
-  }
-  function closeReview(){document.getElementById('mkReviewSheet')?.classList.remove('open');document.body.classList.remove('mk-mobile-sheet-open');hardUnlock();}
-  window.mkOpenReviewDefinitive=openReview;window.mkCloseReviewDefinitive=closeReview;
 
-  window.mkOpenDashboardFinal=function(){
-    if(!mobile()){if(typeof toggleDashboardMenu==='function')return toggleDashboardMenu();return;}
-    document.getElementById('mkReviewSheet')?.classList.remove('open');hideOther();
-    const d=document.getElementById('dashboardMenu'),card=document.getElementById('allSeasonsCard');if(!d||!card)return;
-    card.classList.remove('collapsed');const body=card.querySelector('.section-body');if(body)body.style.setProperty('display','block','important');
-    d.classList.add('open');document.getElementById('mkMobileBackdrop')?.classList.remove('open');document.body.classList.add('mk-mobile-sheet-open');hardLock();
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{
-      try{if(chart){chart.destroy();chart=null}}catch(e){}
-      try{typeof renderOverview==='function'&&renderOverview()}catch(e){console.error('dashboard render',e)}
-      try{window.lucide&&lucide.createIcons()}catch(e){}
-    }));
-  };
-  window.mkCloseDashboardFinal=function(){document.getElementById('dashboardMenu')?.classList.remove('open');document.body.classList.remove('mk-mobile-sheet-open');hardUnlock();};
-
-  document.addEventListener('click',e=>{
-    if(!mobile())return;
-    const r=e.target.closest('.mk-review-final-trigger');if(r){e.preventDefault();e.stopImmediatePropagation();openReview();return;}
-    const d=document.getElementById('dashboardMenu');if(d?.classList.contains('open')&&e.target===d){e.preventDefault();e.stopImmediatePropagation();window.mkCloseDashboardFinal();return;}
-  },true);
-  document.addEventListener('touchmove',e=>{
-    if(!mobile()||!document.body.dataset.mkHardLocked)return;
-    const box=e.target.closest('#mkReviewSheet .mk-review-sheet-box,#dashboardMenu #allSeasonsCard');
-    if(!box){e.preventDefault();return}
-  },{passive:false});
-})();
-</script>
 
 <style id="mk-mobile-final-v7">
 @media (max-width:760px){
