@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.07.8">
+<meta name="mk-app-version" content="2026.09.07.10">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -4186,5 +4186,164 @@ html,body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Sego
     o.type=accent?'triangle':'sine';o.frequency.setValueAtTime(accent?1450:1100,time);o.frequency.exponentialRampToValueAtTime(accent?1050:850,time+.045);
     const level=v*(accent?.52:secondary?.18:.36);g.gain.setValueAtTime(.0001,time);g.gain.linearRampToValueAtTime(level,time+.001);g.gain.exponentialRampToValueAtTime(.0001,time+.055);o.connect(g);g.connect(window.audioCtx.destination);o.start(time);o.stop(time+.07);
   };
+})();
+</script>
+
+
+<!-- MK Studio v2026.09.07.10 — chart clarity, compact Review, crystal controls, performance -->
+<style id="mk-mobile-v10-final">
+:root{--font-ui:"Manrope",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--font-display:"Space Grotesk","Manrope",sans-serif}
+html,body,button,input,select,textarea{font-family:var(--font-ui)!important}
+.logo,.current-name,.title-season-text,.bpm-big,.timer-value,.focus-bpm,.focus-practice-name,.period-box strong,.kpi .v,.stat strong{font-family:var(--font-display)!important}
+@media(max-width:760px){
+  .start-bar .start{color:#f3f8ff!important;text-shadow:0 1px 10px rgba(0,0,0,.7),0 0 8px rgba(255,255,255,.18)!important;font-weight:900!important;letter-spacing:.015em!important;-webkit-text-fill-color:#f3f8ff!important;background:linear-gradient(135deg,rgba(30,40,58,.94),rgba(12,18,30,.9))!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;border-color:rgba(255,255,255,.25)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 20px rgba(0,0,0,.25)!important}
+  .start-bar .start.metro{background:linear-gradient(135deg,rgba(0,245,255,.22),rgba(9,23,32,.94))!important;color:#eaffff!important;-webkit-text-fill-color:#eaffff!important;border-color:rgba(0,245,255,.45)!important}
+  .start-bar .start.session{background:linear-gradient(135deg,rgba(184,255,61,.16),rgba(12,20,22,.94))!important;color:#f4ffe8!important;-webkit-text-fill-color:#f4ffe8!important;border-color:rgba(184,255,61,.4)!important}
+  .start-bar .start.record{background:linear-gradient(135deg,rgba(255,43,214,.2),rgba(25,12,28,.94))!important;color:#fff3fd!important;-webkit-text-fill-color:#fff3fd!important;border-color:rgba(255,43,214,.42)!important}
+  .start-bar .start span,.start-bar .start svg{position:relative;z-index:2;opacity:1!important;visibility:visible!important}
+  .start-bar .start:before,.start-bar .start:after{display:none!important}
+
+  .chart-wrap{height:210px!important;min-height:210px!important;padding:8px!important;background:#080c14!important;border:1px solid rgba(255,255,255,.09)!important;overflow:hidden!important;filter:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .chart-wrap canvas{display:block!important;width:100%!important;height:100%!important;image-rendering:auto!important;filter:none!important;opacity:1!important}
+
+  /* Review is a compact accordion: nothing is open initially; tapping an item opens only that item. */
+  .mk-review-sheet-v10 .mk-review-content{display:flex!important;flex-direction:column!important;gap:8px!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch}
+  .mk-review-item{border:1px solid rgba(255,255,255,.09);border-radius:15px;background:rgba(12,17,27,.9);overflow:hidden}
+  .mk-review-item-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 15px;border:0;background:transparent;color:#eef3ff;font-weight:850;font-size:12px;text-align:left}
+  .mk-review-item-head .mk-review-chevron{transition:transform .18s ease;opacity:.65}
+  .mk-review-item.open .mk-review-chevron{transform:rotate(180deg)}
+  .mk-review-item-body{display:none;padding:0 10px 10px}
+  .mk-review-item.open .mk-review-item-body{display:block}
+  .mk-review-item-body>.section-card,.mk-review-item-body>.panel{margin:0!important;border:0!important;background:transparent!important;padding:0!important;display:block!important}
+  .mk-review-item-body .section-head{display:none!important}
+  .mk-review-item-body .section-body{display:block!important}
+  .mk-review-item-body #panel-record,.mk-review-item-body #panel-calendar{display:block!important}
+  .mk-review-item-body .section-body{max-height:none!important}
+
+  /* Never let an obsolete mobile host create a hit-blocking rectangle. */
+  #mkMobilePanelHost,#mkMobilePanelHost>*{pointer-events:auto}
+  #mkMobilePanelHost:empty{display:none!important}
+  #mkMobilePanelHost{background:transparent!important;border:0!important;box-shadow:none!important;min-height:0!important}
+
+  /* Keep persistent UI static; beat sync uses one tiny class pulse only. */
+  .tempo-display-card,.practice-timer-card,.mk-mobile-category,.focus-timer,.metro-visual{will-change:auto!important}
+}
+</style>
+<script id="mk-mobile-v10-final-js">
+(function(){
+  const isMobile=()=>matchMedia('(max-width:760px)').matches;
+
+  // ---------- Review accordion ----------
+  function ensureReview(){
+    if(!isMobile())return;
+    const rs=document.getElementById('mkReviewSheet'); if(!rs)return;
+    rs.classList.add('mk-review-sheet-v10');
+    const content=rs.querySelector('.mk-review-content'); if(!content)return;
+    const ids=[['panel-record','Recordings','mic'],['panel-calendar','Calendar','calendar-days'],['historyCard','History','history'],['statsCard','Stats','bar-chart-3']];
+    ids.forEach(([id,title,icon])=>{
+      const el=document.getElementById(id); if(!el)return;
+      let item=content.querySelector('.mk-review-item[data-review-id="'+id+'"]');
+      if(!item){
+        item=document.createElement('div');item.className='mk-review-item';item.dataset.reviewId=id;
+        const head=document.createElement('button');head.type='button';head.className='mk-review-item-head';head.innerHTML='<span><i data-lucide="'+icon+'"></i> '+title+'</span><i class="mk-review-chevron" data-lucide="chevron-down"></i>';
+        const body=document.createElement('div');body.className='mk-review-item-body';item.append(head,body);content.appendChild(item);
+        head.addEventListener('click',()=>{
+          content.querySelectorAll('.mk-review-item.open').forEach(x=>{if(x!==item)x.classList.remove('open')});
+          item.classList.toggle('open');
+          if(item.classList.contains('open')){
+            const b=item.querySelector('.mk-review-item-body'); if(b&&!b.contains(el))b.appendChild(el);
+            if(id==='panel-calendar'&&typeof renderCalendar==='function')renderCalendar();
+            if(id==='panel-record'&&typeof renderRecordings==='function')renderRecordings();
+          }
+        });
+      }
+      const body=item.querySelector('.mk-review-item-body');
+      if(body&&!body.contains(el))body.appendChild(el);
+      item.classList.remove('open');
+    });
+    try{lucide.createIcons()}catch{}
+  }
+  window.mkRepairReviewV10=ensureReview;
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(ensureReview,50));
+  document.addEventListener('click',e=>{if(isMobile()&&e.target.closest('[data-category="review"],.mk-mobile-category[data-category="review"]'))setTimeout(ensureReview,50)},true);
+
+  // ---------- Chart: force a crisp high-DPI canvas on mobile ----------
+  function crispChart(){
+    const c=document.getElementById('overviewChart');if(!c)return;
+    const wrap=c.closest('.chart-wrap');if(!wrap)return;
+    const r=wrap.getBoundingClientRect(),d=Math.min(2,window.devicePixelRatio||1);
+    if(r.width>0&&r.height>0){c.style.width=r.width+'px';c.style.height=r.height+'px';c.width=Math.round(r.width*d);c.height=Math.round(r.height*d)}
+    if(window.chart){try{window.chart.resize();window.chart.update('none')}catch{}}
+  }
+  window.addEventListener('resize',()=>requestAnimationFrame(crispChart),{passive:true});
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(crispChart,120));
+
+  // ---------- Low-cost beat visual ----------
+  let beatFrame=0;
+  window.pulseMetroCard=function(accent){
+    if(!isMobile())return;
+    cancelAnimationFrame(beatFrame);
+    beatFrame=requestAnimationFrame(()=>{
+      const root=document.body;
+      root.classList.remove('mk-beat-sync','mk-beat-accent');
+      root.classList.add(accent?'mk-beat-accent':'mk-beat-sync');
+      clearTimeout(window.__mkBeatClear);
+      window.__mkBeatClear=setTimeout(()=>root.classList.remove('mk-beat-sync','mk-beat-accent'),70);
+    });
+  };
+  window.pulseAtAudioTime=function(time,accent){
+    if(!isMobile()||!window.audioCtx)return;
+    const delay=Math.max(0,(time-window.audioCtx.currentTime)*1000);
+    if(delay<180)setTimeout(()=>{if(window.metroRunning)window.pulseMetroCard(!!accent)},delay);
+  };
+
+  // ---------- Audio: cache noise buffers instead of allocating random audio on every hit ----------
+  const noiseCache=new Map();
+  window.playNoise=function(time,duration,vol=.2){
+    const ac=window.audioCtx;if(!ac)return;
+    const key=Math.round(duration*1000);
+    let buffer=noiseCache.get(key);
+    if(!buffer){
+      const len=Math.max(1,Math.floor(ac.sampleRate*duration));buffer=ac.createBuffer(1,len,ac.sampleRate);const data=buffer.getChannelData(0);
+      for(let i=0;i<len;i++)data[i]=Math.random()*2-1;
+      noiseCache.set(key,buffer);
+    }
+    const src=ac.createBufferSource(),g=ac.createGain(),v=(window.metroMuted?0:Number(document.getElementById('volume')?.value||0));
+    src.buffer=buffer;g.gain.setValueAtTime(vol*v,time);g.gain.exponentialRampToValueAtTime(.001,time+duration);src.connect(g);g.connect(ac.destination);src.start(time);
+  };
+
+  // ---------- Beat LEDs: update only previous/current instead of every LED ----------
+  let lastLed=-1;
+  const oldHighlight=window.highlightBeat;
+  window.highlightBeat=function(i){
+    const leds=window.metroLeds?.length?window.metroLeds:document.querySelectorAll('.led');if(!leds?.length)return;
+    const idx=i%leds.length;if(idx===lastLed)return;
+    if(lastLed>=0&&leds[lastLed])leds[lastLed].classList.remove('on');
+    if(leds[idx])leds[idx].classList.add('on');lastLed=idx;
+  };
+
+  // Remove the extra DOM-heavy visual wrappers around transport start/stop.
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.querySelectorAll('.start-bar .start').forEach(b=>{b.style.willChange='auto'});
+    setTimeout(crispChart,250);
+  });
+
+  // ---------- Update state: after successful update/reload, explicitly say Updated ----------
+  const oldCheck=window.checkForAppUpdate;
+  if(typeof oldCheck==='function'&&!oldCheck.__mkV10){
+    const wrapped=async function(showMessage=false){
+      const wasRequested=sessionStorage.getItem('mkStudioUpdateRequested')==='1';
+      const r=await oldCheck(showMessage);
+      if(wasRequested){
+        try{sessionStorage.removeItem('mkStudioUpdateRequested')}catch{}
+        const box=document.getElementById('appUpdateBox'),msg=document.getElementById('appUpdateDetail'),btn=document.getElementById('appUpdateBtn');
+        if(box)box.classList.remove('update-found');
+        if(msg)msg.textContent='Updated successfully. This device is running the latest version.';
+        if(btn)btn.style.display='none';
+      }
+      return r;
+    };
+    wrapped.__mkV10=true;window.checkForAppUpdate=wrapped;
+  }
 })();
 </script>
