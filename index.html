@@ -1463,7 +1463,7 @@ button, input, select, textarea {
   font-size:9px;font-weight:850;box-shadow:0 15px 45px rgba(0,0,0,.4),0 0 24px rgba(0,245,255,.1);
   opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .18s ease,transform .18s ease;
 }
-.practice-toast.show{opacity:1;transform:translateY(0)}
+.practice-toast.show{opacity:0!important;transform:translateY(10px)!important}
 .practice-toast .toast-title{color:var(--cyan);font-size:8px;letter-spacing:.12em;margin-bottom:3px}
 .practice-toast.end .toast-title{color:var(--lime)}
 @media(max-width:600px){.practice-live-indicator{top:8px;font-size:7px;padding:6px 10px}.practice-toast{right:10px;bottom:10px}}
@@ -1548,6 +1548,42 @@ button, input, select, textarea {
 @media(min-width:761px){.mk-mobile-categories,.mk-mobile-nav,.mk-mobile-backdrop{display:none!important}}
 </style>
 
+<style id="mk-mobile-round2">
+@media(max-width:760px){
+  body{padding-bottom:72px}
+  .practice-overview{display:none!important}
+  .mk-mobile-categories{margin-top:10px!important}
+  .mk-mobile-nav{grid-template-columns:repeat(4,1fr)!important}
+  .mk-mobile-nav .nav-primary{color:#041013!important}
+  .target-compact-card{padding:7px!important;background:linear-gradient(180deg,#0d1520,#090e16)!important}
+  .target-compact{width:100%;border:0;background:transparent;color:var(--text);display:flex;align-items:center;gap:10px;padding:4px 5px;text-align:left;font:inherit;cursor:pointer}
+  .target-icon{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;color:var(--lime);background:rgba(184,255,61,.08);border:1px solid rgba(184,255,61,.16);box-shadow:0 0 18px rgba(184,255,61,.06)}
+  .target-icon svg{width:17px;height:17px}.target-copy{display:flex;align-items:baseline;gap:5px;min-width:0}.target-copy small{font-size:7px;letter-spacing:.14em;color:var(--muted);font-weight:900}.target-copy b{font-size:18px;line-height:1;color:var(--lime);font-variant-numeric:tabular-nums}.target-copy em{font-size:7px;color:var(--muted);font-style:normal}.target-chevron{margin-left:auto;width:15px;color:#66728c}
+  .sync-card{padding:9px 10px!important;border-radius:14px!important;margin-top:12px!important}.sync-head{gap:7px!important}.sync-title{gap:7px!important}.sync-title b{font-size:8px!important}.sync-title small{font-size:6px!important}.sync-orb{width:9px!important;height:9px!important;box-shadow:0 0 0 4px rgba(101,113,138,.08)!important}.sync-card #syncStatus{font-size:7px!important}.sync-track{height:3px!important;margin:7px 0 6px!important}.sync-detail-row{flex-direction:row!important;align-items:center!important;gap:5px!important}.sync-detail-row span{font-size:6px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sync-chips{margin-top:6px!important;gap:4px!important}.sync-chips>span{font-size:6px!important;padding:3px 5px!important}.sync-now-btn{font-size:6px!important;padding:4px 6px!important}.app-update-box{margin-top:7px!important;padding:7px 8px!important;border-radius:10px!important}.app-update-title{font-size:6px!important}.app-update-version{font-size:10px!important}.app-update-detail{font-size:6px!important;margin-top:2px!important}.app-update-btn{font-size:6px!important;padding:4px 6px!important}
+  .metro-card{margin-bottom:8px!important}.metro-visual{height:178px!important}.tempo-display-card{min-height:112px!important;width:min(350px,94%)!important}.tempo-display-card .bpm-big{font-size:68px!important;font-weight:950!important;text-shadow:0 0 35px rgba(0,245,255,.28)!important}.tempo-display-card .leds{transform:scale(1.08)}
+  .practice-timer-card{padding:10px!important}.timer-grid{gap:8px!important}.timer-box{min-height:82px!important;display:flex!important;flex-direction:column!important;justify-content:center!important}.timer-value{font-size:26px!important}.timer-label{font-size:7px!important}
+  .start-bar{gap:7px!important}.start-bar .start{min-height:48px!important;border-radius:15px!important;font-weight:950!important;box-shadow:0 10px 24px rgba(0,0,0,.28)!important}.start-bar .start.metro{background:linear-gradient(135deg,#00f5ff,#39e7c4)!important;color:#031014!important}.start-bar .start.session{background:linear-gradient(135deg,#b8ff3d,#68df45)!important;color:#071006!important}.start-bar .start.record{background:linear-gradient(135deg,#ff4dd8,#ff7a9e)!important;color:#180511!important}.start-bar .start:active{transform:scale(.97)!important}
+  .mk-mobile-category{min-height:58px!important;border-radius:15px!important}.mk-mobile-category svg{width:19px!important;height:19px!important}
+  .mk-review-sheet{position:fixed;inset:0;z-index:10010;background:rgba(2,5,10,.76);backdrop-filter:blur(14px);display:flex;align-items:flex-end;padding:0 8px calc(72px + env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .2s ease}.mk-review-sheet.open{opacity:1;pointer-events:auto}.mk-review-sheet-box{width:100%;max-height:86vh;overflow:auto;background:linear-gradient(180deg,#111a29,#080d15);border:1px solid rgba(255,255,255,.11);border-radius:22px 22px 16px 16px;padding:12px 10px 14px;box-shadow:0 30px 90px rgba(0,0,0,.65);transform:translateY(18px);transition:transform .2s ease}.mk-review-sheet.open .mk-review-sheet-box{transform:translateY(0)}.mk-review-handle{width:42px;height:4px;border-radius:99px;background:#3a465d;margin:0 auto 10px}.mk-review-title{font-size:14px;font-weight:950;margin:0 2px 10px}.mk-review-sheet .mk-review-source{display:block!important;margin:0 0 9px!important}.mk-review-sheet .mk-review-source:last-child{margin-bottom:0!important}.mk-review-sheet .section-body{display:block!important}.mk-review-sheet .section-collapse{pointer-events:none}.mk-review-sheet .small-btn{min-height:36px}.mk-review-sheet .history-row{font-size:7px!important}
+  .mk-mobile-sheet-open{overflow:hidden!important}.mk-mobile-sheet-open .mk-review-source{display:none!important}
+  .mk-magic-burst{position:relative;animation:mkMagicGlow .9s ease-out}.mk-magic-burst:after{content:"";position:absolute;inset:-8px;border-radius:inherit;border:1px solid rgba(0,245,255,.45);box-shadow:0 0 22px rgba(0,245,255,.28),0 0 70px rgba(184,255,61,.12);pointer-events:none;animation:mkMagicOrb .9s ease-out}
+  #practiceTimerCard.mk-magic-burst:after{border-color:rgba(184,255,61,.5);box-shadow:0 0 25px rgba(184,255,61,.3),0 0 80px rgba(184,255,61,.12)}
+  @keyframes mkMagicGlow{0%{transform:scale(.985);filter:brightness(1)}35%{transform:scale(1.012);filter:brightness(1.25)}100%{transform:scale(1);filter:brightness(1)}}@keyframes mkMagicOrb{0%{opacity:0;transform:scale(.88)}30%{opacity:1;transform:scale(1.02)}100%{opacity:0;transform:scale(1.12)}}
+  #focusOverlay .focus-shell{padding:16px 14px calc(84px + env(safe-area-inset-bottom))!important;justify-content:space-between!important;gap:12px!important}.focus-top{flex:0 0 auto}.focus-main{flex:1 1 auto!important;min-height:0!important;width:100%!important}.focus-bpm{font-size:clamp(72px,22vw,118px)!important}.focus-timers{flex:0 0 auto!important;grid-template-columns:1fr!important;gap:10px!important}.focus-timer{min-height:76px!important;padding:13px 12px!important;grid-template-columns:24px 1fr!important}.focus-timer-value{font-size:25px!important}.focus-controls{flex:0 0 auto!important;grid-template-columns:1fr 1fr 44px 88px 44px!important;gap:7px!important}.focus-icon-action{height:50px!important}.focus-tempo-value{height:50px!important}.focus-season-start{min-width:0!important}
+  .panel.open,.dashboard-menu.open,.modal.open{touch-action:pan-y}
+  .panel.open:before,.modal-box:before,.dashboard-menu.open .period-card:before{touch-action:none}
+}
+@media(min-width:761px){.mk-review-sheet{display:none!important}}
+.season-option-actions{margin-left:auto;display:flex;align-items:center;gap:2px}.season-option-actions button{width:27px;height:27px;border:0;background:transparent;color:#63708a;border-radius:8px;display:grid;place-items:center;cursor:pointer}.season-option-actions button:hover{background:#111927;color:var(--text)}.season-option-actions .season-delete:hover{color:var(--danger);background:rgba(255,77,109,.1)}.season-option-actions svg{width:13px;height:13px}.season-option .season-delete{margin-left:0}.season-option-meta{display:none!important}
+</style>
+<style id="mk-mobile-round3">
+@media(max-width:760px){
+  .sync-card .app-update-box{border:0!important;background:transparent!important;padding:0!important;margin-top:7px!important;box-shadow:none!important}
+  .sync-card .app-update-head{padding-top:6px;border-top:1px solid rgba(255,255,255,.06);align-items:center}
+  .sync-card .app-update-detail{opacity:.75}
+  .mk-tools-sheet{position:fixed;inset:0;z-index:10012;background:rgba(2,5,10,.74);backdrop-filter:blur(14px);display:flex;align-items:flex-end;padding:0 8px calc(72px + env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .2s ease}.mk-tools-sheet.open{opacity:1;pointer-events:auto}.mk-tools-sheet-box{width:100%;padding:14px;background:linear-gradient(180deg,#111a29,#080d15);border:1px solid rgba(255,255,255,.11);border-radius:22px 22px 16px 16px;box-shadow:0 30px 90px rgba(0,0,0,.65);transform:translateY(18px);transition:transform .2s ease}.mk-tools-sheet.open .mk-tools-sheet-box{transform:translateY(0)}.mk-tools-handle{width:42px;height:4px;border-radius:99px;background:#3a465d;margin:0 auto 11px}.mk-tools-title{font-size:14px;font-weight:950;margin-bottom:10px}.mk-tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mk-tools-grid button{min-height:58px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:#0c1420;color:#dfe9f5;display:flex;align-items:center;gap:9px;padding:0 12px;font:inherit;font-size:9px;font-weight:900}.mk-tools-grid button svg{width:19px;height:19px;color:var(--cyan)}
+}
+</style>
 </head>
 <body>
 <div class="app">
@@ -1739,7 +1775,7 @@ button, input, select, textarea {
         </div>
       </div>
 
-      <div class="card history section-card" id="historyCard">
+      <div class="card history section-card mk-review-source" id="historyCard">
         <div class="period-head section-head">
           <button class="section-collapse" onclick="toggleSection('historyCard')" aria-expanded="true"><b>Current Season History</b><span class="collapse-chevron"><i data-lucide="chevron-down"></i></span></button>
           <button class="small-btn" onclick="clearCurrentHistory()">Clear</button>
@@ -1749,7 +1785,7 @@ button, input, select, textarea {
     </div>
 
     <aside class="right">
-      <div class="card section-card" id="statsCard">
+      <div class="card section-card mk-review-source" id="statsCard">
         <div class="period-head section-head">
           <button class="section-collapse" onclick="toggleSection('statsCard')" aria-expanded="true"><b>Current Season Stats</b><span class="collapse-chevron"><i data-lucide="chevron-down"></i></span></button>
         </div>
@@ -1761,9 +1797,10 @@ button, input, select, textarea {
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="target-head"><span>Target BPM</span><b id="targetValue">120</b></div>
-        <input class="range" id="targetRange" type="range" min="20" max="300" value="120" oninput="setTarget(this.value)">
+      <div class="card target-compact-card">
+        <button class="target-compact" id="targetControl" type="button" onclick="openTargetEditor()" title="Set target BPM">
+          <span class="target-icon"><i data-lucide="crosshair"></i></span><span class="target-copy"><small>TARGET</small><b id="targetValue">120</b><em>BPM</em></span><i data-lucide="chevron-right" class="target-chevron"></i>
+        </button>
       </div>
       <div class="card sync-card">
         <div class="sync-head">
@@ -1886,8 +1923,10 @@ function renderSeasonDropdown(){
     const b=document.createElement("div");
     b.className="season-option "+(p.id===currentId?"active":"");
     b.setAttribute("role","option"); b.setAttribute("aria-selected",p.id===currentId?"true":"false");
-    b.innerHTML=`<span class="season-option-icon" style="color:${p.color||"var(--cyan)"}"><i data-lucide="${p.icon||"music-2"}"></i></span><span class="season-option-name">${escapeHTML(p.name)}</span><span class="season-option-meta">${(p.sessions||[]).length} sessions</span><button class="season-delete" type="button" title="Delete season" aria-label="Delete ${escapeHTML(p.name)}"><i data-lucide="trash-2"></i></button>`;
-    b.onclick=(ev)=>{if(ev.target.closest('.season-delete'))return;selectSeason(p.id)};
+    b.innerHTML=`<span class="season-option-icon" style="color:${p.color||"var(--cyan)"}"><i data-lucide="${p.icon||"music-2"}"></i></span><span class="season-option-name">${escapeHTML(p.name)}</span><span class="season-option-actions"><button class="season-edit" type="button" title="Edit season" aria-label="Edit ${escapeHTML(p.name)}"><i data-lucide="pencil"></i></button><button class="season-reset-btn" type="button" title="Reset season" aria-label="Reset ${escapeHTML(p.name)}"><i data-lucide="rotate-ccw"></i></button><button class="season-delete" type="button" title="Delete season" aria-label="Delete ${escapeHTML(p.name)}"><i data-lucide="trash-2"></i></button></span>`;
+    b.onclick=(ev)=>{if(ev.target.closest('.season-option-actions'))return;selectSeason(p.id)};
+    b.querySelector('.season-edit').onclick=(ev)=>{ev.stopPropagation();selectSeason(p.id);openEditSeason()};
+    b.querySelector('.season-reset-btn').onclick=(ev)=>{ev.stopPropagation();resetSeason(p.id)};
     b.querySelector('.season-delete').onclick=(ev)=>{ev.stopPropagation();deleteSeason(p.id)};
     e.appendChild(b);
   });
@@ -1919,8 +1958,8 @@ function setRangeFill(el,val,color){let min=Number(el.min),max=Number(el.max),pc
 function setBpm(v,persist=true){bpm=Math.max(20,Math.min(300,Math.round(Number(v))));document.getElementById("bpmRange").value=bpm;document.getElementById("bpmDisplay").textContent=bpm;document.getElementById("bpmValue").textContent=bpm;const fv=document.getElementById("focusTempoValue");if(fv)fv.textContent=bpm;const fb=document.getElementById("focusBpm");if(fb)fb.textContent=bpm;setRangeFill(document.getElementById("bpmRange"),bpm,"#00f5ff");settings().bpm=bpm;updateTarget();if(persist&&!realtimeApplying)saveDB()}
 function changeBpm(n){setBpm(bpm+n)}
 function updateVolumeUI(persist=false){let e=document.getElementById("volume"),v=Number(e.value);let pct=Math.max(0,Math.min(100,v*100));document.getElementById("volumeValue").textContent=Math.round(pct)+"%";e.style.setProperty("--volume-fill",pct+"%");settings().volume=v;if(persist&&!realtimeApplying)saveDB()}
-function setTarget(v,persist=true){targetBpm=Math.max(20,Math.min(300,Math.round(Number(v)||120)));let p=currentPractice();if(p)p.target=targetBpm;document.getElementById("targetValue").textContent=targetBpm;document.getElementById("targetRange").value=targetBpm;setRangeFill(document.getElementById("targetRange"),targetBpm,"#b8ff3d");if(persist&&!realtimeApplying)saveDB()}
-function updateTarget(){let p=currentPractice();if(!p)return;targetBpm=p.target||120;document.getElementById("targetValue").textContent=targetBpm;document.getElementById("targetRange").value=targetBpm;setRangeFill(document.getElementById("targetRange"),targetBpm,"#b8ff3d")}
+function setTarget(v,persist=true){targetBpm=Math.max(20,Math.min(300,Math.round(Number(v)||120)));let p=currentPractice();if(p)p.target=targetBpm;const value=document.getElementById("targetValue");if(value)value.textContent=targetBpm;const range=document.getElementById("targetRange");if(range){range.value=targetBpm;setRangeFill(range,targetBpm,"#b8ff3d")}if(persist&&!realtimeApplying)saveDB()}
+function updateTarget(){let p=currentPractice();if(!p)return;targetBpm=p.target||120;const v=document.getElementById("targetValue");if(v)v.textContent=targetBpm;const r=document.getElementById("targetRange");if(r){r.value=targetBpm;setRangeFill(r,targetBpm,"#b8ff3d")}}
 function renderVisual(){let n=Math.max(4,getRhythmPattern().length);document.getElementById("leds").innerHTML=Array.from({length:Math.min(n,16)},(_,i)=>`<span class="led ${i===0?"first":""}" id="led-${i}"></span>`).join("")}
 function renderMeter(){document.getElementById("currentMeterDisplay").textContent=`${meterTime} • ${noteDefs[meterNote]?.symbol||customNotes.find(n=>n.id===meterNote)?.symbol||"♩"}`;renderNotes();let ms=document.getElementById("meterSelect");if(ms&&[...ms.options].some(o=>o.value===meterTime))ms.value=meterTime}
 function renderNotes(){let e=document.getElementById("noteList");e.innerHTML="";Object.entries(noteDefs).forEach(([id,n])=>{let b=document.createElement("button");b.className="note-btn "+(meterNote===id?"active":"");b.innerHTML=`<span class="note-symbol">${n.symbol}</span>${n.label}`;b.onclick=()=>setMeterNote(id);e.appendChild(b)});customNotes.forEach(n=>{let b=document.createElement("button");b.className="note-btn "+(meterNote===n.id?"active":"");b.innerHTML=`<span class="note-symbol">${escapeHTML(n.symbol||"•")}</span>${escapeHTML(n.label)}`;b.onclick=()=>setMeterNote(n.id);e.appendChild(b)})}
@@ -2005,7 +2044,7 @@ function playClick(time,type="normal"){
     ng.gain.setValueAtTime(level*q.noise,time);ng.gain.exponentialRampToValueAtTime(.0001,time+duration);
     src.buffer=buffer;src.connect(filter);filter.connect(ng);ng.connect(master);src.start(time);
   }
-  master.gain.setValueAtTime(1,time);
+  master.gain.setValueAtTime(1.18,time);
   master.gain.exponentialRampToValueAtTime(.0001,time+q.decay+.02);
 }
 
@@ -2021,8 +2060,21 @@ function syncTransportCards(){
     card.setAttribute("aria-pressed",metroRunning?"true":"false");
   }
 }
+function openTargetEditor(){
+  const p=currentPractice();
+  const current=Number(targetBpm)||Number(p?.target)||120;
+  const value=prompt("Target BPM",String(current));
+  if(value===null)return;
+  const next=Math.max(20,Math.min(300,Math.round(Number(value)||current)));
+  setTarget(next);
+}
+function triggerTransportMagic(id){
+  const el=document.getElementById(id); if(!el)return;
+  el.classList.remove("mk-magic-burst"); void el.offsetWidth; el.classList.add("mk-magic-burst");
+  setTimeout(()=>el.classList.remove("mk-magic-burst"),900);
+}
 function toggleMetro(){metroRunning?stopMetro():startMetro()}
-function startMetro(){initAudio();metroRunning=true;beatIndex=0;nextBeatTime=audioCtx.currentTime+.05;schedulerTimer=setInterval(scheduler,40);document.getElementById("metroBtn").innerHTML='<i data-lucide="square"></i><span>Stop Metronome</span>';lucide.createIcons();syncTransportCards();if(!tempoAutomationRunning&&settings().autoTempo?.change)startTempoAutomation()}
+function startMetro(){initAudio();metroRunning=true;beatIndex=0;nextBeatTime=audioCtx.currentTime+.05;schedulerTimer=setInterval(scheduler,40);triggerTransportMagic("tempoDisplayCard");document.getElementById("metroBtn").innerHTML='<i data-lucide="square"></i><span>Stop Metronome</span>';lucide.createIcons();syncTransportCards();if(!tempoAutomationRunning&&settings().autoTempo?.change)startTempoAutomation()}
 function stopMetro(){
   const wasRunning=metroRunning;
   metroRunning=false;clearInterval(schedulerTimer);schedulerTimer=null;
@@ -2119,6 +2171,7 @@ function restoreActiveSession(){
 function startSession(){
   if(sessionRunning)return;
   sessionRunning=true;sessionStartedAt=Date.now();sessionElapsed=0;
+  triggerTransportMagic("practiceTimerCard");
   persistActiveSession();
   document.getElementById("sessionBtn").innerHTML='<i data-lucide="square"></i><span>End Practice</span>';
   lucide.createIcons();syncPracticeLiveUI();showPracticeToast("PRACTICE STARTED","Your practice time is being tracked.");updateSessionTimer();
@@ -2915,7 +2968,7 @@ function setSync(a,b){
 const MK_APP_VERSION=(document.querySelector('meta[name="mk-app-version"]')?.content||"2026.09.07.3").trim();
 let mkRemoteAppVersion="",mkUpdateCheckInFlight=null;
 function compareAppVersions(a,b){const pa=String(a||"").replace(/^v/i,"").split(/[.+-]/).map(x=>parseInt(x,10)||0),pb=String(b||"").replace(/^v/i,"").split(/[.+-]/).map(x=>parseInt(x,10)||0);for(let i=0;i<Math.max(pa.length,pb.length);i++){const d=(pa[i]||0)-(pb[i]||0);if(d)return d}return 0}
-function setAppUpdateUI(state,detail,remote=""){const box=document.getElementById("appUpdateBox"),btn=document.getElementById("appUpdateBtn"),label=document.getElementById("appVersionLabel"),msg=document.getElementById("appUpdateDetail");if(label)label.textContent=`v${MK_APP_VERSION}${remote&&remote!==MK_APP_VERSION?` → v${remote}`:""}`;if(msg)msg.textContent=detail||"";if(btn){btn.classList.toggle("ready",state==="available");btn.innerHTML=state==="available"?'<i data-lucide="download"></i><span>Update now</span>':'<i data-lucide="refresh-cw"></i><span>Check update</span>';btn.onclick=state==="available"?applyAppUpdate:()=>checkForAppUpdate(true);btn.disabled=false}if(box)box.classList.toggle("update-found",state==="available");try{lucide.createIcons()}catch{}}
+function setAppUpdateUI(state,detail,remote=""){const box=document.getElementById("appUpdateBox"),btn=document.getElementById("appUpdateBtn"),label=document.getElementById("appVersionLabel"),msg=document.getElementById("appUpdateDetail");if(label)label.textContent=`v${MK_APP_VERSION}${remote&&remote!==MK_APP_VERSION?` → v${remote}`:""}`;if(msg)msg.textContent=detail||"";if(btn){btn.classList.toggle("ready",state==="available");btn.style.display=state==="available"||state==="error"?"inline-flex":"none";btn.innerHTML=state==="available"?'<i data-lucide="download"></i><span>Update now</span>':'<i data-lucide="refresh-cw"></i><span>Check again</span>';btn.onclick=state==="available"?applyAppUpdate:()=>checkForAppUpdate(true);btn.disabled=false}if(box)box.classList.toggle("update-found",state==="available");try{lucide.createIcons()}catch{}}
 async function fetchRemoteAppVersion(){const res=await fetch(`./version.json?mk_update_check=${Date.now()}`,{cache:"no-store",headers:{"Cache-Control":"no-cache"}});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();return String(data?.version||"").trim()}
 async function checkForAppUpdate(showMessage=false){if(mkUpdateCheckInFlight)return mkUpdateCheckInFlight;mkUpdateCheckInFlight=(async()=>{const btn=document.getElementById("appUpdateBtn");if(btn){btn.disabled=true;btn.innerHTML='<i data-lucide="loader-circle"></i><span>Checking…</span>';try{lucide.createIcons()}catch{}}try{const remote=await fetchRemoteAppVersion();if(!remote)throw new Error("Missing version");mkRemoteAppVersion=remote;if(compareAppVersions(remote,MK_APP_VERSION)>0){setAppUpdateUI("available",`A newer MK Studio build is live on GitHub (v${remote}). Update this device now.`,remote);return true}setAppUpdateUI("current",`This device is up to date. Live version: v${remote}.`,remote);return false}catch(e){console.warn("App update check failed",e);setAppUpdateUI("error",showMessage?"Could not check GitHub right now. Your data and sync are still available.":"GitHub update check unavailable.");return false}finally{mkUpdateCheckInFlight=null}})();return mkUpdateCheckInFlight}
 function applyAppUpdate(){try{sessionStorage.setItem("mkStudioUpdateRequested","1")}catch{}location.replace(`./?mk_update=${Date.now()}`)}
@@ -3268,23 +3321,14 @@ function syncReminderAfterRender(){
     if(!e.target.closest(".title-season-wrap"))closeSeasonDropdown();
   });
 
-  // Ensure user-driven slider changes sync to other logged-in devices.
-  document.addEventListener("input",function(e){
-    if(e.target.matches("#bpmRange,#volume,#targetRange")){
-      if(e.target.id==="bpmRange")setBpm(e.target.value,true);
-      else if(e.target.id==="volume")updateVolumeUI(true);
-      else setTarget(e.target.value,true);
-    }
-  });
-
-  // Faster debounce for genuinely near-real-time cloud updates.
+  // Keep cloud writes deliberately debounced so UI interactions stay responsive.
   const originalDebouncedSync=window.debouncedSync;
   if(typeof originalDebouncedSync==="function"){
     window.debouncedSync=function(){
       clearTimeout(window.__mkFastSyncTimer);
       window.__mkFastSyncTimer=setTimeout(function(){
         if(typeof syncNow==="function")syncNow();
-      },250);
+      },900);
     };
   }
 
@@ -3322,10 +3366,10 @@ function syncReminderAfterRender(){
 
 <div class="mk-mobile-backdrop" id="mkMobileBackdrop" aria-hidden="true"></div>
 <nav class="mk-mobile-nav" id="mkMobileNav" aria-label="Mobile navigation">
-  <button class="nav-primary active" data-nav="practice"><i data-lucide="play-circle"></i><span>Practice</span></button>
+  <button class="nav-primary active" data-nav="practice"><i data-lucide="home"></i><span>Home</span></button>
+  <button data-nav="focus"><i data-lucide="scan-focus"></i><span>Focus</span></button>
   <button data-nav="tools"><i data-lucide="sliders-horizontal"></i><span>Tools</span></button>
-  <button data-nav="progress"><i data-lucide="chart-no-axes-combined"></i><span>Progress</span></button>
-  <button data-nav="more"><i data-lucide="menu"></i><span>More</span></button>
+  <button data-nav="settings"><i data-lucide="settings-2"></i><span>Settings</span></button>
 </nav>
 
 
@@ -3357,8 +3401,45 @@ function syncReminderAfterRender(){
     document.body.classList.add('mk-mobile-sheet-open');
     if(typeof lucide!=='undefined')lucide.createIcons();
   }
+  let reviewSheet=null, reviewSources=[];
+  function setupReviewSheet(){
+    if(reviewSheet)return;
+    reviewSheet=document.createElement('div'); reviewSheet.id='mkReviewSheet'; reviewSheet.className='mk-review-sheet';
+    reviewSheet.innerHTML='<div class="mk-review-sheet-box"><div class="mk-review-handle"></div><div class="mk-review-title">Review</div><div class="mk-review-content"></div></div>';
+    document.body.appendChild(reviewSheet);
+    reviewSources=['statsCard','historyCard'].map(id=>document.getElementById(id)).filter(Boolean);
+    reviewSheet.querySelector('.mk-review-content').append(...reviewSources);
+    reviewSheet.addEventListener('click',e=>{if(e.target===reviewSheet)closeReview();});
+  }
+  function openReview(){
+    if(!mobile())return; setupReviewSheet(); reviewSheet.classList.add('open'); if(backdrop)backdrop.classList.add('open'); document.body.classList.add('mk-mobile-sheet-open');
+    reviewSources.forEach(x=>x.classList.remove('collapsed'));
+  }
+  function closeReview(){if(reviewSheet)reviewSheet.classList.remove('open'); if(backdrop)backdrop.classList.remove('open'); document.body.classList.remove('mk-mobile-sheet-open');}
+  function restoreReviewDesktop(){
+    if(!reviewSources.length)return;
+    const layout=document.querySelector('.layout'); if(!layout)return;
+    const main=layout.querySelector(':scope > div'); const aside=layout.querySelector(':scope > aside');
+    const stats=reviewSources.find(x=>x.id==='statsCard'), hist=reviewSources.find(x=>x.id==='historyCard');
+    if(hist&&main){const metro=main.querySelector('.metro-card'); if(metro)main.insertBefore(hist,metro.nextElementSibling);}
+    if(stats&&aside)aside.insertBefore(stats,aside.firstElementChild);
+    closeReview();
+  }
+  let toolsSheet=null;
+  function setupToolsSheet(){
+    if(toolsSheet)return;
+    toolsSheet=document.createElement('div');toolsSheet.id='mkToolsSheet';toolsSheet.className='mk-tools-sheet';
+    toolsSheet.innerHTML='<div class="mk-tools-sheet-box"><div class="mk-tools-handle"></div><div class="mk-tools-title">Tools</div><div class="mk-tools-grid"></div></div>';
+    document.body.appendChild(toolsSheet);
+    const defs=[['rhythm','music-2','Rhythm'],['sound','audio-lines','Sound'],['technique','sparkles','Technique'],['review','library','Review']];
+    toolsSheet.querySelector('.mk-tools-grid').innerHTML=defs.map(x=>`<button data-cat="${x[0]}"><i data-lucide="${x[1]}"></i><span>${x[2]}</span></button>`).join('');
+    toolsSheet.querySelectorAll('[data-cat]').forEach(b=>b.addEventListener('click',()=>{closeTools();openCategory(b.dataset.cat)}));
+  }
+  function openTools(){if(!mobile())return;setupToolsSheet();toolsSheet.classList.add('open');if(backdrop)backdrop.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');try{lucide.createIcons()}catch{}}
+  function closeTools(){if(toolsSheet)toolsSheet.classList.remove('open');if(backdrop)backdrop.classList.remove('open');document.body.classList.remove('mk-mobile-sheet-open')}
   function openCategory(cat){
     if(!mobile())return;
+    if(cat==='review'){openReview();return;}
     const names=categoryMap[cat]||[];
     if(names.length===1){openPanel(names[0]);return;}
     // Multi-item categories use a compact chooser sheet.
@@ -3379,7 +3460,7 @@ function syncReminderAfterRender(){
   function closeCategoryChooser(){
     const c=document.getElementById('mkCategoryChooser'); if(c)c.classList.remove('open');
   }
-  if(backdrop)backdrop.addEventListener('click',()=>{closeCategoryChooser();closeSheet();closeDashboard();});
+  if(backdrop)backdrop.addEventListener('click',()=>{closeCategoryChooser();closeSheet();closeDashboard();closeReview();closeTools();});
   document.querySelectorAll('.mk-mobile-category').forEach(b=>b.addEventListener('click',()=>openCategory(b.dataset.category)));
   function closeDashboard(){
     const d=document.getElementById('dashboardMenu'); if(d)d.classList.remove('open');
@@ -3390,18 +3471,9 @@ function syncReminderAfterRender(){
     document.querySelectorAll('.mk-mobile-nav button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
     const type=b.dataset.nav;
     if(type==='practice'){closeCategoryChooser();closeSheet();window.scrollTo({top:0,behavior:'smooth'});return;}
-    if(type==='tools'){closeCategoryChooser();closeSheet();document.getElementById('mkMobileCategories')?.scrollIntoView({behavior:'smooth',block:'center'});return;}
-    if(type==='progress'){
-      closeCategoryChooser();closeSheet();
-      const stats=document.getElementById('statsCard'); if(stats)stats.classList.remove('collapsed');
-      const history=document.getElementById('historyCard'); if(history)history.classList.remove('collapsed');
-      stats?.scrollIntoView({behavior:'smooth',block:'start'}); return;
-    }
-    if(type==='more'){
-      closeCategoryChooser();closeSheet();
-      const d=document.getElementById('dashboardMenu'); if(d)d.classList.add('open');
-      if(backdrop)backdrop.classList.add('open'); document.body.classList.add('mk-mobile-sheet-open'); return;
-    }
+    if(type==='focus'){closeCategoryChooser();closeSheet();if(typeof toggleFocusMode==='function'&&!document.getElementById('focusOverlay')?.classList.contains('open'))toggleFocusMode();return;}
+    if(type==='tools'){closeCategoryChooser();closeSheet();openTools();return;}
+    if(type==='settings'){closeCategoryChooser();closeSheet();if(typeof openSettings==='function')openSettings();return;}
   });
   // Inline tool handlers still work; this listener promotes opened panels into sheets.
   document.addEventListener('click',e=>{
@@ -3434,7 +3506,22 @@ function syncReminderAfterRender(){
       .mk-category-sheet-list button i{width:16px;color:var(--cyan)}
     }
   `; document.head.appendChild(style);
-  document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons()});
+  // Tap outside any sheet/modal to close; swipe the top handle downward to dismiss.
+  document.addEventListener('click',e=>{
+    if(!mobile())return;
+    const modal=e.target.closest('.modal.open');
+    if(modal && e.target===modal){modal.classList.remove('open');document.body.classList.remove('mk-mobile-sheet-open');return;}
+    const openSheet=document.querySelector('.metro-card>.panel.open');
+    if(openSheet && !e.target.closest('.metro-card>.panel.open') && !e.target.closest('.mk-mobile-category') && !e.target.closest('.tool'))closeSheet();
+  });
+  let dragStartY=0,dragging=false;
+  document.addEventListener('touchstart',e=>{
+    if(!mobile())return; const t=e.target.closest('.panel.open,.modal-box,.dashboard-menu.open .period-card,.mk-review-sheet-box,.mk-tools-sheet-box');
+    if(!t)return; const r=t.getBoundingClientRect(); if(e.touches[0].clientY-r.top<55){dragStartY=e.touches[0].clientY;dragging=true;}
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{if(!dragging)return;const dy=e.touches[0].clientY-dragStartY;if(dy>18)e.target.closest('.panel.open,.modal-box,.dashboard-menu.open .period-card,.mk-review-sheet-box')?.style.setProperty('transform',`translateY(${Math.min(dy,120)}px)`);},{passive:true});
+  document.addEventListener('touchend',e=>{if(!dragging)return;dragging=false;const dy=e.changedTouches[0].clientY-dragStartY;const el=e.target.closest('.panel.open,.modal-box,.dashboard-menu.open .period-card,.mk-review-sheet-box,.mk-tools-sheet-box');if(el)el.style.removeProperty('transform');if(dy>70){if(el?.classList.contains('mk-review-sheet-box'))closeReview();else if(el?.classList.contains('mk-tools-sheet-box'))closeTools();else if(el?.closest('.modal')){const m=el.closest('.modal');m.classList.remove('open');document.body.classList.remove('mk-mobile-sheet-open');}else if(el?.closest('.dashboard-menu'))closeDashboard();else closeSheet();}},{passive:true});
+  document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons();if(mobile()){setupReviewSheet();setupToolsSheet();}});
 })();
 </script>
 
