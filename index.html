@@ -3368,7 +3368,6 @@ function syncReminderAfterRender(){
 <nav class="mk-mobile-nav" id="mkMobileNav" aria-label="Mobile navigation">
   <button class="nav-primary active" data-nav="practice"><i data-lucide="home"></i><span>Home</span></button>
   <button data-nav="focus"><i data-lucide="scan-focus"></i><span>Focus</span></button>
-  <button data-nav="tools"><i data-lucide="sliders-horizontal"></i><span>Tools</span></button>
   <button data-nav="settings"><i data-lucide="settings-2"></i><span>Settings</span></button>
 </nav>
 
@@ -3646,6 +3645,19 @@ function syncReminderAfterRender(){
   if(typeof originalSession==='function'&&!originalSession.__mkFocusVisual3){window.toggleSession=function(){const r=originalSession.apply(this,arguments);setTimeout(updateFocusUI,20);return r};window.toggleSession.__mkFocusVisual3=true}
 })();
 </script>
+
+<style id="mk-round4-fixes">
+@media(max-width:760px){
+  .mk-review-sheet-content,.mk-review-content{max-height:72vh!important;overflow:auto!important;display:flex!important;flex-direction:column!important;gap:12px!important;padding-bottom:8px!important}
+  .mk-review-content .section-card,.mk-review-content .history{width:100%!important;box-sizing:border-box!important}
+  .mk-review-content .section-card.collapsed,.mk-review-content .history.collapsed{display:block!important}
+  .mk-mobile-category-sheet .mk-cat-action-icon{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:10px;background:rgba(0,245,255,.08);color:var(--cyan)}
+  .mk-mobile-category-sheet .mk-cat-action-icon svg{width:17px;height:17px}
+  .mk-mobile-category-sheet .mk-cat-action-copy{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left}
+  .mk-mobile-category-sheet .mk-cat-action-copy b{font-size:11px;color:#f2f6ff}
+  .mk-mobile-category-sheet .mk-cat-action-copy small{font-size:8px;color:var(--muted);font-weight:650}
+}
+</style>
 </body></html>
 <!-- Mobile polish: category contents, no Tools sheet, focus-style home tempo -->
 <style id="mk-round4-fixes">
@@ -3716,7 +3728,17 @@ function syncReminderAfterRender(){
     closeAllSurfaces();
     if(cat==='review'){
       const rs=document.getElementById('mkReviewSheet');
-      if(rs){rs.classList.add('open');backdrop()?.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');rs.querySelectorAll('.mk-review-source').forEach(x=>x.classList.remove('collapsed'));try{lucide.createIcons()}catch{};return;}
+      if(rs){
+        const content=rs.querySelector('.mk-review-content');
+        if(content){
+          const stats=document.getElementById('statsCard');
+          const hist=document.getElementById('historyCard');
+          if(stats && stats.parentElement!==content) content.appendChild(stats);
+          if(hist && hist.parentElement!==content) content.appendChild(hist);
+          [stats,hist].filter(Boolean).forEach(x=>{x.classList.remove('collapsed');x.style.display='block'});
+        }
+        closeAllSurfaces(); rs.classList.add('open');backdrop()?.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');try{lucide.createIcons()}catch{};return;
+      }
       return;
     }
     let sheet=document.getElementById('mkCategoryChooser');
@@ -3726,7 +3748,13 @@ function syncReminderAfterRender(){
     const items=categoryData[cat]||[];
     sheet.innerHTML='<div class="mk-category-sheet-handle"></div><div class="mk-category-sheet-title">'+names[cat]+'</div><div class="mk-category-sheet-subtitle">'+subs[cat]+'</div><div class="mk-category-sheet-list">'+items.map(x=>'<button type="button" data-panel="'+x[0]+'"><span class="mk-cat-action-icon"><i data-lucide="'+x[1]+'"></i></span><span class="mk-cat-action-copy"><b>'+x[2]+'</b><small>'+x[3]+'</small></span><i data-lucide="chevron-right"></i></button>').join('')+'</div>';
     sheet.classList.add('open');backdrop()?.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');
-    sheet.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>{sheet.classList.remove('open');if(typeof window.openPanel==='function')window.openPanel(b.dataset.panel);else document.getElementById('panel-'+b.dataset.panel)?.classList.add('open')}));
+    sheet.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>{
+      const name=b.dataset.panel; sheet.classList.remove('open');
+      document.querySelectorAll('.metro-card>.panel.open').forEach(x=>x.classList.remove('open'));
+      document.querySelectorAll('.tool.active').forEach(x=>x.classList.remove('active'));
+      const panel=document.getElementById('panel-'+name);
+      if(panel){panel.classList.add('open'); const btn=[...document.querySelectorAll('.tool')].find(x=>(x.textContent||'').trim().toLowerCase()===name.toLowerCase()); if(btn)btn.classList.add('active'); backdrop()?.classList.add('open'); document.body.classList.add('mk-mobile-sheet-open'); try{lucide.createIcons()}catch{}}
+    }));
     if(typeof lucide!=='undefined')lucide.createIcons();
   }
   document.addEventListener('click',e=>{const c=e.target.closest('.mk-mobile-category');if(c&&mobile()){e.preventDefault();e.stopImmediatePropagation();openRichCategory(c.dataset.category)}},true);
