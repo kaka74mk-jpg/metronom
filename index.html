@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.08.2">
+<meta name="mk-app-version" content="2026.09.08.3">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -3437,6 +3437,7 @@ function schedulePracticeReminders(){
     document.body.classList.remove('mk-mobile-sheet-open');
   }
   function openPanel(name){
+    if(document.getElementById('mkReviewSheet')?.classList.contains('open'))closeReview();
     const panel=document.getElementById('panel-'+name);
     const btn=[...document.querySelectorAll('.tool')].find(x=>new RegExp('^\\s*'+name+'\\s*$','i').test((x.textContent||'').trim()));
     if(!panel)return;
@@ -3490,11 +3491,12 @@ function schedulePracticeReminders(){
     toolsSheet.querySelector('.mk-tools-grid').innerHTML=defs.map(x=>`<button data-cat="${x[0]}"><i data-lucide="${x[1]}"></i><span>${x[2]}</span></button>`).join('');
     toolsSheet.querySelectorAll('[data-cat]').forEach(b=>b.addEventListener('click',()=>{closeTools();openCategory(b.dataset.cat)}));
   }
-  function openTools(){if(!mobile())return;setupToolsSheet();toolsSheet.classList.add('open');if(backdrop)backdrop.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');try{lucide.createIcons()}catch{}}
+  function openTools(){if(!mobile())return;if(document.getElementById('mkReviewSheet')?.classList.contains('open'))closeReview();setupToolsSheet();toolsSheet.classList.add('open');if(backdrop)backdrop.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');try{lucide.createIcons()}catch{}}
   function closeTools(){if(toolsSheet)toolsSheet.classList.remove('open');if(backdrop)backdrop.classList.remove('open');document.body.classList.remove('mk-mobile-sheet-open')}
   function openCategory(cat){
     if(!mobile())return;
     if(cat==='review'){openReview();return;}
+    if(document.getElementById('mkReviewSheet')?.classList.contains('open'))closeReview();
     const names=categoryMap[cat]||[];
     if(names.length===1){openPanel(names[0]);return;}
     // Multi-item categories use a compact chooser sheet.
@@ -3524,6 +3526,13 @@ function schedulePracticeReminders(){
   nav?.addEventListener('click',e=>{
     const b=e.target.closest('button[data-nav]'); if(!b)return;
     document.querySelectorAll('.mk-mobile-nav button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+    // Switching bottom-nav tabs (Home/Focus/Settings/Tools) never closed Review
+    // at all, on any branch below — so its moved Recordings/Calendar/Stats/
+    // History cards were simply left wherever they were, still forced visible,
+    // while the user navigated elsewhere. This is very likely the actual bug
+    // being reported: it doesn't take a swipe or backdrop tap, just tapping
+    // another tab while Review happens to be open.
+    if(document.getElementById('mkReviewSheet')?.classList.contains('open'))closeReview();
     const type=b.dataset.nav;
     if(type==='practice'){closeCategoryChooser();closeSheet();window.scrollTo({top:0,behavior:'smooth'});return;}
     if(type==='focus'){closeCategoryChooser();closeSheet();if(typeof toggleFocusMode==='function'&&!document.getElementById('focusOverlay')?.classList.contains('open'))toggleFocusMode();return;}

@@ -1,5 +1,5 @@
 {
-  "version": "2026.09.08.2",
-  "releasedAt": "2026-09-08T00:30:00Z",
-  "message": "Perf: remove always-on blur layers (topbar, bottom nav, start buttons, stale review sheet) that kept repainting during scroll/navigation"
+  "version": "2026.09.08.3",
+  "releasedAt": "2026-09-08T01:00:00Z",
+  "message": "Fix: bottom nav tabs (Home/Focus/Tools/Settings) and category tiles now close Review properly instead of leaving Recordings/Calendar stuck on screen"
 }
