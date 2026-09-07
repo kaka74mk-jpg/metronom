@@ -1792,6 +1792,8 @@ function renderSeasonDropdown(){
 function selectSeason(id){
   if(!db.practices.some(x=>x.id===id))return;
   currentId=id; localStorage.setItem("studioMetronomeCurrent",currentId);
+  sessionRunning=false; clearActiveSession();
+  restoreLastSavedSessionDisplay();
   loadPracticeSettings(currentPractice()); closeSeasonDropdown(); renderAll();
 }
 function toggleSeasonDropdown(e){
@@ -2011,6 +2013,20 @@ function restoreActiveSession(){
     syncPracticeLiveUI();
     return true;
   }catch(e){localStorage.removeItem(ACTIVE_SESSION_KEY);return false}
+}
+
+// Keep the last completed session visible after a page refresh. The live timer
+// itself is transient, but the completed session duration is already stored in
+// p.sessions. Previously sessionElapsed always started at 0 on a fresh page,
+// which made a correctly saved session look like it had been lost.
+function restoreLastSavedSessionDisplay(){
+  if(sessionRunning)return;
+  const p=currentPractice();
+  const sessions=Array.isArray(p?.sessions)?p.sessions:[];
+  if(!sessions.length){sessionElapsed=0;return}
+  const last=sessions[sessions.length-1];
+  const seconds=Number(last?.seconds);
+  sessionElapsed=Number.isFinite(seconds)?Math.max(0,Math.floor(seconds)):0;
 }
 function startSession(){
   if(sessionRunning)return;
@@ -2641,6 +2657,7 @@ function applyRemoteSnapshot(remote,source="Realtime"){
     if(currentId)localStorage.setItem("studioMetronomeCurrent",currentId);
     localStorage.setItem(DB_KEY,JSON.stringify(db));
     loadPracticeSettings(currentPractice());
+    restoreLastSavedSessionDisplay();
     renderAll();
     restoreSectionState();
     realtimeLastUpdatedAt=remoteUpdatedAt||realtimeLastUpdatedAt;
@@ -2680,6 +2697,7 @@ async function loadCloudData(){
         localStorage.setItem(DB_KEY,JSON.stringify(db));
         realtimeLastUpdatedAt=remote.updated_at||"";
         loadPracticeSettings(currentPractice());
+        restoreLastSavedSessionDisplay();
         renderAll();
         restoreSectionState();
         setSync("Synced","Cloud data loaded.");
@@ -2844,7 +2862,7 @@ function stopRealtimeSync(){
   stopCloudPolling();
   realtimeUserId=null;
 }
-loadPracticeSettings(currentPractice());renderAll();restoreSectionState();restoreActiveSession();updateSessionTimer();try{loadReminderUI();schedulePracticeReminders()}catch{}
+loadPracticeSettings(currentPractice());restoreLastSavedSessionDisplay();renderAll();restoreSectionState();if(!restoreActiveSession())restoreLastSavedSessionDisplay();updateSessionTimer();try{loadReminderUI();schedulePracticeReminders()}catch{}
 if(sb){
   sb.auth.onAuthStateChange(async (event,session)=>{
     await loadUserEmail();
