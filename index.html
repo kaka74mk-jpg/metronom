@@ -3927,6 +3927,7 @@ function syncReminderAfterRender(){
   /* Backdrop closes only the surface, never the page behind it. */
   document.addEventListener('touchmove',function(e){
     if(!isMob()||!anySurfaceOpen())return;
+    return; /* MK_SCROLL_FIX: never block page/sheet scrolling */
     const scrollBox=e.target.closest('.mk-review-sheet-box,.mk-tools-sheet-box,.mk-mobile-category-sheet,.metro-card>.panel.open,.dashboard-menu.open .period-card');
     if(!scrollBox){e.preventDefault();return;}
     const canScroll=scrollBox.scrollHeight>scrollBox.clientHeight+1;
@@ -4026,6 +4027,7 @@ function syncReminderAfterRender(){
   },true);
   document.addEventListener('touchmove',e=>{
     if(!mobile()||!document.body.dataset.mkV8Lock)return;
+    return; /* MK_SCROLL_FIX: never block touch scrolling */
     const allowed=e.target.closest('#mkReviewSheet .mk-review-sheet-box,#dashboardMenu #allSeasonsCard,#focusOverlay .focus-shell,.mk-tools-sheet-box,.mk-mobile-category-sheet,.mk-mobile-panel-sheet');
     if(!allowed)e.preventDefault();
   },{passive:false});
@@ -4409,5 +4411,47 @@ function syncReminderAfterRender(){
     const allowed=e.target.closest('#mkReviewSheet .mk-review-sheet-box,#dashboardMenu #allSeasonsCard');
     if(!allowed)e.preventDefault();
   },{passive:false});
+})();
+</script>
+
+
+<style id="mk-scroll-fix-final">
+/* FINAL SCROLL FIX: sheets may scroll; the page must never become permanently frozen. */
+html,body{overscroll-behavior-y:auto!important;}
+@media(max-width:700px){
+  body{touch-action:pan-y!important;}
+  .mk-review-sheet-box,.mk-review-sheet-final .mk-review-sheet-box,
+  .dashboard-menu.open,.mk-tools-sheet-box,.mk-mobile-category-sheet-box,
+  .mk-mobile-panel-sheet-box,.metro-card>.panel.open,.modal-box{touch-action:pan-y!important;-webkit-overflow-scrolling:touch!important;}
+}
+</style>
+<script id="mk-scroll-fix-final-js">
+(function(){
+  'use strict';
+  function mob(){return innerWidth<=700 || matchMedia('(pointer:coarse)').matches;}
+  function visible(el){if(!el||!el.classList.contains('open'))return false; const r=el.getBoundingClientRect(); const cs=getComputedStyle(el); return cs.display!=='none'&&cs.visibility!=='hidden'&&r.width>0&&r.height>0;}
+  function surfaceOpen(){
+    if(!mob()) return false;
+    const sels=['#mkReviewSheet','.mk-review-sheet','#dashboardMenu','#focusOverlay','.mk-tools-sheet','.mk-mobile-category-sheet','.mk-mobile-panel-sheet','.metro-card>.panel.open','.modal.open'];
+    return sels.some(sel=>[...document.querySelectorAll(sel)].some(visible));
+  }
+  function unlock(){
+    const b=document.body;
+    b.classList.remove('mk-mobile-sheet-open','mk-mobile-locked','mk-mobile-final-lock');
+    delete b.dataset.mkV8Lock; delete b.dataset.mkFinalLock;
+    b.style.removeProperty('position'); b.style.removeProperty('top'); b.style.removeProperty('left');
+    b.style.removeProperty('right'); b.style.removeProperty('width'); b.style.removeProperty('overflow');
+    b.style.removeProperty('touch-action');
+    document.documentElement.style.removeProperty('overflow');
+  }
+  function sync(){
+    if(!mob()){unlock();return;}
+    if(!surfaceOpen()) unlock();
+  }
+  // If an old patch leaves a lock behind after a sheet has disappeared, clear it immediately.
+  setInterval(sync,120);
+  window.addEventListener('resize',sync,{passive:true});
+  window.addEventListener('pageshow',sync,{passive:true});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')setTimeout(sync,0);});
 })();
 </script>
