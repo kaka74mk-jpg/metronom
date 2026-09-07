@@ -1468,6 +1468,1049 @@ button, input, select, textarea {
 .practice-toast.end .toast-title{color:var(--lime)}
 @media(max-width:600px){.practice-live-indicator{top:8px;font-size:7px;padding:6px 10px}.practice-toast{right:10px;bottom:10px}}
 </style>
+
+<style id="mk-mobile-app-shell">
+/* =========================================================
+   MK Studio — mobile app shell
+   Desktop stays visually unchanged. Phones get a dedicated
+   navigation hierarchy, touch targets, spacing and grouping.
+   ========================================================= */
+
+.mk-mobile-nav,
+.mk-mobile-fab { display:none; }
+
+@media (max-width:760px){
+  :root{
+    --mobile-gutter:12px;
+    --mobile-radius:16px;
+    --mobile-nav-h:70px;
+  }
+
+  body{
+    padding-bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom) + 14px);
+    background:
+      radial-gradient(circle at 15% 0%,rgba(0,245,255,.055),transparent 30%),
+      radial-gradient(circle at 90% 80%,rgba(255,43,214,.045),transparent 32%),
+      var(--bg);
+  }
+
+  .app{min-height:100svh;}
+  .main{
+    padding:10px var(--mobile-gutter) 18px !important;
+  }
+
+  /* Header becomes a calm app bar instead of a toolbar full of icons. */
+  .topbar{
+    position:sticky;
+    top:0;
+    z-index:80;
+    margin:0 calc(var(--mobile-gutter) * -1) 10px !important;
+    padding:10px var(--mobile-gutter) 9px !important;
+    background:rgba(5,6,11,.88);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border-bottom:1px solid rgba(255,255,255,.055);
+    align-items:center !important;
+  }
+
+  .title-season-wrap{min-width:0;}
+  .title-season-trigger{
+    max-width:100%;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    min-height:34px;
+    padding:0;
+    border:0;
+    background:none;
+    color:var(--text);
+    font-size:18px;
+    font-weight:900;
+  }
+  .title-season-trigger svg{width:15px;height:15px;color:var(--muted);}
+  .current-meta{font-size:9px !important;margin-top:1px !important;}
+
+  .topbar .actions{
+    gap:5px !important;
+  }
+  /* Keep only the three most useful header actions on a phone.
+     New Season is promoted to the floating action button. */
+  .topbar .actions .icon-btn:nth-child(1),
+  .topbar .actions .icon-btn:nth-child(5){
+    display:none !important;
+  }
+  .topbar .actions .icon-btn{
+    width:36px !important;
+    height:36px !important;
+    border-radius:11px !important;
+    background:rgba(14,18,29,.88) !important;
+  }
+
+  /* Stats are secondary on mobile: compact cards, not a wall of numbers. */
+  .practice-overview{
+    margin:0 0 10px !important;
+    border-radius:var(--mobile-radius) !important;
+  }
+  .practice-overview .period-head{min-height:40px;}
+  .practice-overview .overview{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:6px !important;
+  }
+  .practice-overview .kpi{
+    min-height:57px;
+    padding:9px 10px !important;
+    border-radius:12px !important;
+  }
+  .practice-overview .kpi .v{font-size:17px !important;}
+  .practice-overview .kpi .l{font-size:8px !important;}
+
+  /* Dashboard opens as a clear secondary surface. */
+  .dashboard-menu{margin:0 0 10px !important;}
+  .dashboard-menu .period-card{
+    border-radius:var(--mobile-radius) !important;
+    box-shadow:0 12px 35px rgba(0,0,0,.25) !important;
+  }
+  .dashboard-menu .period-head{
+    display:grid !important;
+    grid-template-columns:1fr auto;
+    align-items:center;
+  }
+  .dashboard-menu .tabs{
+    grid-column:1/-1;
+    width:100%;
+    display:grid !important;
+    grid-template-columns:repeat(3,1fr);
+    overflow:visible !important;
+  }
+  .dashboard-menu .tab{
+    width:100%;
+    min-height:34px;
+  }
+
+  /* Main instrument becomes the single hero surface. */
+  .layout{
+    display:block !important;
+    margin:0 !important;
+  }
+  .layout > aside{margin-top:10px;}
+  .metro-card{
+    padding:12px !important;
+    border-radius:18px !important;
+    box-shadow:0 18px 50px rgba(0,0,0,.35) !important;
+  }
+  .metro-visual{
+    height:154px !important;
+    border-radius:14px !important;
+  }
+  .tempo-display-card{
+    width:min(310px,88%) !important;
+    min-height:76px !important;
+    padding:10px 14px !important;
+  }
+  .tempo-display-card .bpm-big{
+    font-size:48px !important;
+  }
+
+  /* Practice timers read as two equal status tiles. */
+  .practice-timer-card{
+    margin-top:-24px !important;
+    width:100% !important;
+  }
+  .practice-timer-card .timer-grid{
+    width:100% !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:6px !important;
+  }
+  .practice-timer-card .timer-box{
+    min-height:47px;
+    padding:7px !important;
+    border-radius:10px !important;
+  }
+  .practice-timer-card .timer-value{font-size:17px !important;}
+
+  .metro-header-row{
+    width:100% !important;
+    margin:7px 0 3px !important;
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:6px !important;
+  }
+  .market-below-tempo{
+    width:100% !important;
+    min-width:0 !important;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .metro-header-row .mk-pro-tools{
+    gap:4px !important;
+  }
+  .metro-header-row .mk-pro-tools button{
+    min-width:36px !important;
+    height:32px !important;
+    padding:0 8px !important;
+  }
+
+  /* Tempo control: one clear row. */
+  .slider-row{
+    display:grid !important;
+    grid-template-columns:36px minmax(0,1fr) 36px !important;
+    gap:6px !important;
+    align-items:center !important;
+    margin-top:8px !important;
+  }
+  .slider-row .round{
+    width:36px !important;
+    height:36px !important;
+  }
+  .slider-row .bpm-number{
+    grid-column:1/-1;
+    grid-row:2;
+    font-size:9px;
+    margin-top:-1px;
+  }
+
+  .volume-row{
+    margin-top:7px !important;
+    padding:7px 8px !important;
+    border-radius:10px !important;
+  }
+
+  /* Primary actions are always visible and evenly weighted. */
+  .start-bar{
+    grid-template-columns:1fr 1fr !important;
+    gap:6px !important;
+    margin-top:8px !important;
+  }
+  .start-bar .start{
+    min-height:40px !important;
+    font-size:9px !important;
+    border-radius:10px !important;
+  }
+  .start-bar .start.record{
+    grid-column:1/-1 !important;
+    min-height:38px !important;
+  }
+
+  /* Feature tools are a proper app grid, not a horizontal strip of pills. */
+  .tools{
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:5px !important;
+    overflow:visible !important;
+    padding:7px 0 1px !important;
+  }
+  .tool{
+    min-height:42px;
+    padding:6px 4px !important;
+    border-radius:10px !important;
+    display:flex !important;
+    flex-direction:column !important;
+    justify-content:center !important;
+    gap:3px !important;
+    font-size:7px !important;
+    text-align:center;
+  }
+  .tool svg{width:15px;height:15px;}
+  .tool.active{
+    background:rgba(0,245,255,.075) !important;
+  }
+
+  .panel{
+    margin-top:7px !important;
+    border-radius:13px !important;
+  }
+
+  /* History and right-side stats become stacked cards. */
+  .history,
+  .right .card{
+    border-radius:var(--mobile-radius) !important;
+  }
+  .history-row{
+    grid-template-columns:1fr 1fr !important;
+    gap:5px !important;
+    padding:9px !important;
+    border:1px solid rgba(255,255,255,.045) !important;
+  }
+  .right{gap:8px !important;}
+  .stats-grid{gap:5px !important;}
+
+  /* Persistent bottom navigation = mobile-app mental model. */
+  .mk-mobile-nav{
+    position:fixed;
+    left:8px;
+    right:8px;
+    bottom:calc(7px + env(safe-area-inset-bottom));
+    height:var(--mobile-nav-h);
+    z-index:10050;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:3px;
+    padding:6px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:20px;
+    background:rgba(9,13,21,.93);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    box-shadow:0 18px 50px rgba(0,0,0,.48),0 0 30px rgba(0,245,255,.045);
+  }
+  .mk-mobile-nav-item{
+    min-width:0;
+    border:0;
+    border-radius:14px;
+    background:transparent;
+    color:#65718a;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    font:inherit;
+    font-size:7px;
+    font-weight:850;
+    letter-spacing:.02em;
+  }
+  .mk-mobile-nav-item svg{width:18px;height:18px;}
+  .mk-mobile-nav-item.active,
+  .mk-mobile-nav-item:active{
+    color:var(--cyan);
+    background:rgba(0,245,255,.08);
+  }
+  .mk-mobile-focus{
+    color:var(--text);
+    background:linear-gradient(135deg,rgba(0,245,255,.13),rgba(255,43,214,.10));
+    border:1px solid rgba(0,245,255,.16);
+  }
+
+  /* New Season is a floating action, separate from navigation. */
+  .mk-mobile-fab{
+    position:fixed;
+    right:18px;
+    bottom:calc(var(--mobile-nav-h) + 20px + env(safe-area-inset-bottom));
+    z-index:10040;
+    width:46px;
+    height:46px;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(0,245,255,.38);
+    border-radius:15px;
+    background:linear-gradient(135deg,var(--cyan),#3cf7d2);
+    color:#041013;
+    box-shadow:0 12px 28px rgba(0,0,0,.38),0 0 24px rgba(0,245,255,.16);
+  }
+  .mk-mobile-fab svg{width:20px;height:20px;}
+  .mk-mobile-fab:active{transform:scale(.96);}
+
+  /* Modals should feel like native bottom sheets on small screens. */
+  .modal{
+    align-items:flex-end !important;
+    padding:0 !important;
+  }
+  .modal-box{
+    width:100% !important;
+    max-width:none !important;
+    border-radius:20px 20px 0 0 !important;
+    padding:18px 14px calc(18px + env(safe-area-inset-bottom)) !important;
+    max-height:88svh;
+    overflow:auto;
+  }
+
+  /* Focus remains a full-screen task mode, not a tiny dialog. */
+  #focusOverlay .focus-shell{
+    width:100vw !important;
+    max-width:none !important;
+    height:100svh !important;
+    max-height:none !important;
+    border:0 !important;
+    border-radius:0 !important;
+    padding:16px 14px calc(16px + env(safe-area-inset-bottom)) !important;
+    justify-content:flex-start !important;
+  }
+
+  @media(max-width:390px){
+    .tools{grid-template-columns:repeat(3,minmax(0,1fr)) !important;}
+    .tempo-display-card .bpm-big{font-size:44px !important;}
+    .mk-mobile-nav{left:5px;right:5px;}
+  }
+}
+
+/* On desktop the new mobile shell never affects layout. */
+@media(min-width:761px){
+  .mk-mobile-nav,.mk-mobile-fab{display:none !important;}
+}
+</style>
+
+
+<style id="mk-redesign-v5">
+/* =========================================================
+   MK STUDIO v5 — complete visual redesign
+   Keep the existing JS/IDs; rebuild the visual hierarchy.
+   ========================================================= */
+
+:root{
+  --bg:#07090d;
+  --bg2:#0b0f16;
+  --card:#10151e;
+  --card2:#151c27;
+  --line:#222b39;
+  --line2:#2c3748;
+  --text:#f3f6fb;
+  --muted:#8490a4;
+  --cyan:#58e6ff;
+  --pink:#ff5bd7;
+  --lime:#b9f56a;
+  --orange:#ffb45c;
+  --danger:#ff647c;
+  --shadow:0 18px 55px rgba(0,0,0,.28);
+  --r:20px;
+  --season-color:var(--cyan);
+}
+
+html,body{
+  background:
+    radial-gradient(circle at 18% 0%,rgba(88,230,255,.055),transparent 30%),
+    radial-gradient(circle at 92% 92%,rgba(255,91,215,.045),transparent 28%),
+    var(--bg);
+  color:var(--text);
+}
+body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{min-height:100vh}
+.main{
+  width:min(1480px,100%);
+  margin:0 auto;
+  padding:22px 28px 60px;
+}
+
+/* ---------- top app bar ---------- */
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:80;
+  width:100%;
+  max-width:none;
+  min-height:68px;
+  margin:0 0 18px;
+  padding:10px 12px 10px 16px;
+  background:rgba(9,12,17,.86);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:18px;
+  backdrop-filter:blur(18px);
+  box-shadow:0 10px 35px rgba(0,0,0,.18);
+}
+.title-season-wrap{min-width:0}
+.title-season-trigger{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  max-width:min(520px,60vw);
+  border:0;
+  background:none;
+  color:var(--text);
+  padding:0;
+  font-family:"Space Grotesk",Inter,sans-serif;
+  font-size:22px;
+  font-weight:800;
+}
+.title-season-trigger svg{width:16px;color:var(--muted)}
+.current-meta{font-size:10px;color:var(--muted);margin-top:4px}
+.actions{gap:6px}
+.icon-btn{
+  width:40px;height:40px;
+  border-radius:12px;
+  background:#111722;
+  border:1px solid #273142;
+  color:#aeb8c9;
+  transition:.18s ease;
+}
+.icon-btn:hover{background:#17202d;color:var(--text);border-color:#3b485c;box-shadow:none}
+.icon-btn[title="New Season"]{
+  background:var(--cyan);
+  color:#061015;
+  border-color:transparent;
+}
+
+/* ---------- surfaces ---------- */
+.period-card,.card,.metro-card{
+  background:linear-gradient(180deg,rgba(17,22,31,.97),rgba(12,16,23,.97));
+  border:1px solid #202a38;
+  border-radius:20px;
+  box-shadow:var(--shadow);
+}
+.period-card,.card{padding:18px}
+.section-head{margin-bottom:14px}
+.section-collapse b{font-size:12px;letter-spacing:.01em}
+.section-collapse .collapse-chevron{color:#6d788b}
+
+/* ---------- overview becomes compact stat strip ---------- */
+.practice-overview{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  padding:0;
+  margin-bottom:18px!important;
+}
+.practice-overview .section-head{display:none}
+.practice-overview .section-body{display:block!important}
+.overview{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:8px;
+}
+.kpi{
+  min-height:72px;
+  padding:13px 14px;
+  background:#0e131b;
+  border:1px solid #1f2936;
+  border-radius:14px;
+}
+.kpi .v{font-size:19px;line-height:1.05}
+.kpi .l{
+  margin-top:7px;
+  font-size:8px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#687489;
+}
+
+/* ---------- dashboard: secondary, not a competing hero ---------- */
+.dashboard-menu{margin:0 0 18px}
+.dashboard-menu .period-card{
+  border-radius:16px;
+  box-shadow:none;
+  background:#0d121a;
+}
+.period-head{align-items:center}
+.tabs{background:#090d13;border:1px solid #1e2734;padding:3px;border-radius:10px}
+.tab{
+  border:0;
+  background:transparent;
+  color:#78859a;
+  padding:7px 12px;
+  border-radius:7px;
+}
+.tab.active{background:#eaf8fb;color:#071016;border:0}
+
+/* ---------- main two-column workspace ---------- */
+.layout{
+  grid-template-columns:minmax(0,1fr) 310px;
+  gap:18px;
+  margin-top:0;
+}
+.metro-card{
+  padding:18px;
+  border-radius:24px;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(88,230,255,.055),transparent 28%),
+    linear-gradient(180deg,#111722,#0b0f16);
+}
+
+/* ---------- tempo hero: no fake device frame ---------- */
+.metro-visual{
+  height:260px!important;
+  display:grid;
+  place-items:center;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 50% 42%,rgba(88,230,255,.11),transparent 28%),
+    linear-gradient(180deg,#0a1018,#080b11);
+  border:1px solid #1c2836;
+}
+.visual-studio{
+  width:min(620px,92%)!important;
+  padding:18px 24px!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.tempo-display-card{
+  width:100%!important;
+  min-height:150px!important;
+  border:1px solid rgba(88,230,255,.13)!important;
+  border-radius:22px!important;
+  background:rgba(9,15,23,.72)!important;
+  box-shadow:inset 0 0 45px rgba(88,230,255,.035)!important;
+}
+.tempo-display-card.is-running{
+  border-color:rgba(88,230,255,.58)!important;
+  box-shadow:0 0 45px rgba(88,230,255,.10),inset 0 0 50px rgba(88,230,255,.06)!important;
+}
+.tempo-display-card .bpm-big{
+  font-size:clamp(68px,9vw,104px)!important;
+  font-weight:850;
+  letter-spacing:-.07em!important;
+}
+.tempo-display-card .leds{margin-top:4px}
+
+/* timers sit below the hero, never overlap it */
+.practice-timer-card{
+  width:min(620px,94%)!important;
+  margin:10px auto 0!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.practice-timer-card .timer-grid{gap:8px!important}
+.practice-timer-card .timer-box{
+  padding:11px 13px!important;
+  background:#0d141e!important;
+  border:1px solid #202b39!important;
+  border-radius:13px!important;
+}
+.practice-timer-card .timer-value{font-size:20px!important}
+.practice-timer-card .timer-state{margin-top:7px}
+
+/* identity / Focus / Tap row */
+.metro-header-row{
+  width:100%;
+  margin:14px 0 10px;
+  justify-content:space-between;
+  align-items:center;
+}
+.metro-header-row .market-below-tempo{
+  width:auto;
+  max-width:65%;
+  margin:0!important;
+  padding:7px 10px!important;
+  border-radius:9px;
+  background:#0c121a;
+  border:1px solid #1d2937;
+}
+.metro-header-row .mk-pro-tools{gap:6px}
+.metro-header-row .mk-pro-tools button{
+  height:34px;
+  padding:0 11px;
+  border-radius:9px;
+  background:#101722;
+  border:1px solid #273243;
+  color:#aeb8c9;
+}
+
+/* ---------- controls ---------- */
+.slider-row{
+  display:grid!important;
+  grid-template-columns:42px minmax(0,1fr) 42px 72px!important;
+  gap:8px!important;
+  margin-top:12px;
+}
+.round{
+  width:42px!important;height:42px!important;
+  border-radius:12px;
+  background:#121a25;
+  border:1px solid #2a3545;
+}
+.bpm-number{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:42px;
+  background:#0d141d;
+  border:1px solid #202b39;
+  border-radius:12px;
+  color:#c8d2df;
+  font-size:10px;
+}
+.range{height:7px}
+.volume-row{
+  margin-top:9px;
+  padding:8px 10px;
+  background:#0c121a;
+  border:1px solid #1e2937;
+  border-radius:11px;
+}
+.quick-bpm{
+  gap:5px;
+  padding:11px 0 9px;
+}
+.quick-bpm button{
+  border-radius:9px;
+  background:#111822;
+  border:1px solid #232e3d;
+  color:#7f8da2;
+  padding:7px 10px;
+}
+.quick-bpm button:hover{color:var(--text);border-color:#3a485b}
+
+/* Primary actions are visually separated */
+.start-bar{
+  display:grid;
+  grid-template-columns:1.2fr 1fr .8fr;
+  gap:8px;
+  margin-top:2px;
+  padding-top:4px;
+}
+.start{
+  min-height:44px!important;
+  border-radius:12px!important;
+  font-size:10px!important;
+}
+.start.metro{
+  background:#dff9fd!important;
+  color:#071116!important;
+}
+.start.session{
+  background:#151e2b!important;
+  border:1px solid #2a3646!important;
+}
+.start.record{
+  background:#251722!important;
+  border:1px solid rgba(255,91,215,.28)!important;
+  color:#ff8de2!important;
+}
+
+/* ---------- tools: grouped control shelf ---------- */
+.tools{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:6px;
+  margin-top:14px;
+  padding:8px;
+  background:#090e15;
+  border:1px solid #1b2532;
+  border-radius:14px;
+}
+.tool{
+  min-height:42px;
+  justify-content:center;
+  flex-direction:column;
+  gap:4px;
+  padding:6px 4px;
+  border-radius:10px;
+  background:#0f151e;
+  border:1px solid transparent;
+  color:#78869b;
+  font-size:8px;
+}
+.tool svg{width:15px;height:15px}
+.tool:hover{color:#dbe4ef;background:#141d28}
+.tool.active{
+  color:var(--cyan);
+  background:rgba(88,230,255,.08);
+  border-color:rgba(88,230,255,.28);
+  box-shadow:none;
+}
+
+/* Panels become clean drawers */
+.panel{
+  margin-top:8px;
+  padding:15px;
+  background:#0b1119;
+  border:1px solid #1f2a38;
+  border-radius:14px;
+}
+.panel-title{font-size:11px;margin-bottom:11px}
+
+/* ---------- right rail ---------- */
+.right{gap:10px}
+.right .card{padding:15px;border-radius:16px;box-shadow:none}
+.stats-grid{gap:7px}
+.stat{
+  padding:11px;
+  background:#0d141d;
+  border:1px solid #1e2936;
+  border-radius:11px;
+}
+.stat strong{font-size:18px}
+.target{
+  padding:13px;
+  background:#0d141d;
+  border:1px solid #1e2936;
+}
+.sync-card{
+  background:linear-gradient(145deg,#0e151f,#0a0f16)!important;
+}
+.sync-chips{flex-wrap:wrap}
+
+/* ---------- history ---------- */
+.history{
+  margin-top:16px;
+  padding:16px;
+  border-radius:18px;
+  box-shadow:none;
+}
+.history-row{
+  grid-template-columns:1.5fr .8fr .8fr .8fr;
+  padding:11px 6px;
+  font-size:9px;
+}
+
+/* ---------- ONE modal at a time; true dialog layer ---------- */
+.modal{
+  z-index:5000!important;
+  padding:20px!important;
+  background:rgba(2,5,9,.82)!important;
+  backdrop-filter:blur(20px)!important;
+}
+.modal.open{display:flex!important}
+.modal-box{
+  width:min(520px,100%)!important;
+  max-height:min(86vh,760px);
+  overflow:auto;
+  padding:20px!important;
+  border-radius:20px!important;
+  background:#10161f!important;
+  border:1px solid #2a3545!important;
+  box-shadow:0 30px 90px rgba(0,0,0,.55)!important;
+}
+.modal-head{
+  position:sticky;
+  top:-20px;
+  z-index:2;
+  margin:-20px -20px 16px;
+  padding:16px 20px;
+  background:rgba(16,22,31,.96);
+  border-bottom:1px solid #1f2936;
+}
+.modal-title{font-size:15px}
+.modal-close{
+  width:34px;height:34px;
+  display:grid;place-items:center;
+  border-radius:10px;
+  background:#151d28;
+  color:#a5b0c1;
+}
+.modal-actions{
+  gap:8px;
+  margin-top:16px;
+}
+.modal-actions button{
+  min-height:42px;
+  border-radius:11px;
+}
+.modal .num,.modal .select{
+  min-height:42px;
+  background:#0c121a;
+  border-color:#283445;
+}
+
+/* Nested panels/dialogs: opening a child closes/hides the parent visually. */
+.mk-pro-panel{
+  z-index:7000!important;
+  right:20px!important;
+  bottom:20px!important;
+  width:min(360px,calc(100vw - 40px))!important;
+  padding:16px!important;
+  background:#10161f!important;
+  border:1px solid #2a3545!important;
+  border-radius:18px!important;
+}
+
+/* Focus is a dedicated full-screen workspace, not a normal modal. */
+.mk-pro-modal{
+  z-index:10000!important;
+  background:#05080d!important;
+}
+#focusOverlay .focus-shell{
+  width:min(720px,94vw)!important;
+  height:min(780px,92vh)!important;
+  padding:24px!important;
+  border-radius:24px!important;
+  background:
+    radial-gradient(circle at 50% 28%,rgba(88,230,255,.07),transparent 30%),
+    #090e15!important;
+  border:1px solid #263342!important;
+  box-shadow:0 30px 100px rgba(0,0,0,.55)!important;
+}
+
+/* ---------- mobile: actual app layout, not desktop squeezed ---------- */
+@media(max-width:760px){
+  .main{
+    width:100%;
+    padding:10px 10px 28px;
+  }
+  .topbar{
+    position:relative;
+    top:auto;
+    min-height:58px;
+    padding:9px 10px;
+    margin-bottom:12px;
+    border-radius:15px;
+  }
+  .title-season-trigger{
+    max-width:58vw;
+    font-size:17px;
+  }
+  .current-meta{font-size:8px}
+  .actions{gap:4px}
+  .icon-btn{width:34px;height:34px;border-radius:10px}
+  .icon-btn[title="New Season"]{display:grid}
+  .icon-btn[title="Rename"]{display:none}
+
+  .practice-overview{margin-bottom:12px!important}
+  .overview{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+  .kpi{
+    min-height:60px;
+    padding:10px 11px;
+    border-radius:12px;
+  }
+  .kpi .v{font-size:16px}
+  .kpi .l{font-size:7px;margin-top:5px}
+
+  .dashboard-menu{margin-bottom:12px}
+  .dashboard-menu .period-card{padding:12px}
+  .period-head{gap:8px}
+  .period-head .section-collapse{flex:1 1 auto}
+  .tabs{width:100%;display:grid;grid-template-columns:repeat(3,1fr)}
+  .tab{padding:7px 4px;font-size:8px}
+
+  .layout{display:block;margin:0}
+  .metro-card{
+    padding:10px;
+    border-radius:18px;
+  }
+  .metro-visual{
+    height:210px!important;
+    border-radius:15px;
+  }
+  .visual-studio{
+    width:100%!important;
+    padding:10px!important;
+  }
+  .tempo-display-card{
+    min-height:132px!important;
+    border-radius:18px!important;
+  }
+  .tempo-display-card .bpm-big{font-size:64px!important}
+  .practice-timer-card{
+    width:100%!important;
+    margin-top:8px!important;
+  }
+  .practice-timer-card .timer-box{padding:9px 6px!important}
+  .practice-timer-card .timer-value{font-size:16px!important}
+
+  .metro-header-row{
+    margin:11px 0 8px;
+    gap:6px;
+  }
+  .metro-header-row .market-below-tempo{
+    max-width:58%;
+    font-size:7px!important;
+    padding:6px 8px!important;
+  }
+  .metro-header-row .mk-pro-tools button{
+    height:32px;
+    padding:0 8px;
+    font-size:7px;
+  }
+
+  .slider-row{
+    grid-template-columns:38px minmax(0,1fr) 38px!important;
+  }
+  .slider-row .bpm-number{
+    grid-column:1/-1;
+    grid-row:2;
+    width:max-content;
+    min-width:78px;
+    justify-self:center;
+    height:30px;
+  }
+  .round{width:38px!important;height:38px!important}
+  .volume-row{margin-top:8px}
+
+  .quick-bpm{
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .quick-bpm button{padding:7px 10px;font-size:8px}
+
+  .start-bar{
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+  .start-bar .record{grid-column:1/-1}
+  .start{min-height:42px!important;font-size:8px!important}
+
+  .tools{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+    padding:6px;
+  }
+  .tool{
+    min-height:50px;
+    font-size:7px;
+  }
+  .tool svg{width:16px;height:16px}
+
+  .panel{padding:11px}
+  .meter-grid,.profile-grid{grid-template-columns:1fr}
+  .rhythm-grid{grid-template-columns:repeat(8,minmax(0,1fr))}
+  .right{
+    margin-top:12px;
+    display:flex;
+  }
+  .right .card{border-radius:15px}
+  .history{margin-top:12px;padding:12px}
+  .history-row{
+    grid-template-columns:1fr 1fr;
+    gap:3px;
+    padding:9px;
+    border:1px solid #1d2734;
+    border-radius:10px;
+    margin-bottom:5px;
+    background:#0d141d;
+  }
+
+  /* Modals are bottom sheets on phones, with no overlap. */
+  .modal{
+    align-items:flex-end!important;
+    padding:0!important;
+  }
+  .modal-box{
+    width:100%!important;
+    max-height:88vh;
+    padding:16px!important;
+    border-radius:20px 20px 0 0!important;
+    border-bottom:0!important;
+  }
+  .modal-head{
+    top:-16px;
+    margin:-16px -16px 14px;
+    padding:14px 16px;
+  }
+  .modal-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+  .modal-actions button{width:100%}
+  .season-custom{grid-template-columns:1fr 1fr}
+
+  .mk-pro-panel{
+    left:10px!important;
+    right:10px!important;
+    bottom:10px!important;
+    width:auto!important;
+    max-height:80vh;
+  }
+  #focusOverlay .focus-shell{
+    width:100%!important;
+    height:100%!important;
+    max-height:none!important;
+    padding:16px!important;
+    border-radius:0!important;
+    border:0!important;
+  }
+  #focusOverlay .focus-bpm{font-size:72px!important}
+  #focusOverlay .focus-controls{
+    grid-template-columns:1fr 1fr 36px 66px 36px!important;
+  }
+}
+
+@media(max-width:390px){
+  .main{padding-left:7px;padding-right:7px}
+  .actions .icon-btn{width:32px;height:32px}
+  .title-season-trigger{font-size:15px}
+  .tempo-display-card .bpm-big{font-size:58px!important}
+  .metro-visual{height:190px!important}
+  .tools{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .season-custom{grid-template-columns:1fr}
+}
+
+/* Prevent any old patch from reintroducing the previous bottom navigation. */
+.mk-mobile-nav,.mk-mobile-fab{display:none!important}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -3230,6 +4273,56 @@ function syncReminderAfterRender(){
   if(document.readyState==="loading"){
     document.addEventListener("DOMContentLoaded",applySeasonColor,{once:true});
   }else applySeasonColor();
+})();
+</script>
+
+
+
+
+<script id="mk-redesign-modal-manager">
+(function(){
+  const dialogIds=["practiceModal","editSeasonModal","profileModal","authModal","settingsModal","backupModal"];
+  function closeOtherDialogs(exceptId){
+    dialogIds.forEach(id=>{
+      if(id!==exceptId) document.getElementById(id)?.classList.remove("open");
+    });
+    document.querySelectorAll(".mk-pro-panel").forEach(x=>x.classList.remove("open"));
+  }
+
+  const wrap=(name,id)=>{
+    const original=window[name];
+    if(typeof original!=="function") return;
+    window[name]=function(){
+      closeOtherDialogs(id);
+      return original.apply(this,arguments);
+    };
+  };
+
+  ["openNew","openEditSeason","openProfile","openAuth","openSettings","openBackup"].forEach((name)=>{
+    const id={
+      openNew:"practiceModal",
+      openEditSeason:"editSeasonModal",
+      openProfile:"profileModal",
+      openAuth:"authModal",
+      openSettings:"settingsModal",
+      openBackup:"backupModal"
+    }[name];
+    wrap(name,id);
+  });
+
+  const oldOpenPro=window.openProPanel;
+  if(typeof oldOpenPro==="function"){
+    window.openProPanel=function(id){
+      closeOtherDialogs(null);
+      document.getElementById(id)?.classList.add("open");
+    };
+  }
+
+  document.addEventListener("keydown",e=>{
+    if(e.key==="Escape"){
+      document.querySelectorAll(".modal.open,.mk-pro-panel.open").forEach(x=>x.classList.remove("open"));
+    }
+  });
 })();
 </script>
 
