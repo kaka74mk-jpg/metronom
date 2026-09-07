@@ -7,8 +7,11 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.07.7">
+<meta name="mk-app-version" content="2026.09.07.8">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/lucide@0.468.0"></script>
@@ -20,8 +23,7 @@
  --orange:#ff9d3d;--danger:#ff4d6d;--shadow:0 22px 70px rgba(0,0,0,.55);--r:18px
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
-html,body{margin:0;min-height:100%;overflow-x:hidden;background:radial-gradient(circle at 10% 10%,#071b24 0,transparent 28%),radial-gradient(circle at 90% 85%,#1a0718 0,transparent 30%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+html,body{margin:0;min-height:100%;overflow-x:hidden;background:radial-gradient(circle at 10% 10%,#071b24 0,transparent 28%),radial-gradient(circle at 90% 85%,#1a0718 0,transparent 30%),var(--bg);color:var(--text);font-family:Manrope,Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#28334a;border-radius:20px}
 .app{display:block;min-height:100vh;width:100%;max-width:100vw;overflow-x:hidden}
@@ -3788,6 +3790,117 @@ function syncReminderAfterRender(){
   });
 })();
 </script>
+
+<style id="mk-v9-polish">
+:root{--font-ui:Manrope,Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--font-display:"Space Grotesk",Manrope,sans-serif}
+html,body,button,input,select,textarea{font-family:var(--font-ui)!important}
+.current-name,.logo,.bpm-big,.title-season-text,.focus-bpm,.focus-practice-name{font-family:var(--font-display)!important}
+/* Crystal / glass transport controls */
+.start-bar .start{position:relative;isolation:isolate;overflow:hidden;min-height:46px!important;border:1px solid rgba(255,255,255,.16)!important;border-radius:14px!important;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.055) 42%,rgba(255,255,255,.025))!important;color:#eef8ff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.24),inset 0 -1px 0 rgba(0,0,0,.35),0 10px 28px rgba(0,0,0,.28),0 0 18px rgba(0,245,255,.06)!important;backdrop-filter:blur(16px) saturate(135%);-webkit-backdrop-filter:blur(16px) saturate(135%);transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease}
+.start-bar .start:before{content:"";position:absolute;inset:1px 12% 58%;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.32),transparent);opacity:.55;pointer-events:none;z-index:-1}
+.start-bar .start:after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 15%,rgba(255,255,255,.13) 47%,transparent 63%);transform:translateX(-120%);transition:transform .45s ease;pointer-events:none}
+.start-bar .start:hover{transform:translateY(-1px);border-color:rgba(0,245,255,.34)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 12px 30px rgba(0,0,0,.3),0 0 24px rgba(0,245,255,.10)!important}
+.start-bar .start:hover:after{transform:translateX(120%)}
+.start-bar .start:active{transform:translateY(1px) scale(.985)}
+.start-bar .start.metro{background:linear-gradient(135deg,rgba(0,245,255,.27),rgba(0,245,255,.08) 48%,rgba(7,17,25,.55))!important}
+.start-bar .start.session{background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(90,120,170,.07) 48%,rgba(7,12,20,.55))!important}
+.start-bar .start.record{background:linear-gradient(135deg,rgba(255,43,214,.25),rgba(255,43,214,.07) 48%,rgba(12,8,20,.56))!important}
+.start-bar .start svg{filter:drop-shadow(0 0 6px currentColor);width:17px;height:17px}
+/* The panel host must not render as an empty black rectangle. */
+#mkMobilePanelHost{display:none!important}
+#mkMobilePanelHost.mk-host-open{display:block!important}
+/* Beat animation only touches the visual hero, not the whole page. */
+@keyframes mkLeanBeat{0%{transform:scale(1);box-shadow:0 0 30px rgba(0,245,255,.10),inset 0 0 28px rgba(0,245,255,.06)}35%{transform:scale(1.025);box-shadow:0 0 44px rgba(0,245,255,.22),0 0 70px rgba(255,43,214,.07),inset 0 0 36px rgba(0,245,255,.10)}100%{transform:scale(1);box-shadow:0 0 30px rgba(0,245,255,.10),inset 0 0 28px rgba(0,245,255,.06)}}
+.tempo-display-card.mk-light-beat{animation:mkLeanBeat .20s cubic-bezier(.2,.8,.2,1)}
+.focus-main.mk-light-beat{animation:mkLeanBeat .16s cubic-bezier(.2,.8,.2,1)}
+</style>
+<script id="mk-v9-final-js">
+(function(){
+  const mobile=()=>matchMedia('(max-width:760px)').matches;
+  // Replace the expensive global beat pulse with a tiny, GPU-friendly visual pulse.
+  window.pulseMetroCard=function(accent){
+    if(!window.metroRunning)return;
+    const a=document.getElementById('tempoDisplayCard');
+    if(a){a.classList.remove('mk-light-beat');void a.offsetWidth;a.classList.add('mk-light-beat');}
+    const f=document.getElementById('focusOverlay');
+    if(f?.classList.contains('open')){const m=f.querySelector('.focus-main');if(m){m.classList.remove('mk-light-beat');void m.offsetWidth;m.classList.add('mk-light-beat');}}
+  };
+  // One visual pulse per scheduled beat; don't create a timeout for every rhythm subdivision.
+  const oldSchedule=window.scheduleBeat;
+  if(typeof oldSchedule==='function'&&!oldSchedule.__mkLean){
+    window.scheduleBeat=function(t){
+      const now=audioCtx?.currentTime||0, delay=Math.max(0,(t-now)*1000);
+      setTimeout(()=>{if(window.metroRunning)window.pulseMetroCard(false)},delay);
+      return oldSchedule.apply(this,arguments);
+    };
+    window.scheduleBeat.__mkLean=true;
+  }
+  // Hide/show the mobile panel host correctly.
+  const oldOpen=window.mkOpenPanelMobileFixed,oldClose=window.mkClosePanelMobileFixed;
+  if(typeof oldOpen==='function'&&!oldOpen.__mkHost){
+    window.mkOpenPanelMobileFixed=function(name){const r=oldOpen.apply(this,arguments);document.getElementById('mkMobilePanelHost')?.classList.add('mk-host-open');return r};window.mkOpenPanelMobileFixed.__mkHost=true;
+  }
+  if(typeof oldClose==='function'&&!oldClose.__mkHost){
+    window.mkClosePanelMobileFixed=function(){const r=oldClose.apply(this,arguments);document.getElementById('mkMobilePanelHost')?.classList.remove('mk-host-open');return r};window.mkClosePanelMobileFixed.__mkHost=true;
+  }
+  const host=document.getElementById('mkMobilePanelHost'); if(host&&!host.children.length)host.classList.remove('mk-host-open');
+  // Dedicated, stable Review sheet: recordings + calendar + history + stats.
+  function reviewSheet(){
+    let rs=document.getElementById('mkReviewSheetV9');
+    if(!rs){
+      rs=document.createElement('div');rs.id='mkReviewSheetV9';rs.className='mk-review-sheet mk-review-sheet-v9';
+      rs.innerHTML='<div class="mk-review-sheet-box"><div class="mk-review-handle"></div><div class="mk-review-title">Review</div><div class="mk-review-content"></div></div>';
+      document.body.appendChild(rs);
+      rs.addEventListener('click',e=>{if(e.target===rs)rs.classList.remove('open')});
+    }
+    return rs;
+  }
+  function openReviewV9(){
+    if(!mobile())return;
+    const rs=reviewSheet(),c=rs.querySelector('.mk-review-content');
+    ['panel-record','panel-calendar','historyCard','statsCard'].forEach(id=>{
+      const el=document.getElementById(id);if(!el)return;
+      el.classList.remove('open','collapsed');el.style.display='block';el.style.visibility='visible';el.style.opacity='1';
+      if(el.parentElement!==c)c.appendChild(el);
+    });
+    rs.classList.add('open');
+    document.getElementById('mkMobileBackdrop')?.classList.add('open');
+    document.body.classList.add('mk-mobile-sheet-open');
+    try{renderCalendar();renderRecordings();renderHistory();renderStats();lucide.createIcons()}catch(e){}
+  }
+  // Capture first so older mobile category patches cannot steal Review.
+  document.addEventListener('click',function(e){
+    if(!mobile())return;
+    const b=e.target.closest('.mk-mobile-category[data-category="review"]');
+    if(!b)return;
+    e.preventDefault();e.stopImmediatePropagation();openReviewV9();
+  },true);
+  // If a Review sheet from an older patch opens, keep all four sources visible and add the missing two panels.
+  document.addEventListener('click',function(e){
+    if(!mobile())return;
+    const b=e.target.closest('.mk-category-sheet-list button[data-panel="record"],.mk-category-sheet-list button[data-panel="calendar"]');
+    if(!b)return;
+    e.preventDefault();e.stopImmediatePropagation();openReviewV9();
+  },true);
+  // Close the V9 sheet from backdrop and restore panels on desktop.
+  document.getElementById('mkMobileBackdrop')?.addEventListener('click',()=>document.getElementById('mkReviewSheetV9')?.classList.remove('open'),{passive:true});
+  window.addEventListener('resize',()=>{if(!mobile()){const rs=document.getElementById('mkReviewSheetV9');rs?.classList.remove('open')}},{passive:true});
+})();
+</script>
+<style id="mk-v9-review-css">
+@media(max-width:760px){
+  .mk-review-sheet-v9{z-index:10060!important;display:flex!important;align-items:flex-end!important;padding:0 8px calc(72px + env(safe-area-inset-bottom))!important}
+  .mk-review-sheet-v9:not(.open){opacity:0!important;pointer-events:none!important}
+  .mk-review-sheet-v9.open{opacity:1!important;pointer-events:auto!important}
+  .mk-review-sheet-v9 .mk-review-sheet-box{max-height:86vh!important;width:100%!important;overflow:auto!important;position:relative!important;z-index:10061!important}
+  .mk-review-sheet-v9 .mk-review-content{display:flex!important;flex-direction:column!important;gap:10px!important}
+  .mk-review-sheet-v9 #panel-record,.mk-review-sheet-v9 #panel-calendar,.mk-review-sheet-v9 #historyCard,.mk-review-sheet-v9 #statsCard{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;box-sizing:border-box!important;margin:0!important}
+  .mk-review-sheet-v9 #panel-record,.mk-review-sheet-v9 #panel-calendar{padding:12px!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:15px!important;background:rgba(8,13,22,.7)!important}
+  .mk-review-sheet-v9 .section-body{display:block!important;visibility:visible!important}
+  .mk-review-sheet-v9 .recordings{min-height:24px!important}
+  .mk-review-sheet-v9 .calendar-grid-full{min-height:120px!important}
+}
+</style>
 </body></html>
 <!-- Mobile polish: category contents, no Tools sheet, focus-style home tempo -->
 <style id="mk-round4-fixes">
@@ -3970,5 +4083,108 @@ function syncReminderAfterRender(){
   document.getElementById("mkMobileBackdrop")?.addEventListener("click",close);
   const observer=new MutationObserver(()=>{if(!isMobile())return;const p=document.querySelector(".metro-card>.panel.open");if(p){const n=p.id.replace(/^panel-/i,"");if(n)open(n)}});observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]});
   window.addEventListener("resize",()=>{if(!isMobile())close()},{passive:true});
+})();
+</script>
+
+<!-- MK Studio v2026.09.07.8 — mobile polish + performance pass -->
+<style id="mk-mobile-v8-polish">
+html,body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+.title-season-text,.current-name,.market-ticker,.timer-value,.bpm-big,.focus-bpm,.focus-tempo-value{font-family:"Space Grotesk",Inter,ui-sans-serif,sans-serif!important}
+@media(max-width:760px){
+  /* The header Settings button is redundant; Settings lives only in bottom nav. */
+  .topbar .actions .icon-btn[title="Settings"]{display:none!important}
+
+  /* Crystal / glass transport controls. Keep them GPU-friendly: opacity, border and transform only. */
+  .start-bar .start{position:relative;isolation:isolate;overflow:hidden!important;border:1px solid rgba(255,255,255,.22)!important;background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.055) 42%,rgba(255,255,255,.025))!important;color:#f5fbff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.34),inset 0 -10px 24px rgba(0,0,0,.16),0 10px 28px rgba(0,0,0,.24),0 0 22px rgba(0,245,255,.08)!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .12s ease,box-shadow .16s ease,border-color .16s ease!important}
+  .start-bar .start:before{content:"";position:absolute;inset:1px 1px 48% 1px;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.24),transparent);opacity:.8;pointer-events:none;z-index:-1}
+  .start-bar .start:after{content:"";position:absolute;top:-70%;left:-28%;width:34%;height:240%;transform:rotate(18deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);opacity:0;pointer-events:none}
+  .start-bar .start:hover:after{animation:mkCrystalSheen .7s ease-out}
+  .start-bar .start.metro{border-color:rgba(0,245,255,.38)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -10px 24px rgba(0,245,255,.08),0 10px 28px rgba(0,0,0,.25),0 0 26px rgba(0,245,255,.12)!important}
+  .start-bar .start.session{border-color:rgba(184,255,61,.34)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.34),inset 0 -10px 24px rgba(184,255,61,.07),0 10px 28px rgba(0,0,0,.25),0 0 24px rgba(184,255,61,.10)!important}
+  .start-bar .start.record{border-color:rgba(255,77,216,.34)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.34),inset 0 -10px 24px rgba(255,77,216,.07),0 10px 28px rgba(0,0,0,.25),0 0 24px rgba(255,77,216,.10)!important}
+  .start-bar .start:active{transform:scale(.975)!important}
+  @keyframes mkCrystalSheen{0%{left:-28%;opacity:0}20%{opacity:1}100%{left:115%;opacity:0}}
+
+  /* Review is a real scrollable sheet. All four review sources must be visible. */
+  .mk-review-sheet.open .mk-review-sheet-box{max-height:calc(100vh - 78px)!important;min-height:0!important;overflow:hidden!important}
+  .mk-review-sheet.open .mk-review-content{max-height:calc(100vh - 132px)!important;overflow-y:auto!important;overflow-x:hidden!important;padding:0 2px 18px!important;display:flex!important;flex-direction:column!important;gap:10px!important;-webkit-overflow-scrolling:touch}
+  .mk-review-sheet.open #historyCard,.mk-review-sheet.open #statsCard,.mk-review-sheet.open #panel-record,.mk-review-sheet.open #panel-calendar{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;inset:auto!important;max-height:none!important;overflow:visible!important;width:auto!important;margin:0!important}
+  .mk-review-sheet.open #panel-record,.mk-review-sheet.open #panel-calendar{border:1px solid rgba(255,255,255,.09)!important;border-radius:16px!important;background:rgba(9,14,23,.72)!important;padding:12px!important}
+  .mk-review-sheet.open .section-body{display:block!important;visibility:visible!important;max-height:none!important}
+
+  /* The temporary mobile panel host used by the old compatibility layer must not become a black rectangle. */
+  #mkMobilePanelHost{display:none!important;pointer-events:none!important;background:transparent!important;box-shadow:none!important;border:0!important}
+  #mkMobilePanelHost:empty{display:none!important}
+
+  /* Avoid expensive blur/paint on the persistent beat surface. */
+  .mk-mobile-backdrop,.mk-review-sheet,.mk-tools-sheet,.mk-mobile-category-sheet{backdrop-filter:blur(7px)!important;-webkit-backdrop-filter:blur(7px)!important}
+  .mk-mobile-category,.practice-timer-card,.metro-visual,.focus-timer,.focus-main{will-change:auto!important}
+
+  /* One compositor-friendly beat pulse is shared by all major surfaces. */
+  body.mk-beat-sync .tempo-display-card,body.mk-beat-sync .practice-timer-card,body.mk-beat-sync .mk-mobile-category,body.mk-beat-sync .focus-timer{box-shadow:0 0 24px rgba(0,245,255,.10),inset 0 0 18px rgba(0,245,255,.035)!important}
+  body.mk-beat-accent .tempo-display-card,body.mk-beat-accent .practice-timer-card,body.mk-beat-accent .mk-mobile-category,body.mk-beat-accent .focus-timer{box-shadow:0 0 30px rgba(184,255,61,.16),inset 0 0 22px rgba(184,255,61,.045)!important}
+  body.mk-beat-sync .metro-visual,body.mk-beat-sync .mk-mobile-category{transform:translateZ(0) scale(1.006)!important}
+  body.mk-beat-accent .metro-visual,body.mk-beat-accent .mk-mobile-category{transform:translateZ(0) scale(1.01)!important}
+}
+</style>
+<script id="mk-mobile-v8-js">
+(function(){
+  /* Keep the existing Review sheet, but always move the real Recordings + Calendar panels into it. */
+  function repairReview(){
+    if(!window.matchMedia('(max-width:760px)').matches)return;
+    const rs=document.getElementById('mkReviewSheet'); if(!rs)return;
+    const content=rs.querySelector('.mk-review-content'); if(!content)return;
+    ['statsCard','historyCard','panel-record','panel-calendar'].forEach(id=>{
+      const el=document.getElementById(id); if(!el)return;
+      if(!el.dataset.mkReviewParent)el.dataset.mkReviewParent=el.parentElement?.id||'metro-card';
+      content.appendChild(el);
+      el.classList.remove('collapsed');
+      el.classList.add('open');
+      el.style.display='block';el.style.visibility='visible';el.style.opacity='1';
+    });
+    if(typeof renderCalendar==='function')renderCalendar();
+    if(typeof renderRecordings==='function')renderRecordings();
+  }
+  window.mkRepairReview=repairReview;
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(repairReview,0));
+  document.addEventListener('click',e=>{
+    const b=e.target.closest('.mk-mobile-category,[data-category="review"],[data-nav="review"]');
+    if(b)setTimeout(repairReview,40);
+  },true);
+
+  /* Remove the redundant Settings action even if a late render recreates header actions. */
+  function hideHeaderSettings(){document.querySelectorAll('.topbar .actions .icon-btn[title="Settings"]').forEach(x=>x.remove())}
+  document.addEventListener('DOMContentLoaded',hideHeaderSettings);
+  new MutationObserver(hideHeaderSettings).observe(document.body,{subtree:true,childList:true});
+
+  /* Performance: do not animate every section independently on every beat. */
+  let pulseTimer=0;
+  window.pulseMetroCard=function(accent){
+    const root=document.body;
+    root.classList.remove('mk-beat-sync','mk-beat-accent');
+    void root.offsetWidth;
+    root.classList.add(accent?'mk-beat-accent':'mk-beat-sync');
+    clearTimeout(pulseTimer);
+    pulseTimer=setTimeout(()=>root.classList.remove('mk-beat-sync','mk-beat-accent'),90);
+    const card=document.getElementById('tempoDisplayCard');
+    if(card){card.classList.remove('beat-pulse','beat-accent');void card.offsetWidth;card.classList.add(accent?'beat-accent':'beat-pulse');setTimeout(()=>card.classList.remove('beat-pulse','beat-accent'),100)}
+  };
+  window.pulseAtAudioTime=function(time,accent){
+    if(!window.audioCtx)return;
+    const delay=Math.max(0,(time-window.audioCtx.currentTime)*1000);
+    setTimeout(()=>{if(window.metroRunning)window.pulseMetroCard(!!accent)},delay);
+  };
+
+  /* Mobile audio path: keep the metronome crisp while avoiding per-click harmonic/noise allocations. */
+  const originalPlayClick=window.playClick;
+  window.playClick=function(time,type='normal'){
+    if(!window.matchMedia('(max-width:760px)').matches){return originalPlayClick(time,type)}
+    if(!window.audioCtx)return;
+    const v=window.metroMuted?0:Math.max(0,Math.min(1,Number(document.getElementById('volume')?.value||.7)));if(v<=0)return;
+    const accent=type==='accent', secondary=type==='secondary';
+    const o=window.audioCtx.createOscillator(),g=window.audioCtx.createGain();
+    o.type=accent?'triangle':'sine';o.frequency.setValueAtTime(accent?1450:1100,time);o.frequency.exponentialRampToValueAtTime(accent?1050:850,time+.045);
+    const level=v*(accent?.52:secondary?.18:.36);g.gain.setValueAtTime(.0001,time);g.gain.linearRampToValueAtTime(level,time+.001);g.gain.exponentialRampToValueAtTime(.0001,time+.055);o.connect(g);g.connect(window.audioCtx.destination);o.start(time);o.stop(time+.07);
+  };
 })();
 </script>
