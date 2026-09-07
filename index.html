@@ -1889,8 +1889,8 @@ let practiceLiveIndicator=null,practiceToastTimer=null;
 let tempoModifierTimer=null, tempoAutomationRunning=false;
 let mediaRecorder=null,mediaStream=null,recordingChunks=[],recordingStartedAt=0,recordings=[]; let recordingAudioCtx=null,recordingSource=null,recordingProcessor=null,recordingBuffers=[],recordingSampleRate=44100,recordingStopping=false; let calendarCursor=new Date(); calendarCursor.setDate(1);
 const noteDefs={
- quarter:{label:"Quarter",symbol:"♩",div:1},half:{label:"Half",symbol:"𝅝",div:2},dottedQuarter:{label:"Dotted Quarter",symbol:"♩.",div:1.5},
- eighth:{label:"Eighth",symbol:"♪",div:.5},sixteenth:{label:"Sixteenth",symbol:"♬",div:.25},triplet:{label:"Triplet",symbol:"♬",div:1/3},dottedEighth:{label:"Dotted Eighth",symbol:"♪.",div:.75},whole:{label:"Whole",symbol:"𝅝",div:4}
+ quarter:{label:"Quarter",symbol:"♩",div:1},half:{label:"Half",symbol:"𝅗𝅥",div:2},dottedQuarter:{label:"Dotted Quarter",symbol:"♩.",div:1.5},
+ eighth:{label:"Eighth",symbol:"♪",div:.5},sixteenth:{label:"Sixteenth",symbol:"𝅘𝅥𝅯",div:.25},triplet:{label:"Triplet",symbol:"♫³",div:1/3},dottedEighth:{label:"Dotted Eighth",symbol:"♪.",div:.75},whole:{label:"Whole",symbol:"𝅝",div:4}
 };
 const soundDefs={classic:"Classic",soft:"Soft",sharp:"Sharp",beep:"Beep",digital:"Digital",wood:"Wood"};
 const drumDefs={off:"Off",basic:"Basic Rock",rock:"Rock",disco:"Disco",halftime:"Half Time",shuffle:"Shuffle",jazz:"Jazz",latin:"Latin",funk:"Funk"};
@@ -4210,6 +4210,109 @@ function syncReminderAfterRender(){
     if(!mobile()||!document.body.dataset.mkHardLocked)return;
     const box=e.target.closest('#mkReviewSheet .mk-review-sheet-box,#dashboardMenu #allSeasonsCard');
     if(!box){e.preventDefault();return}
+  },{passive:false});
+})();
+</script>
+
+<style id="mk-mobile-final-v7">
+@media (max-width:760px){
+  /* Distinct crystal colors */
+  .start-bar .start.metro{background:linear-gradient(145deg,rgba(0,214,255,.34),rgba(0,76,145,.58))!important;border-color:rgba(85,225,255,.72)!important;box-shadow:inset 0 1px rgba(255,255,255,.30),0 12px 30px rgba(0,180,255,.28)!important}
+  .start-bar .start.session{background:linear-gradient(145deg,rgba(87,225,120,.34),rgba(13,105,54,.60))!important;border-color:rgba(115,245,150,.70)!important;box-shadow:inset 0 1px rgba(255,255,255,.30),0 12px 30px rgba(40,205,90,.25)!important}
+  .start-bar .start.record{background:linear-gradient(145deg,rgba(255,74,106,.36),rgba(125,13,42,.62))!important;border-color:rgba(255,125,150,.74)!important;box-shadow:inset 0 1px rgba(255,255,255,.30),0 12px 30px rgba(245,40,85,.27)!important}
+  .start-bar .start.metro:active,.start-bar .start.session:active,.start-bar .start.record:active{transform:translateY(1px) scale(.985)!important}
+  /* Musical note glyphs: correct values and a font stack that renders the symbols consistently */
+  .note-symbol{font-family:"Noto Music","Bravura","Segoe UI Symbol","DejaVu Sans",serif!important;font-size:25px!important;line-height:1.05!important;font-weight:400!important;display:block!important;min-height:27px!important;font-variant-ligatures:none!important}
+  .note-btn{min-height:66px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important}
+  .note-btn.active .note-symbol{filter:drop-shadow(0 0 7px rgba(255,43,214,.55))}
+  /* Review content is a real scroll container; cards are restored to their original parents on close. */
+  #mkReviewSheet.mk-review-sheet-final .mk-review-sheet-box{max-height:84dvh!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+  #mkReviewSheet.mk-review-sheet-final .mk-review-content{padding-bottom:18px!important}
+  #mkReviewSheet.mk-review-sheet-final #practiceOverview{display:block!important;visibility:visible!important;opacity:1!important}
+  #mkReviewSheet.mk-review-sheet-final #practiceOverview .section-body{display:block!important;visibility:visible!important;opacity:1!important}
+  #mkReviewSheet.mk-review-sheet-final #historyCard .section-body,#mkReviewSheet.mk-review-sheet-final #statsCard .section-body{display:block!important;visibility:visible!important;opacity:1!important}
+}
+</style>
+<script id="mk-mobile-final-v7-js">
+(function(){
+  const isMobile=()=>window.matchMedia('(max-width:760px)').matches;
+  let moved=[];
+  let lockY=0;
+  function lock(){if(!isMobile()||document.body.dataset.mkV7Lock==='1')return;lockY=window.scrollY||0;document.body.dataset.mkV7Lock='1';document.body.style.position='fixed';document.body.style.top=(-lockY)+'px';document.body.style.left='0';document.body.style.right='0';document.body.style.width='100%';document.body.style.overflow='hidden';}
+  function unlock(){if(document.body.dataset.mkV7Lock!=='1')return;delete document.body.dataset.mkV7Lock;['position','top','left','right','width','overflow'].forEach(p=>document.body.style.removeProperty(p));requestAnimationFrame(()=>window.scrollTo(0,lockY));}
+  function ensureReview(){
+    let rs=document.getElementById('mkReviewSheet');
+    if(!rs){rs=document.createElement('div');rs.id='mkReviewSheet';document.body.appendChild(rs)}
+    rs.className='mk-review-sheet mk-review-sheet-final';
+    rs.innerHTML='<div class="mk-review-sheet-box"><div class="mk-review-handle"></div><div class="mk-review-title">Review</div><div class="mk-review-content"></div></div>';
+    return rs;
+  }
+  function closeReview(){
+    const rs=document.getElementById('mkReviewSheet');
+    if(!rs)return;
+    rs.classList.remove('open');
+    const content=rs.querySelector('.mk-review-content');
+    /* Restore every moved node to its exact original position. */
+    [...moved].reverse().forEach(item=>{try{item.placeholder.parentNode?.insertBefore(item.el,item.placeholder.nextSibling);item.placeholder.remove()}catch(e){console.warn('restore review node',e)}});
+    moved=[];
+    document.body.classList.remove('mk-mobile-sheet-open');
+    document.getElementById('mkMobileBackdrop')?.classList.remove('open');
+    unlock();
+  }
+  function openReview(){
+    if(!isMobile())return;
+    const rs=ensureReview(),content=rs.querySelector('.mk-review-content');
+    closeReview();
+    /* Recreate the empty content after closeReview removed the sheet state. */
+    const fresh=ensureReview(), box=fresh.querySelector('.mk-review-content');
+    ['practiceOverview','statsCard','historyCard','panel-record','panel-calendar'].forEach(id=>{
+      const el=document.getElementById(id); if(!el||el.parentNode===box)return;
+      const ph=document.createComment('mk-review-v7-'+id); el.parentNode.insertBefore(ph,el); moved.push({el,placeholder:ph}); box.appendChild(el);
+      el.classList.remove('collapsed');el.classList.add('open');el.style.setProperty('display','block','important');el.style.setProperty('visibility','visible','important');el.style.setProperty('opacity','1','important');
+    });
+    fresh.classList.add('open');
+    document.getElementById('mkMobileBackdrop')?.classList.remove('open');
+    document.body.classList.add('mk-mobile-sheet-open');lock();
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      try{typeof renderRecordings==='function'&&renderRecordings()}catch(e){console.warn(e)}
+      try{typeof renderCalendar==='function'&&renderCalendar()}catch(e){console.warn(e)}
+      try{typeof renderStats==='function'&&renderStats()}catch(e){console.warn(e)}
+      try{typeof renderHistory==='function'&&renderHistory()}catch(e){console.warn(e)}
+      try{typeof renderAll==='function'&&renderAll;window.lucide&&lucide.createIcons()}catch(e){}
+    }));
+  }
+  window.mkOpenReviewV7=openReview;window.mkCloseReviewV7=closeReview;window.openReview=openReview;
+  /* Dashboard: do not use the old backdrop; open one controlled sheet and render only after it has layout. */
+  function openDashboard(){
+    if(!isMobile()){try{return window.toggleDashboardMenuOriginalV7?.()}catch(e){return}};
+    closeReview();
+    const d=document.getElementById('dashboardMenu'),card=document.getElementById('allSeasonsCard');if(!d||!card)return;
+    card.classList.remove('collapsed');card.querySelector('.section-body')?.style.setProperty('display','block','important');
+    d.classList.add('open');document.getElementById('mkMobileBackdrop')?.classList.remove('open');document.body.classList.add('mk-mobile-sheet-open');lock();
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      try{if(chart){chart.destroy();chart=null}}catch(e){}
+      try{typeof renderOverview==='function'&&renderOverview()}catch(e){console.error('mobile dashboard',e)}
+      try{if(chart)chart.resize()}catch(e){}
+      try{window.lucide&&lucide.createIcons()}catch(e){}
+    }));
+  }
+  function closeDashboard(){document.getElementById('dashboardMenu')?.classList.remove('open');document.body.classList.remove('mk-mobile-sheet-open');unlock()}
+  window.toggleDashboardMenuOriginalV7=window.toggleDashboardMenu;
+  window.mkOpenDashboardV7=openDashboard;window.mkCloseDashboardV7=closeDashboard;
+  window.toggleDashboardMenu=function(){if(isMobile())openDashboard();else window.toggleDashboardMenuOriginalV7?.()};
+  document.addEventListener('click',function(e){
+    if(!isMobile())return;
+    const r=e.target.closest('[data-category="review"],.mk-mobile-category[data-category="review"],.mk-review-final-trigger');
+    if(r){e.preventDefault();e.stopImmediatePropagation();openReview();return}
+    const db=e.target.closest('.dashboard-menu-btn');
+    if(db){e.preventDefault();e.stopImmediatePropagation();openDashboard();return}
+    const rs=document.getElementById('mkReviewSheet');if(rs?.classList.contains('open')&&e.target===rs){e.preventDefault();closeReview();return}
+    const d=document.getElementById('dashboardMenu');if(d?.classList.contains('open')&&e.target===d){e.preventDefault();closeDashboard();return}
+  },true);
+  document.addEventListener('touchmove',function(e){
+    if(!isMobile()||document.body.dataset.mkV7Lock!=='1')return;
+    const allowed=e.target.closest('#mkReviewSheet .mk-review-sheet-box,#dashboardMenu #allSeasonsCard');
+    if(!allowed)e.preventDefault();
   },{passive:false});
 })();
 </script>
