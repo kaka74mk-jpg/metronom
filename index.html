@@ -3917,14 +3917,44 @@ function schedulePracticeReminders(){
     rs.innerHTML='<div class="mk-review-sheet-box"><div class="mk-review-handle"></div><div class="mk-review-title">Review</div><div class="mk-review-content"></div></div>';
     return rs;
   }
+  function restoreReviewNodes(){
+    /* Restore nodes moved by any of the older mobile Review controllers too.
+       This is intentionally independent of the local `moved` array so a Review
+       opened through an older handler can never leave Recordings/Calendar behind. */
+    [...moved].reverse().forEach(item=>{
+      try{
+        if(item.placeholder?.parentNode) item.placeholder.parentNode.insertBefore(item.el,item.placeholder.nextSibling);
+        item.placeholder?.remove();
+      }catch(e){console.warn('restore review node',e)}
+    });
+    moved=[];
+
+    const root=document.querySelector('.metro-card');
+    if(root){
+      ['practiceOverview','statsCard','historyCard','panel-record','panel-calendar'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(!el || !el.dataset.mkReviewParent)return;
+        const parentId=el.dataset.mkReviewParent;
+        const parent=parentId==='metro-card'?root:document.getElementById(parentId);
+        if(!parent)return;
+        const nextId=el.dataset.mkReviewNext;
+        const next=nextId?document.getElementById(nextId):null;
+        try{
+          if(next && next.parentElement===parent) parent.insertBefore(el,next);
+          else parent.appendChild(el);
+        }catch(e){console.warn('restore legacy review node',id,e)}
+        el.classList.remove('open');
+        el.classList.remove('collapsed');
+        ['display','visibility','opacity','transform','position','inset','left','right','top','bottom','z-index'].forEach(prop=>el.style.removeProperty(prop));
+        delete el.dataset.mkReviewParent;
+        delete el.dataset.mkReviewNext;
+      });
+    }
+  }
   function closeReview(){
     const rs=document.getElementById('mkReviewSheet');
-    if(!rs)return;
-    rs.classList.remove('open');
-    const content=rs.querySelector('.mk-review-content');
-    /* Restore every moved node to its exact original position. */
-    [...moved].reverse().forEach(item=>{try{item.placeholder.parentNode?.insertBefore(item.el,item.placeholder.nextSibling);item.placeholder.remove()}catch(e){console.warn('restore review node',e)}});
-    moved=[];
+    restoreReviewNodes();
+    if(rs)rs.classList.remove('open');
     document.body.classList.remove('mk-mobile-sheet-open');
     document.getElementById('mkMobileBackdrop')?.classList.remove('open');
     unlock();
