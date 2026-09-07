@@ -1,5 +1,5 @@
 {
-  "version": "2026.09.07.7",
-  "releasedAt": "2026-09-07T19:15:00Z",
-  "message": "MK Studio mobile review, focus and performance sync fix"
+  "version": "2026.09.08.1",
+  "releasedAt": "2026-09-08T00:00:00Z",
+  "message": "Fix: Review sheet leaving Recordings/Calendar stuck as an overlay after closing"
 }

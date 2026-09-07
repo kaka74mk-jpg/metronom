@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.07.7">
+<meta name="mk-app-version" content="2026.09.08.1">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -3458,10 +3458,19 @@ function schedulePracticeReminders(){
     reviewSheet.addEventListener('click',e=>{if(e.target===reviewSheet && typeof window.mkCloseReviewV7==='function')window.mkCloseReviewV7();});
   }
   function openReview(){
+    if(typeof window.mkOpenReviewV7==='function'){window.mkOpenReviewV7();return;}
     if(!mobile())return; setupReviewSheet(); reviewSheet.classList.add('open'); if(backdrop)backdrop.classList.add('open'); document.body.classList.add('mk-mobile-sheet-open');
     reviewSources.forEach(x=>x.classList.remove('collapsed'));
   }
-  function closeReview(){if(reviewSheet)reviewSheet.classList.remove('open'); if(backdrop)backdrop.classList.remove('open'); document.body.classList.remove('mk-mobile-sheet-open');}
+  function closeReview(){
+    // Always defer to the final V7 controller: it is the only one that puts
+    // the moved Recordings/Calendar/Stats/History cards back where they came
+    // from. Every other close path (backdrop tap, swipe-to-dismiss) used to
+    // call this stub instead, which only hid the sheet with CSS and left the
+    // real cards stranded inside it — that's the "stuck layer" bug.
+    if(typeof window.mkCloseReviewV7==='function'){window.mkCloseReviewV7();return;}
+    if(reviewSheet)reviewSheet.classList.remove('open'); if(backdrop)backdrop.classList.remove('open'); document.body.classList.remove('mk-mobile-sheet-open');
+  }
   function restoreReviewDesktop(){
     if(!reviewSources.length)return;
     const layout=document.querySelector('.layout'); if(!layout)return;
@@ -3580,6 +3589,10 @@ function schedulePracticeReminders(){
   const bodyClose=()=>document.body.classList.remove('mk-mobile-sheet-open');
   function closeEverything(except){
     if(!mobile())return;
+    // Close Review through its real controller first (unless it's the one thing
+    // we're keeping open) so its moved cards get restored instead of stranded.
+    const rs=document.getElementById('mkReviewSheet');
+    if(rs&&rs!==except&&rs.classList.contains('open')&&typeof window.mkCloseReviewV7==='function')window.mkCloseReviewV7();
     document.querySelectorAll('.mk-tools-sheet.open,.mk-review-sheet.open,.mk-mobile-category-sheet.open').forEach(x=>{if(x!==except)x.classList.remove('open')});
     document.querySelectorAll('.metro-card>.panel.open').forEach(x=>x.classList.remove('open'));
     document.querySelectorAll('.tool.active').forEach(x=>x.classList.remove('active'));
@@ -3723,6 +3736,12 @@ function schedulePracticeReminders(){
     review:[['record','mic','Recordings','Capture and review practice takes'],['calendar','calendar-days','Calendar','Practice calendar & monthly summary']]
   };
   function closeAllSurfaces(){
+    // Close Review through its real controller first so moved cards (Recordings,
+    // Calendar, Stats, History) get restored to their normal spot. Stripping the
+    // 'open' class directly below (for the other sheet types) would otherwise
+    // leave them stranded inside the hidden review sheet when switching straight
+    // from Review to another tab.
+    if(document.getElementById('mkReviewSheet')?.classList.contains('open')&&typeof window.mkCloseReviewV7==='function')window.mkCloseReviewV7();
     document.querySelectorAll('.mk-tools-sheet.open,.mk-review-sheet.open,.mk-mobile-category-sheet.open,.metro-card>.panel.open,.dashboard-menu.open').forEach(x=>x.classList.remove('open'));
     document.querySelectorAll('.modal.open').forEach(x=>x.classList.remove('open'));
     const f=document.getElementById('focusOverlay');if(f&&f.classList.contains('open')){f.classList.remove('open');f.setAttribute('aria-hidden','true')}
@@ -3749,28 +3768,12 @@ function schedulePracticeReminders(){
     closeAllSurfaces();
     restoreReviewPanels();
     if(cat==='review'){
-      const rs=document.getElementById('mkReviewSheet');
-      if(rs){
-        const content=rs.querySelector('.mk-review-content');
-        if(content){
-          const ids=['statsCard','historyCard','panel-record','panel-calendar'];
-          ids.forEach(id=>{
-            const el=document.getElementById(id);
-            if(!el)return;
-            if(!el.dataset.mkReviewParent){
-              el.dataset.mkReviewParent=el.parentElement?.id||'metro-card';
-              el.dataset.mkReviewNext=el.nextElementSibling?.id||'';
-            }
-            content.appendChild(el);
-            el.classList.add('open');
-            el.classList.remove('collapsed');
-            el.style.display='block';el.style.visibility='visible';el.style.opacity='1';
-          });
-        }
-        closeAllSurfaces();
-        ['statsCard','historyCard','panel-record','panel-calendar'].forEach(id=>{const el=document.getElementById(id);if(el&&el.parentElement===content){el.classList.add('open');el.classList.remove('collapsed');el.style.display='block';el.style.visibility='visible';el.style.opacity='1'}});
-        rs.classList.add('open');backdrop()?.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');try{lucide.createIcons()}catch{};return;
-      }
+      // Delegate entirely to the final V7 review controller. It owns the only
+      // move/restore logic that's actually safe (placeholder-based, scroll-lock
+      // aware). A second independent mover here previously duplicated that work
+      // without a matching restore for statsCard/historyCard, which could leave
+      // those cards stranded outside the page's normal layout after closing.
+      if(typeof window.mkOpenReviewV7==='function'){window.mkOpenReviewV7();return;}
       return;
     }
     let sheet=document.getElementById('mkCategoryChooser');
