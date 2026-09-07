@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.07.5">
+<meta name="mk-app-version" content="2026.09.07.7">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1598,6 +1598,14 @@ button, input, select, textarea {
   .mk-review-sheet.open .mk-review-sheet-box{position:relative;z-index:10041!important;}
 }
 </style>
+
+<style id="mk-performance-sync-fix">
+@media(max-width:760px){
+  .mk-beat-sync{animation:mkBeatSync .10s cubic-bezier(.2,.8,.2,1)!important}
+  @keyframes mkBeatSync{0%{transform:scale(1);filter:brightness(1)}45%{transform:scale(1.012);filter:brightness(1.16)}100%{transform:scale(1);filter:brightness(1)}}
+  .mk-mobile-category,.practice-timer-card,.metro-visual,.focus-timer,.focus-main{will-change:transform,filter}
+}
+</style>
 </head>
 <body>
 <div class="app">
@@ -2125,8 +2133,8 @@ function scheduleBeat(t){
     }
     const delay=Math.max(0,(et-audioCtx.currentTime)*1000);
     setTimeout(()=>highlightBeat(beatIndex*pat.length+i),delay);
-    pulseAtAudioTime(et,isBarStart&&i===0);
   });
+  pulseAtAudioTime(t,isBarStart);
   // Drums run on their own 16th-note grid, independent of the selected rhythm.
   if(drumPat&&drumPat.length){
     const step=pulse/4;
@@ -2676,14 +2684,17 @@ function restoreSectionState(){
     if(btn)btn.setAttribute("aria-expanded",collapsed?"false":"true");
   });
 }
+let __mkBeatNodes=null;
 function pulseMetroCard(accent=false){
-  const card=document.querySelector(".tempo-display-card"); if(!card)return;
-  card.classList.remove("beat-pulse","beat-accent");
-  requestAnimationFrame(()=>{if(metroRunning)card.classList.add(accent?"beat-accent":"beat-pulse")});
+  if(!metroRunning)return;
+  const cls=accent?"beat-accent":"beat-pulse";
+  if(!__mkBeatNodes||!__mkBeatNodes.length){__mkBeatNodes=document.querySelectorAll(".tempo-display-card,.metro-visual,.practice-timer-card,.mk-mobile-category,.section-card,.panel,.focus-main,.focus-timer")}
+  const nodes=__mkBeatNodes;
+  nodes.forEach(n=>{n.classList.remove("mk-beat-sync");n.classList.add("mk-beat-sync")});
   clearTimeout(window.__metroPulseClear);
-  window.__metroPulseClear=setTimeout(()=>card.classList.remove("beat-pulse","beat-accent"),240);
-  const focusBeat=document.getElementById("focusBeat");
-  if(focusBeat){focusBeat.classList.remove("pulse");void focusBeat.offsetWidth;focusBeat.classList.add("pulse");setTimeout(()=>focusBeat.classList.remove("pulse"),130)}
+  window.__metroPulseClear=setTimeout(()=>nodes.forEach(n=>n.classList.remove("mk-beat-sync")),110);
+  const card=document.querySelector(".tempo-display-card");
+  if(card){card.classList.remove("beat-pulse","beat-accent");card.classList.add(cls);clearTimeout(window.__metroPulseCardClear);window.__metroPulseCardClear=setTimeout(()=>card.classList.remove("beat-pulse","beat-accent"),130)}
 }
 function pulseAtAudioTime(time,accent=false){
   if(!audioCtx)return;
@@ -3044,7 +3055,7 @@ function startCloudPolling(user){
       const remote=await getCloudSnapshot(user);
       if(remote?.data?.practices)applyRemoteSnapshot(remote,"Cloud sync");
     }catch(e){console.warn("Cloud fallback check failed",e)}
-  },1000);
+  },5000);
 }
 function stopCloudPolling(){
   if(cloudPollTimer){clearInterval(cloudPollTimer);cloudPollTimer=null}
@@ -3842,21 +3853,47 @@ function syncReminderAfterRender(){
     document.querySelectorAll('.tool.active').forEach(x=>x.classList.remove('active'));
     backdrop()?.classList.remove('open');document.body.classList.remove('mk-mobile-sheet-open');
   }
+  function restoreReviewPanels(){
+    const root=document.querySelector('.metro-card');
+    if(!root)return;
+    ['panel-record','panel-calendar'].forEach(id=>{
+      const el=document.getElementById(id); if(!el)return;
+      el.classList.remove('open');
+      el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity');
+      const target=el.dataset.mkReviewParent==='metro-card'?root:null;
+      if(target && el.parentElement!==target){
+        const nextId=el.dataset.mkReviewNext;
+        const next=nextId?document.getElementById(nextId):null;
+        if(next&&next.parentElement===target)target.insertBefore(el,next);else target.appendChild(el);
+      }
+    });
+  }
   function openRichCategory(cat){
     if(!mobile())return;
     closeAllSurfaces();
+    restoreReviewPanels();
     if(cat==='review'){
       const rs=document.getElementById('mkReviewSheet');
       if(rs){
         const content=rs.querySelector('.mk-review-content');
         if(content){
-          const stats=document.getElementById('statsCard');
-          const hist=document.getElementById('historyCard');
-          if(stats && stats.parentElement!==content) content.appendChild(stats);
-          if(hist && hist.parentElement!==content) content.appendChild(hist);
-          [stats,hist].filter(Boolean).forEach(x=>{x.classList.remove('collapsed');x.style.display='block'});
+          const ids=['statsCard','historyCard','panel-record','panel-calendar'];
+          ids.forEach(id=>{
+            const el=document.getElementById(id);
+            if(!el)return;
+            if(!el.dataset.mkReviewParent){
+              el.dataset.mkReviewParent=el.parentElement?.id||'metro-card';
+              el.dataset.mkReviewNext=el.nextElementSibling?.id||'';
+            }
+            content.appendChild(el);
+            el.classList.add('open');
+            el.classList.remove('collapsed');
+            el.style.display='block';el.style.visibility='visible';el.style.opacity='1';
+          });
         }
-        closeAllSurfaces(); rs.classList.add('open');backdrop()?.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');try{lucide.createIcons()}catch{};return;
+        closeAllSurfaces();
+        ['statsCard','historyCard','panel-record','panel-calendar'].forEach(id=>{const el=document.getElementById(id);if(el&&el.parentElement===content){el.classList.add('open');el.classList.remove('collapsed');el.style.display='block';el.style.visibility='visible';el.style.opacity='1'}});
+        rs.classList.add('open');backdrop()?.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');try{lucide.createIcons()}catch{};return;
       }
       return;
     }
@@ -3876,6 +3913,7 @@ function syncReminderAfterRender(){
     }));
     if(typeof lucide!=='undefined')lucide.createIcons();
   }
+  window.addEventListener('resize',()=>{if(!mobile())restoreReviewPanels()},{passive:true});
   document.addEventListener('click',e=>{const c=e.target.closest('.mk-mobile-category');if(c&&mobile()){e.preventDefault();e.stopImmediatePropagation();openRichCategory(c.dataset.category)}},true);
 
   // Home tempo orb: sync its running state with the actual metronome and pulse on every start/beat.
@@ -3907,8 +3945,18 @@ function syncReminderAfterRender(){
 
 <style id="mk-mobile-final-fix">
 @media(max-width:760px){
+  /* Settings lives in the bottom mobile navigation; remove the duplicate header button. */
+  .topbar .actions .icon-btn[title="Settings"]{display:none!important}
   .mk-mobile-panel-sheet{position:fixed!important;left:8px!important;right:8px!important;bottom:calc(64px + env(safe-area-inset-bottom))!important;max-height:min(78vh,680px)!important;overflow:auto!important;z-index:10032!important;margin:0!important;padding:16px!important;border:1px solid rgba(255,255,255,.11)!important;border-radius:20px 20px 16px 16px!important;background:linear-gradient(180deg,#101725,#080d15)!important;box-shadow:0 24px 80px rgba(0,0,0,.62),0 0 35px rgba(0,245,255,.07)!important;display:block!important;animation:mkSheetIn .18s ease-out}
   .mk-mobile-panel-sheet .panel-title{font-size:13px!important;margin-bottom:12px!important}.mk-mobile-panel-sheet .preset,.mk-mobile-panel-sheet .small-btn{min-height:40px}
+}
+
+@media(max-width:760px){
+  #focusOverlay .focus-shell{position:relative!important;isolation:isolate!important}
+  #focusOverlay .focus-top{position:relative!important;z-index:50!important;width:100%!important;top:auto!important}
+  #focusOverlay .focus-close{position:relative!important;z-index:60!important;pointer-events:auto!important;touch-action:manipulation!important}
+  #focusOverlay .focus-main{z-index:1!important}
+  #focusOverlay .focus-main:after{z-index:-1!important}
 }
 </style>
 <script id="mk-mobile-final-fix-js">
