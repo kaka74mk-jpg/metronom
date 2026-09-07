@@ -3454,8 +3454,8 @@ function schedulePracticeReminders(){
     reviewSheet.innerHTML='<div class="mk-review-sheet-box"><div class="mk-review-handle"></div><div class="mk-review-title">Review</div><div class="mk-review-content"></div></div>';
     document.body.appendChild(reviewSheet);
     reviewSources=['statsCard','historyCard'].map(id=>document.getElementById(id)).filter(Boolean);
-    reviewSheet.querySelector('.mk-review-content').append(...reviewSources);
-    reviewSheet.addEventListener('click',e=>{if(e.target===reviewSheet)closeReview();});
+    // Do not move review cards here. The final V7 review controller owns all moves/restores.
+    reviewSheet.addEventListener('click',e=>{if(e.target===reviewSheet && typeof window.mkCloseReviewV7==='function')window.mkCloseReviewV7();});
   }
   function openReview(){
     if(!mobile())return; setupReviewSheet(); reviewSheet.classList.add('open'); if(backdrop)backdrop.classList.add('open'); document.body.classList.add('mk-mobile-sheet-open');
@@ -3637,22 +3637,9 @@ function schedulePracticeReminders(){
     if(cat){closeEverything();return;}
   },true);
 
-  /* Keep the single-sheet rule even when legacy functions open a surface directly. */
-  const observer=new MutationObserver(muts=>{
-    if(!mobile())return;
-    let opened=null;
-    muts.forEach(m=>m.addedNodes&&m.addedNodes.forEach(n=>{
-      if(n.nodeType===1 && (n.classList?.contains('open')||n.querySelector?.('.open')))opened=n;
-    }));
-    const opens=[...document.querySelectorAll('.mk-tools-sheet.open,.mk-review-sheet.open,.mk-mobile-category-sheet.open,.modal.open,.metro-card>.panel.open,#focusOverlay.open,.dashboard-menu.open')];
-    if(opens.length>1){
-      const last=opens[opens.length-1];closeEverything(last);
-      if(last.classList.contains('modal')){last.classList.add('open');const b=backdrop();b?.classList.remove('open');}
-      else if(last.id==='focusOverlay'){last.classList.add('open');last.setAttribute('aria-hidden','false');}
-      else {last.classList.add('open');backdrop()?.classList.add('open');document.body.classList.add('mk-mobile-sheet-open')}
-    }
-  });
-  observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
+  /* Surface exclusivity is handled by the final mobile controllers below.
+     Avoid a document-wide MutationObserver here: it was waking up on nearly every
+     class change (including scrolling/animations) and made the app feel heavy. */
 
   /* Reflect transport state and add a pulse whenever Focus starts. */
   const originalStart=window.startMetro,originalStop=window.stopMetro,originalSession=window.toggleSession;
@@ -3699,7 +3686,8 @@ function schedulePracticeReminders(){
 
   /* Home tempo display gets the same magical visual language as Focus mode. */
   .metro-card .tempo-display-card{position:relative;overflow:visible!important;isolation:isolate;min-height:112px!important;border-radius:50%!important;width:190px!important;height:190px!important;display:grid!important;place-items:center!important;background:radial-gradient(circle at 50% 48%,rgba(0,245,255,.14) 0 16%,rgba(0,245,255,.065) 34%,rgba(7,13,23,.96) 67%,rgba(3,7,13,.98) 100%)!important;border:1px solid rgba(0,245,255,.16)!important;box-shadow:0 0 30px rgba(0,245,255,.11),inset 0 0 38px rgba(0,245,255,.08)!important;cursor:pointer}
-  .metro-card .tempo-display-card:before{content:"";position:absolute;inset:-13%;border-radius:50%;border:1px solid rgba(0,245,255,.10);box-shadow:0 0 42px rgba(0,245,255,.09),inset 0 0 38px rgba(255,43,214,.035);animation:mkHomeAura 3.2s ease-in-out infinite;pointer-events:none;z-index:-1}
+  .metro-card .tempo-display-card:before{content:"";position:absolute;inset:-13%;border-radius:50%;border:1px solid rgba(0,245,255,.10);box-shadow:0 0 28px rgba(0,245,255,.07),inset 0 0 24px rgba(255,43,214,.025);animation:none;pointer-events:none;z-index:-1}
+  .metro-card .tempo-display-card.mk-home-running:before{animation:mkHomeAura 4.8s ease-in-out infinite}
   .metro-card .tempo-display-card:after{content:"";position:absolute;inset:13%;border-radius:50%;background:radial-gradient(circle,rgba(0,245,255,.11),transparent 68%);opacity:.7;pointer-events:none;z-index:-1}
   .metro-card .tempo-display-card .bpm-big{position:relative;z-index:2;font-size:72px!important;font-weight:1000!important;line-height:.86!important;letter-spacing:-.065em!important;text-shadow:0 0 24px rgba(0,245,255,.4),0 0 70px rgba(0,245,255,.17)!important;transition:transform .2s ease,text-shadow .2s ease}
   .metro-card .tempo-display-card .leds{position:absolute!important;inset:10px!important;z-index:1;pointer-events:none}
@@ -3908,6 +3896,7 @@ function schedulePracticeReminders(){
   .note-btn.active .note-symbol{filter:drop-shadow(0 0 7px rgba(255,43,214,.55))}
   /* Review content is a real scroll container; cards are restored to their original parents on close. */
   #mkReviewSheet.mk-review-sheet-final .mk-review-sheet-box{max-height:84dvh!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+  #mkReviewSheet.mk-review-sheet-final .mk-review-content{contain:layout paint;will-change:scroll-position}
   #mkReviewSheet.mk-review-sheet-final .mk-review-content{padding-bottom:18px!important}
   #mkReviewSheet.mk-review-sheet-final #practiceOverview{display:block!important;visibility:visible!important;opacity:1!important}
   #mkReviewSheet.mk-review-sheet-final #practiceOverview .section-body{display:block!important;visibility:visible!important;opacity:1!important}
@@ -3942,9 +3931,9 @@ function schedulePracticeReminders(){
   }
   function openReview(){
     if(!isMobile())return;
-    const rs=ensureReview(),content=rs.querySelector('.mk-review-content');
+    // Restore/close any previous review first; never rebuild the sheet while moved
+    // nodes are still inside it, otherwise their placeholders become unreachable.
     closeReview();
-    /* Recreate the empty content after closeReview removed the sheet state. */
     const fresh=ensureReview(), box=fresh.querySelector('.mk-review-content');
     ['practiceOverview','statsCard','historyCard','panel-record','panel-calendar'].forEach(id=>{
       const el=document.getElementById(id); if(!el||el.parentNode===box)return;
@@ -4024,8 +4013,10 @@ function schedulePracticeReminders(){
       document.documentElement.style.removeProperty('overflow');
     }
   }
-  setInterval(cleanup,80);
+  // Event-driven safety cleanup instead of polling every 80ms.
+  document.addEventListener('click',()=>requestAnimationFrame(cleanup),{passive:true});
   window.addEventListener('resize',cleanup,{passive:true});
   window.addEventListener('pageshow',cleanup,{passive:true});
+  window.addEventListener('visibilitychange',cleanup,{passive:true});
 })();
 </script>
