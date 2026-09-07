@@ -3647,3 +3647,112 @@ function syncReminderAfterRender(){
 })();
 </script>
 </body></html>
+<!-- Mobile polish: category contents, no Tools sheet, focus-style home tempo -->
+<style id="mk-round4-fixes">
+@media(max-width:760px){
+  /* Tools are already visible through the category launcher; no duplicate Tools sheet/nav item. */
+  .mk-tools-sheet{display:none!important}
+  .mk-mobile-nav button[data-nav="tools"]{display:none!important}
+  .mk-mobile-nav{grid-template-columns:repeat(3,1fr)!important}
+
+  /* Category chooser contains actual actions, not an empty title shell. */
+  .mk-mobile-category-sheet{z-index:10031!important;max-height:70vh;overflow:auto}
+  .mk-category-sheet-title{font-size:14px!important;margin-bottom:5px!important}
+  .mk-category-sheet-subtitle{font-size:8px;color:var(--muted);margin-bottom:11px;line-height:1.5}
+  .mk-category-sheet-list{gap:7px!important}
+  .mk-category-sheet-list button{min-height:56px!important;justify-content:flex-start!important;gap:11px!important}
+  .mk-category-sheet-list button i{margin-left:auto}
+  .mk-cat-action-icon{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:rgba(0,245,255,.07);border:1px solid rgba(0,245,255,.12);color:var(--cyan)}
+  .mk-cat-action-copy{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left}
+  .mk-cat-action-copy b{font-size:10px;color:#edf4ff}
+  .mk-cat-action-copy small{font-size:7px;color:var(--muted);font-weight:600}
+
+  /* Home tempo display gets the same magical visual language as Focus mode. */
+  .metro-card .tempo-display-card{position:relative;overflow:visible!important;isolation:isolate;min-height:112px!important;border-radius:50%!important;width:190px!important;height:190px!important;display:grid!important;place-items:center!important;background:radial-gradient(circle at 50% 48%,rgba(0,245,255,.14) 0 16%,rgba(0,245,255,.065) 34%,rgba(7,13,23,.96) 67%,rgba(3,7,13,.98) 100%)!important;border:1px solid rgba(0,245,255,.16)!important;box-shadow:0 0 30px rgba(0,245,255,.11),inset 0 0 38px rgba(0,245,255,.08)!important;cursor:pointer}
+  .metro-card .tempo-display-card:before{content:"";position:absolute;inset:-13%;border-radius:50%;border:1px solid rgba(0,245,255,.10);box-shadow:0 0 42px rgba(0,245,255,.09),inset 0 0 38px rgba(255,43,214,.035);animation:mkHomeAura 3.2s ease-in-out infinite;pointer-events:none;z-index:-1}
+  .metro-card .tempo-display-card:after{content:"";position:absolute;inset:13%;border-radius:50%;background:radial-gradient(circle,rgba(0,245,255,.11),transparent 68%);opacity:.7;pointer-events:none;z-index:-1}
+  .metro-card .tempo-display-card .bpm-big{position:relative;z-index:2;font-size:72px!important;font-weight:1000!important;line-height:.86!important;letter-spacing:-.065em!important;text-shadow:0 0 24px rgba(0,245,255,.4),0 0 70px rgba(0,245,255,.17)!important;transition:transform .2s ease,text-shadow .2s ease}
+  .metro-card .tempo-display-card .leds{position:absolute!important;inset:10px!important;z-index:1;pointer-events:none}
+  .metro-card .tempo-display-card.mk-home-running{border-color:rgba(0,245,255,.42)!important;box-shadow:0 0 48px rgba(0,245,255,.22),0 0 90px rgba(255,43,214,.08),inset 0 0 45px rgba(0,245,255,.10)!important}
+  .metro-card .tempo-display-card.mk-home-running .bpm-big{transform:scale(1.06);text-shadow:0 0 30px rgba(0,245,255,.8),0 0 85px rgba(0,245,255,.34)!important}
+  .metro-card .tempo-display-card.mk-home-pulse:after{animation:mkHomeOrb .72s cubic-bezier(.2,.8,.2,1)}
+  .metro-card .tempo-display-card.mk-home-pulse .bpm-big{animation:mkHomeBpm .55s ease-out}
+  @keyframes mkHomeAura{0%,100%{transform:scale(.93);opacity:.4}50%{transform:scale(1.04);opacity:.95}}
+  @keyframes mkHomeOrb{0%{transform:scale(.55);opacity:.25}45%{transform:scale(1.16);opacity:1}100%{transform:scale(1);opacity:.72}}
+  @keyframes mkHomeBpm{0%{transform:scale(.82);filter:brightness(1)}45%{transform:scale(1.13);filter:brightness(1.5)}100%{transform:scale(1.06);filter:brightness(1)}}
+  .metro-visual{height:205px!important;display:grid!important;place-items:center!important}
+}
+</style>
+<script id="mk-round4-js">
+(function(){
+  const mobile=()=>window.matchMedia('(max-width:760px)').matches;
+  const backdrop=()=>document.getElementById('mkMobileBackdrop');
+  const closeToolsSheet=()=>{const x=document.getElementById('mkToolsSheet');if(x)x.classList.remove('open')};
+
+  // Remove the redundant Tools bottom-sheet entry completely.
+  document.addEventListener('DOMContentLoaded',()=>{
+    const toolsNav=document.querySelector('.mk-mobile-nav button[data-nav="tools"]');
+    if(toolsNav)toolsNav.remove();
+    closeToolsSheet();
+    if(typeof lucide!=='undefined')lucide.createIcons();
+  });
+
+  // Replace the category chooser with a richer, explicit action list.
+  const categoryData={
+    rhythm:[['meter','music-2','Meter','Time signature & note values'],['rhythm','grid-2x2','Rhythm','Build and edit rhythm patterns']],
+    sound:[['sound','audio-lines','Sound','Metronome sound & voice'],['drums','drum','Drums','Practice drum patterns']],
+    technique:[['special','sparkles','Techniques','Special practice techniques']],
+    review:[['record','mic','Recordings','Capture and review practice takes'],['calendar','calendar-days','Calendar','Practice calendar & monthly summary']]
+  };
+  function closeAllSurfaces(){
+    document.querySelectorAll('.mk-tools-sheet.open,.mk-review-sheet.open,.mk-mobile-category-sheet.open,.metro-card>.panel.open,.dashboard-menu.open').forEach(x=>x.classList.remove('open'));
+    document.querySelectorAll('.modal.open').forEach(x=>x.classList.remove('open'));
+    const f=document.getElementById('focusOverlay');if(f&&f.classList.contains('open')){f.classList.remove('open');f.setAttribute('aria-hidden','true')}
+    document.querySelectorAll('.tool.active').forEach(x=>x.classList.remove('active'));
+    backdrop()?.classList.remove('open');document.body.classList.remove('mk-mobile-sheet-open');
+  }
+  function openRichCategory(cat){
+    if(!mobile())return;
+    closeAllSurfaces();
+    if(cat==='review'){
+      const rs=document.getElementById('mkReviewSheet');
+      if(rs){rs.classList.add('open');backdrop()?.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');rs.querySelectorAll('.mk-review-source').forEach(x=>x.classList.remove('collapsed'));try{lucide.createIcons()}catch{};return;}
+      return;
+    }
+    let sheet=document.getElementById('mkCategoryChooser');
+    if(!sheet){sheet=document.createElement('div');sheet.id='mkCategoryChooser';sheet.className='mk-mobile-category-sheet';document.body.appendChild(sheet)}
+    const names={rhythm:'Rhythm',sound:'Sound',technique:'Technique',review:'Review'};
+    const subs={rhythm:'Choose a rhythm workspace',sound:'Choose a sound workspace',technique:'Choose a technique',review:'Review your practice'};
+    const items=categoryData[cat]||[];
+    sheet.innerHTML='<div class="mk-category-sheet-handle"></div><div class="mk-category-sheet-title">'+names[cat]+'</div><div class="mk-category-sheet-subtitle">'+subs[cat]+'</div><div class="mk-category-sheet-list">'+items.map(x=>'<button type="button" data-panel="'+x[0]+'"><span class="mk-cat-action-icon"><i data-lucide="'+x[1]+'"></i></span><span class="mk-cat-action-copy"><b>'+x[2]+'</b><small>'+x[3]+'</small></span><i data-lucide="chevron-right"></i></button>').join('')+'</div>';
+    sheet.classList.add('open');backdrop()?.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');
+    sheet.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>{sheet.classList.remove('open');if(typeof window.openPanel==='function')window.openPanel(b.dataset.panel);else document.getElementById('panel-'+b.dataset.panel)?.classList.add('open')}));
+    if(typeof lucide!=='undefined')lucide.createIcons();
+  }
+  document.addEventListener('click',e=>{const c=e.target.closest('.mk-mobile-category');if(c&&mobile()){e.preventDefault();e.stopImmediatePropagation();openRichCategory(c.dataset.category)}},true);
+
+  // Home tempo orb: sync its running state with the actual metronome and pulse on every start/beat.
+  function updateHomeTempo(){
+    const card=document.getElementById('tempoDisplayCard');if(!card)return;
+    const btn=document.getElementById('metroBtn');
+    const running=!!(btn && /stop/i.test(btn.textContent||''));
+    card.classList.toggle('mk-home-running',running);
+  }
+  function pulseHomeTempo(){
+    const card=document.getElementById('tempoDisplayCard');if(!card||!mobile())return;
+    card.classList.remove('mk-home-pulse');void card.offsetWidth;card.classList.add('mk-home-pulse');
+    clearTimeout(window.__mkHomePulse);window.__mkHomePulse=setTimeout(()=>card.classList.remove('mk-home-pulse'),760);
+  }
+  const oldStart=window.startMetro,oldStop=window.stopMetro;
+  if(typeof oldStart==='function'&&!oldStart.__mkHome4){window.startMetro=function(){const r=oldStart.apply(this,arguments);setTimeout(()=>{updateHomeTempo();pulseHomeTempo()},20);return r};window.startMetro.__mkHome4=true}
+  if(typeof oldStop==='function'&&!oldStop.__mkHome4){window.stopMetro=function(){const r=oldStop.apply(this,arguments);setTimeout(updateHomeTempo,20);return r};window.stopMetro.__mkHome4=true}
+  const oldToggle=window.toggleMetro;
+  if(typeof oldToggle==='function'&&!oldToggle.__mkHome4){window.toggleMetro=function(){const r=oldToggle.apply(this,arguments);setTimeout(()=>{updateHomeTempo();if(window.metroRunning)pulseHomeTempo()},20);return r};window.toggleMetro.__mkHome4=true}
+  document.addEventListener('DOMContentLoaded',()=>{
+    const card=document.getElementById('tempoDisplayCard');
+    if(card){card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();window.toggleMetro?.()}});updateHomeTempo()}
+    if(typeof lucide!=='undefined')lucide.createIcons();
+  });
+  window.mkPulseHomeTempo=pulseHomeTempo;
+})();
+</script>
