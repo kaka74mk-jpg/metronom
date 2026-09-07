@@ -1,4 +1,4 @@
-const CACHE_NAME = "mk-studio-v4";
+const CACHE_NAME = "mk-studio-v5";
 
 const APP_SHELL = [
   "./",

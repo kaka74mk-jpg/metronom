@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.07.3">
+<meta name="mk-app-version" content="2026.09.07.5">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1917,6 +1917,7 @@ function saveDB(skipSync=false){
   renderAll();
   if(!skipSync)debouncedSync();
 }
+function saveDBFast(){localStorage.setItem(DB_KEY,JSON.stringify(db));markLocalChange();debouncedSync();}
 function currentPractice(){let p=db.practices.find(x=>x.id===currentId);if(!p){p=db.practices[0];currentId=p?.id}return p}
 function settings(){let p=currentPractice();return p.settings||(p.settings={})}
 function saveSetting(k,v){settings()[k]=v;saveDB()}
@@ -1969,9 +1970,13 @@ function renderHeader(){
   renderSeasonDropdown();
 }
 function setRangeFill(el,val,color){let min=Number(el.min),max=Number(el.max),pct=((Number(val)-min)/(max-min))*100;el.style.background=`linear-gradient(90deg,${color} 0%,${color} ${pct}%,#1b2538 ${pct}%,#1b2538 100%)`}
-function setBpm(v,persist=true){bpm=Math.max(20,Math.min(300,Math.round(Number(v))));document.getElementById("bpmRange").value=bpm;document.getElementById("bpmDisplay").textContent=bpm;document.getElementById("bpmValue").textContent=bpm;const fv=document.getElementById("focusTempoValue");if(fv)fv.textContent=bpm;const fb=document.getElementById("focusBpm");if(fb)fb.textContent=bpm;setRangeFill(document.getElementById("bpmRange"),bpm,"#00f5ff");settings().bpm=bpm;updateTarget();if(persist&&!realtimeApplying)saveDB()}
+function setBpm(v,persist=true){
+  bpm=Math.max(20,Math.min(300,Math.round(Number(v))));const r=document.getElementById("bpmRange");if(r)r.value=bpm;const d=document.getElementById("bpmDisplay");if(d)d.textContent=bpm;const vEl=document.getElementById("bpmValue");if(vEl)vEl.textContent=bpm;
+  const fv=document.getElementById("focusTempoValue");if(fv)fv.textContent=bpm;const fb=document.getElementById("focusBpm");if(fb)fb.textContent=bpm;if(r)setRangeFill(r,bpm,"#00f5ff");settings().bpm=bpm;updateTarget();
+  if(typeof updateTempoDirectionIndicator==="function")updateTempoDirectionIndicator();if(persist&&!realtimeApplying)saveDBFast();
+}
 function changeBpm(n){setBpm(bpm+n)}
-function updateVolumeUI(persist=false){let e=document.getElementById("volume"),v=Number(e.value);let pct=Math.max(0,Math.min(100,v*100));document.getElementById("volumeValue").textContent=Math.round(pct)+"%";e.style.setProperty("--volume-fill",pct+"%");settings().volume=v;if(persist&&!realtimeApplying)saveDB()}
+function updateVolumeUI(persist=false){const e=document.getElementById("volume");if(!e)return;const v=Number(e.value)||0,pct=Math.max(0,Math.min(100,v*100));const out=document.getElementById("volumeValue");if(out)out.textContent=Math.round(pct)+"%";e.style.setProperty("--volume-fill",pct+"%");settings().volume=v;if(persist&&!realtimeApplying)saveDBFast()}
 function setTarget(v,persist=true){targetBpm=Math.max(20,Math.min(300,Math.round(Number(v)||120)));let p=currentPractice();if(p)p.target=targetBpm;const value=document.getElementById("targetValue");if(value)value.textContent=targetBpm;const range=document.getElementById("targetRange");if(range){range.value=targetBpm;setRangeFill(range,targetBpm,"#b8ff3d")}if(persist&&!realtimeApplying)saveDB()}
 function updateTarget(){let p=currentPractice();if(!p)return;targetBpm=p.target||120;const v=document.getElementById("targetValue");if(v)v.textContent=targetBpm;const r=document.getElementById("targetRange");if(r){r.value=targetBpm;setRangeFill(r,targetBpm,"#b8ff3d")}}
 function renderVisual(){let n=Math.max(4,getRhythmPattern().length);document.getElementById("leds").innerHTML=Array.from({length:Math.min(n,16)},(_,i)=>`<span class="led ${i===0?"first":""}" id="led-${i}"></span>`).join("")}
@@ -2615,10 +2620,38 @@ if(!window.__mkRecordingAudioBound){
 }
 function formatDateTime(d){return new Date(d).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}
 
-function periodSessions(){if(period==="calendar")period="month";let now=new Date();let start=new Date(now);if(period==="week"){let day=(now.getDay()+6)%7;start.setDate(now.getDate()-day);start.setHours(0,0,0,0)}else if(period==="month"){start=new Date(now.getFullYear(),now.getMonth(),1)}else start=new Date(now.getFullYear(),0,1);return allSessions().filter(s=>new Date(s.date)>=start)}
-function setPeriod(v,b){period=v;if(v==="calendar"){document.getElementById("panel-calendar").style.display="block";renderCalendar()}else document.getElementById("panel-calendar").style.display="none";document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));if(b)b.classList.add("active");renderOverview()}
-function renderOverview(){let ss=periodSessions(),time=ss.reduce((a,s)=>a+(s.seconds||0),0),days=new Set(ss.map(s=>localDateKey(s.date)));document.getElementById("periodSessions").textContent=ss.length;document.getElementById("periodTime").textContent=formatMinutes(time);document.getElementById("periodDays").textContent=days.size;let buckets=period==="week"?7:period==="month"?30:12,labels=[],vals=[];if(period==="year"){for(let m=0;m<12;m++){labels.push(new Date(new Date().getFullYear(),m,1).toLocaleDateString("fa-IR",{month:"short"}));vals.push(ss.filter(s=>new Date(s.date).getMonth()===m).reduce((a,s)=>a+(s.seconds||0),0)/60)}}else{for(let i=buckets-1;i>=0;i--){let d=new Date();d.setDate(d.getDate()-i);let k=localDateKey(d);labels.push(d.getDate());vals.push(ss.filter(s=>localDateKey(s.date)===k).reduce((a,s)=>a+(s.seconds||0),0)/60)}}let c=document.getElementById("overviewChart").getContext("2d");if(chart)chart.destroy();chart=new Chart(c,{type:"line",data:{labels,datasets:[{data:vals,borderColor:"#00f5ff",backgroundColor:"rgba(0,245,255,.08)",fill:true,tension:.35,pointRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:"rgba(255,255,255,.03)"},ticks:{color:"#66728c",font:{size:7}}},y:{grid:{color:"rgba(255,255,255,.03)"},ticks:{color:"#66728c",font:{size:7}}}}}})}
-
+function periodSessions(){
+  if(period==="calendar")period="month";
+  const now=new Date(); let start;
+  if(period==="week"){const day=(now.getDay()+6)%7;start=new Date(now);start.setDate(now.getDate()-day);start.setHours(0,0,0,0)}
+  else if(period==="month")start=new Date(now.getFullYear(),now.getMonth(),1);
+  else start=new Date(now.getFullYear(),0,1);
+  return allSessions().filter(s=>{const d=new Date(s.date);return Number.isFinite(d.getTime())&&d>=start});
+}
+function setPeriod(v,b){
+  period=v;const cal=document.getElementById("panel-calendar");
+  if(v==="calendar"){if(cal)cal.style.display="block";renderCalendar()}else if(cal)cal.style.display="none";
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));if(b)b.classList.add("active");renderOverview();
+}
+function renderOverview(){
+  const ss=periodSessions(),time=ss.reduce((a,s)=>a+(Number(s.seconds)||0),0),days=new Set(ss.map(s=>localDateKey(s.date)));
+  document.getElementById("periodSessions").textContent=ss.length;document.getElementById("periodTime").textContent=formatMinutes(time);document.getElementById("periodDays").textContent=days.size;
+  const now=new Date();let labels=[],vals=[];
+  if(period==="week"){
+    const monday=new Date(now),day=(now.getDay()+6)%7;monday.setDate(now.getDate()-day);monday.setHours(0,0,0,0);const map=new Map();
+    ss.forEach(s=>{const k=localDateKey(s.date);map.set(k,(map.get(k)||0)+(Number(s.seconds)||0)/60)});
+    for(let i=0;i<7;i++){const d=new Date(monday);d.setDate(monday.getDate()+i);labels.push(d.toLocaleDateString("en-US",{weekday:"short"}));vals.push(map.get(localDateKey(d))||0)}
+  }else if(period==="month"){
+    const last=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),map=new Map();ss.forEach(s=>{const d=new Date(s.date),k=d.getDate();map.set(k,(map.get(k)||0)+(Number(s.seconds)||0)/60)});
+    for(let d=1;d<=last;d++){labels.push(String(d));vals.push(map.get(d)||0)}
+  }else{
+    const map=new Map();ss.forEach(s=>{const d=new Date(s.date);if(d.getFullYear()===now.getFullYear()){const k=d.getMonth();map.set(k,(map.get(k)||0)+(Number(s.seconds)||0)/60)}});
+    for(let m=0;m<12;m++){labels.push(new Date(now.getFullYear(),m,1).toLocaleDateString("en-US",{month:"short"}));vals.push(map.get(m)||0)}
+  }
+  const canvas=document.getElementById("overviewChart");if(!canvas||typeof Chart==="undefined")return;const c=canvas.getContext("2d");
+  if(chart){chart.data.labels=labels;chart.data.datasets[0].data=vals;chart.update("none");return}
+  chart=new Chart(c,{type:"line",data:{labels,datasets:[{data:vals,borderColor:"#00f5ff",backgroundColor:"rgba(0,245,255,.08)",fill:true,tension:.25,pointRadius:1.5,pointHitRadius:8}]},options:{responsive:true,maintainAspectRatio:false,animation:false,normalized:true,plugins:{legend:{display:false}},interaction:{mode:"index",intersect:false},scales:{x:{grid:{color:"rgba(255,255,255,.03)"},ticks:{color:"#66728c",font:{size:7},autoSkip:true,maxTicksLimit:period==="month"?10:12}},y:{beginAtZero:true,grid:{color:"rgba(255,255,255,.03)"},ticks:{color:"#66728c",font:{size:7}}}}}});
+}
 function currentStats(){let s=currentPractice()?.sessions||[],bp=s.map(x=>Number(x.bpm)).filter(Boolean),total=s.reduce((a,x)=>a+(x.seconds||0),0);return{best:bp.length?Math.max(...bp):null,last:s.at(-1)?.bpm||null,avg:bp.length?Math.round(bp.reduce((a,b)=>a+b,0)/bp.length):null,total,longest:s.length?Math.max(...s.map(x=>x.seconds||0)):0}}
 function calcStreak(sessions){let set=new Set(sessions.map(s=>localDateKey(s.date))),d=new Date(),n=0;while(set.has(localDateKey(d))){n++;d.setDate(d.getDate()-1)}return n}
 function renderStats(){let s=currentStats(),days=allDays();document.getElementById("statBest").textContent=s.best||"—";document.getElementById("statLast").textContent=s.last||"—";document.getElementById("statAvg").textContent=s.avg||"—";document.getElementById("statSessions").textContent=currentPractice()?.sessions.length||0;document.getElementById("statTime").textContent=formatMinutes(s.total);document.getElementById("statStreak").textContent=calcStreak(currentPractice()?.sessions||[]);let a=allSessions(),bp=a.map(x=>Number(x.bpm)).filter(Boolean),t=a.reduce((x,s)=>x+(s.seconds||0),0);document.getElementById("allSessions").textContent=a.length;document.getElementById("allTime").textContent=formatMinutes(t);document.getElementById("allDays").textContent=days.size;document.getElementById("allBest").textContent=bp.length?Math.max(...bp):"—";document.getElementById("allAvg").textContent=bp.length?Math.round(bp.reduce((x,y)=>x+y,0)/bp.length):"—";document.getElementById("allStreak").textContent=calcStreak(a)}
@@ -3868,5 +3901,26 @@ function syncReminderAfterRender(){
     if(typeof lucide!=='undefined')lucide.createIcons();
   });
   window.mkPulseHomeTempo=pulseHomeTempo;
+})();
+</script>
+
+
+<style id="mk-mobile-final-fix">
+@media(max-width:760px){
+  .mk-mobile-panel-sheet{position:fixed!important;left:8px!important;right:8px!important;bottom:calc(64px + env(safe-area-inset-bottom))!important;max-height:min(78vh,680px)!important;overflow:auto!important;z-index:10032!important;margin:0!important;padding:16px!important;border:1px solid rgba(255,255,255,.11)!important;border-radius:20px 20px 16px 16px!important;background:linear-gradient(180deg,#101725,#080d15)!important;box-shadow:0 24px 80px rgba(0,0,0,.62),0 0 35px rgba(0,245,255,.07)!important;display:block!important;animation:mkSheetIn .18s ease-out}
+  .mk-mobile-panel-sheet .panel-title{font-size:13px!important;margin-bottom:12px!important}.mk-mobile-panel-sheet .preset,.mk-mobile-panel-sheet .small-btn{min-height:40px}
+}
+</style>
+<script id="mk-mobile-final-fix-js">
+(function(){
+  const isMobile=()=>window.matchMedia("(max-width:760px)").matches;let host=null,placeholder=null,current=null;
+  function ensureHost(){if(host)return host;host=document.createElement("div");host.id="mkMobilePanelHost";host.className="mk-mobile-panel-sheet";document.body.appendChild(host);return host}
+  function close(){if(!current)return;const panel=document.getElementById("panel-"+current);if(panel&&placeholder&&placeholder.parentNode){panel.classList.remove("open");placeholder.parentNode.insertBefore(panel,placeholder.nextSibling)}if(host)host.innerHTML="";current=null;placeholder=null}
+  function open(name){if(!isMobile())return false;const panel=document.getElementById("panel-"+name);if(!panel)return false;close();const h=ensureHost();current=name;placeholder=document.createComment("mk-mobile-panel-placeholder");panel.parentNode.insertBefore(placeholder,panel);h.appendChild(panel);panel.classList.add("open");document.querySelectorAll(".tool.active").forEach(x=>x.classList.remove("active"));const btn=[...document.querySelectorAll(".tool")].find(x=>(x.textContent||"").trim().toLowerCase()===name.toLowerCase());if(btn)btn.classList.add("active");document.getElementById("mkMobileBackdrop")?.classList.add("open");document.body.classList.add("mk-mobile-sheet-open");try{lucide.createIcons()}catch{}return true}
+  window.mkOpenPanelMobileFixed=open;window.mkClosePanelMobileFixed=close;
+  document.addEventListener("click",e=>{if(!isMobile())return;const b=e.target.closest("[data-final-panel],[data-panel]");const name=b?.dataset?.finalPanel||b?.dataset?.panel;if(!name||name==="record"||name==="calendar")return;e.preventDefault();e.stopImmediatePropagation();document.getElementById("mkCategoryChooser")?.classList.remove("open");open(name)},true);
+  document.getElementById("mkMobileBackdrop")?.addEventListener("click",close);
+  const observer=new MutationObserver(()=>{if(!isMobile())return;const p=document.querySelector(".metro-card>.panel.open");if(p){const n=p.id.replace(/^panel-/i,"");if(n)open(n)}});observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]});
+  window.addEventListener("resize",()=>{if(!isMobile())close()},{passive:true});
 })();
 </script>
