@@ -1,19 +1,20 @@
-const CACHE_NAME = "mk-studio-v3";
+const CACHE_NAME = "mk-studio-v4";
 
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./icon-192.png",
-  "./icon-512.png"
+  "./version.json"
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
-  );
-
   self.skipWaiting();
+
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(APP_SHELL);
+    })
+  );
 });
 
 self.addEventListener("activate", (event) => {
@@ -24,20 +25,32 @@ self.addEventListener("activate", (event) => {
           .filter((key) => key !== CACHE_NAME)
           .map((key) => caches.delete(key))
       )
-    )
+    ).then(() => self.clients.claim())
   );
-
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
-
   const request = event.request;
   const url = new URL(request.url);
 
-  // HTML pages / app navigation:
-  // Always try network first so installed PWAs receive new versions.
+  // نسخه و Service Worker همیشه از شبکه خوانده شوند
+  if (
+    url.pathname.endsWith("/version.json") ||
+    url.pathname.endsWith("/sw.js")
+  ) {
+    event.respondWith(
+      fetch(request, {
+        cache: "no-store"
+      })
+        .then((response) => {
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // صفحات HTML: اول شبکه، در صورت نبود اینترنت از کش
   if (
     request.mode === "navigate" ||
     url.pathname.endsWith(".html") ||
@@ -47,37 +60,26 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const responseClone = response.clone();
+          const copy = response.clone();
 
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
+            cache.put(request, copy);
           });
 
           return response;
         })
-        .catch(() => caches.match(request))
+        .catch(() => {
+          return caches.match(request);
+        })
     );
 
     return;
   }
 
-  // Static assets:
-  // Cache first for fast loading, with network fallback.
+  // سایر فایل‌ها: کش اول، سپس شبکه
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(request).then((response) => {
-        const responseClone = response.clone();
-
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, responseClone);
-        });
-
-        return response;
-      });
+    caches.match(request).then((cached) => {
+      return cached || fetch(request);
     })
   );
 });

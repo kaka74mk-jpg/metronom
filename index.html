@@ -7,6 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
+<meta name="mk-app-version" content="2026.09.07.3">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1338,6 +1339,16 @@ button, input, select, textarea {
 .recording-card.compact .record-expand{display:block}
 .record-empty{padding:18px 10px;text-align:center;border:1px dashed #202b40;border-radius:12px;color:#66728c;font-size:8px}
 
+/* ===== App update / sync ===== */
+.app-update-box{margin-top:10px;padding:10px 11px;border:1px solid #202b40;border-radius:11px;background:#0a1019}
+.app-update-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.app-update-title{font-size:8px;font-weight:900;letter-spacing:.08em;color:#dfe8f8}
+.app-update-version{font-size:7px;color:#6c7891;margin-top:3px}
+.app-update-btn{border:1px solid rgba(0,245,255,.28);background:rgba(0,245,255,.07);color:var(--cyan);border-radius:8px;padding:6px 8px;font-size:7px;font-weight:900;display:inline-flex;align-items:center;gap:4px}
+.app-update-btn:hover{border-color:var(--cyan);background:rgba(0,245,255,.12)}
+.app-update-btn.ready{border-color:rgba(184,255,61,.45);background:rgba(184,255,61,.08);color:var(--lime)}
+.app-update-detail{margin-top:7px;font-size:7px;color:#66728c;line-height:1.5}
+.app-update-box.update-found{border-color:rgba(184,255,61,.35);box-shadow:0 0 18px rgba(184,255,61,.06)}
 /* ===== Sync status ===== */
 .sync-card{padding:13px 14px;overflow:hidden}
 .sync-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -1676,6 +1687,13 @@ button, input, select, textarea {
         <div class="sync-track"><span id="syncTrackFill"></span></div>
         <div class="sync-detail-row"><span id="syncDetail">Data is currently stored locally.</span><span id="syncLast">Not synced yet</span></div>
         <div class="sync-chips"><span id="syncChipCloud">Cloud <b>OFF</b></span><span id="syncChipRealtime">Realtime <b>OFF</b></span><button class="sync-now-btn" onclick="syncNow()"><i data-lucide="refresh-cw"></i> Sync now</button></div>
+        <div class="app-update-box" id="appUpdateBox">
+          <div class="app-update-head">
+            <div><div class="app-update-title">APP VERSION</div><div class="app-update-version" id="appVersionLabel">v2026.09.07.3</div></div>
+            <button class="app-update-btn" id="appUpdateBtn" onclick="checkForAppUpdate(true)"><i data-lucide="refresh-cw"></i><span>Check update</span></button>
+          </div>
+          <div class="app-update-detail" id="appUpdateDetail">Every device can check the live GitHub version here.</div>
+        </div>
       </div>
     </aside>
   </section>
@@ -2807,6 +2825,15 @@ function setSync(a,b){
   if(card){card.classList.remove("sync-live","sync-working","sync-offline");if(/realtime|synced/i.test(String(a)))card.classList.add("sync-live");else if(/syncing/i.test(String(a)))card.classList.add("sync-working");else card.classList.add("sync-offline")}
 }
 
+/* ===== GitHub app update manager ===== */
+const MK_APP_VERSION=(document.querySelector('meta[name="mk-app-version"]')?.content||"2026.09.07.3").trim();
+let mkRemoteAppVersion="",mkUpdateCheckInFlight=null;
+function compareAppVersions(a,b){const pa=String(a||"").replace(/^v/i,"").split(/[.+-]/).map(x=>parseInt(x,10)||0),pb=String(b||"").replace(/^v/i,"").split(/[.+-]/).map(x=>parseInt(x,10)||0);for(let i=0;i<Math.max(pa.length,pb.length);i++){const d=(pa[i]||0)-(pb[i]||0);if(d)return d}return 0}
+function setAppUpdateUI(state,detail,remote=""){const box=document.getElementById("appUpdateBox"),btn=document.getElementById("appUpdateBtn"),label=document.getElementById("appVersionLabel"),msg=document.getElementById("appUpdateDetail");if(label)label.textContent=`v${MK_APP_VERSION}${remote&&remote!==MK_APP_VERSION?` → v${remote}`:""}`;if(msg)msg.textContent=detail||"";if(btn){btn.classList.toggle("ready",state==="available");btn.innerHTML=state==="available"?'<i data-lucide="download"></i><span>Update now</span>':'<i data-lucide="refresh-cw"></i><span>Check update</span>';btn.onclick=state==="available"?applyAppUpdate:()=>checkForAppUpdate(true);btn.disabled=false}if(box)box.classList.toggle("update-found",state==="available");try{lucide.createIcons()}catch{}}
+async function fetchRemoteAppVersion(){const res=await fetch(`./version.json?mk_update_check=${Date.now()}`,{cache:"no-store",headers:{"Cache-Control":"no-cache"}});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();return String(data?.version||"").trim()}
+async function checkForAppUpdate(showMessage=false){if(mkUpdateCheckInFlight)return mkUpdateCheckInFlight;mkUpdateCheckInFlight=(async()=>{const btn=document.getElementById("appUpdateBtn");if(btn){btn.disabled=true;btn.innerHTML='<i data-lucide="loader-circle"></i><span>Checking…</span>';try{lucide.createIcons()}catch{}}try{const remote=await fetchRemoteAppVersion();if(!remote)throw new Error("Missing version");mkRemoteAppVersion=remote;if(compareAppVersions(remote,MK_APP_VERSION)>0){setAppUpdateUI("available",`A newer MK Studio build is live on GitHub (v${remote}). Update this device now.`,remote);return true}setAppUpdateUI("current",`This device is up to date. Live version: v${remote}.`,remote);return false}catch(e){console.warn("App update check failed",e);setAppUpdateUI("error",showMessage?"Could not check GitHub right now. Your data and sync are still available.":"GitHub update check unavailable.");return false}finally{mkUpdateCheckInFlight=null}})();return mkUpdateCheckInFlight}
+function applyAppUpdate(){try{sessionStorage.setItem("mkStudioUpdateRequested","1")}catch{}location.replace(`./?mk_update=${Date.now()}`)}
+
 document.addEventListener("keydown",e=>{if(["INPUT","SELECT","TEXTAREA"].includes(e.target.tagName))return;if(e.code==="Space"){e.preventDefault();toggleMetro()}if(e.key==="ArrowUp")changeBpm(1);if(e.key==="ArrowDown")changeBpm(-1);if(e.key.toLowerCase()==="r")toggleRecording()});
 document.addEventListener("visibilitychange",()=>{
   if(!document.hidden&&audioCtx?.state==="suspended")audioCtx.resume();
@@ -3045,14 +3072,21 @@ window.addEventListener("DOMContentLoaded",()=>{
 
 <script>
   if ("serviceWorker" in navigator) {
+    let mkControllerReloaded=false;
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{
+      if(mkControllerReloaded)return;
+      mkControllerReloaded=true;
+      if(!sessionStorage.getItem("mkStudioSWReloaded")){sessionStorage.setItem("mkStudioSWReloaded","1");location.reload();}
+    });
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" })
-        .then((registration) => {
+        .then(async (registration) => {
           console.log("Service Worker registered:", registration.scope);
+          try{await registration.update()}catch{}
+          setTimeout(()=>{try{sessionStorage.removeItem("mkStudioSWReloaded")}catch{}},8000);
+          checkForAppUpdate(false);
         })
-        .catch((error) => {
-          console.error("Service Worker registration failed:", error);
-        });
+        .catch((error) => {console.error("Service Worker registration failed:", error);checkForAppUpdate(false);});
     });
   }
 </script>
