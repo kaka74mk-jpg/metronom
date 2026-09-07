@@ -1620,7 +1620,7 @@ button, input, select, textarea {
     </div>
     <div class="actions">
       <button class="icon-btn" title="New Season" onclick="openNew()"><i data-lucide="plus"></i></button>
-      <button class="icon-btn dashboard-menu-btn" title="All Seasons Dashboard" onclick="toggleDashboardMenu()"><i data-lucide="layout-dashboard"></i></button>
+      <button class="icon-btn dashboard-menu-btn" title="All Seasons Dashboard" onclick="mkOpenDashboardFinal()"><i data-lucide="layout-dashboard"></i></button>
       <button class="icon-btn" title="Profile" onclick="openProfile()"><i data-lucide="user-round"></i></button>
       <button class="icon-btn" title="Settings" onclick="openSettings()"><i data-lucide="settings-2"></i></button>
       <button class="icon-btn" title="Rename" onclick="renameCurrent()"><i data-lucide="pencil"></i></button>
@@ -1710,7 +1710,7 @@ button, input, select, textarea {
           <button class="mk-mobile-category" data-category="rhythm"><i data-lucide="music-2"></i><span>Rhythm</span></button>
           <button class="mk-mobile-category" data-category="sound"><i data-lucide="audio-lines"></i><span>Sound</span></button>
           <button class="mk-mobile-category" data-category="technique"><i data-lucide="sparkles"></i><span>Technique</span></button>
-          <button class="mk-mobile-category" data-category="review"><i data-lucide="library"></i><span>Review</span></button>
+          <button class="mk-mobile-category-final mk-review-final-trigger" data-final-review="1"><i data-lucide="library"></i><span>Review</span></button>
         </div>
         <div class="tools">
           <button class="tool" onclick="togglePanel('meter',this)"><i data-lucide="music-2"></i>Meter</button>
@@ -4120,5 +4120,96 @@ function syncReminderAfterRender(){
   document.getElementById("mkMobileBackdrop")?.addEventListener("click",close);
   const observer=new MutationObserver(()=>{if(!isMobile())return;const p=document.querySelector(".metro-card>.panel.open");if(p){const n=p.id.replace(/^panel-/i,"");if(n)open(n)}});observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:["class"]});
   window.addEventListener("resize",()=>{if(!isMobile())close()},{passive:true});
+})();
+</script>
+
+<style id="mk-mobile-definitive-fix-v6">
+@media(max-width:760px){
+  /* keep Review trigger visually identical to other category tiles while bypassing old handlers */
+  .mk-mobile-categories .mk-mobile-category-final{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;min-height:62px!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:16px!important;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.025))!important;color:var(--text)!important;font:inherit!important;box-shadow:inset 0 1px rgba(255,255,255,.04)!important}
+  .mk-mobile-categories .mk-mobile-category-final svg{width:19px!important;height:19px!important;color:#f2b84b!important}.mk-mobile-categories .mk-mobile-category-final span{font-size:8px!important;font-weight:850!important}
+
+  /* three controls: same crystal language, clearly different color identities */
+  .start-bar .start{border:1px solid rgba(255,255,255,.20)!important;backdrop-filter:blur(16px) saturate(155%)!important;-webkit-backdrop-filter:blur(16px) saturate(155%)!important;position:relative!important;overflow:hidden!important;color:#f8fbff!important;text-shadow:0 1px 8px rgba(0,0,0,.35)!important}
+  .start-bar .start.metro{background:linear-gradient(145deg,rgba(20,164,255,.33),rgba(2,67,125,.56))!important;box-shadow:inset 0 1px rgba(255,255,255,.25),0 10px 28px rgba(0,130,255,.23)!important;border-color:rgba(90,190,255,.48)!important}
+  .start-bar .start.session{background:linear-gradient(145deg,rgba(60,205,128,.30),rgba(16,94,61,.56))!important;box-shadow:inset 0 1px rgba(255,255,255,.25),0 10px 28px rgba(35,190,105,.20)!important;border-color:rgba(105,235,165,.45)!important}
+  .start-bar .start.record{background:linear-gradient(145deg,rgba(236,83,111,.34),rgba(126,26,54,.58))!important;box-shadow:inset 0 1px rgba(255,255,255,.25),0 10px 28px rgba(235,55,95,.22)!important;border-color:rgba(255,120,145,.48)!important}
+  .start-bar .start:before{content:""!important;position:absolute!important;left:8%!important;right:8%!important;top:1px!important;height:38%!important;border-radius:999px!important;background:linear-gradient(180deg,rgba(255,255,255,.20),rgba(255,255,255,0))!important;pointer-events:none!important}
+
+  /* Definitive Review sheet, independent from old .metro-card > .panel mobile rules */
+  #mkReviewSheet.mk-review-sheet-final{display:flex!important;position:fixed!important;inset:0!important;z-index:12000!important;align-items:flex-end!important;padding:0 8px calc(70px + env(safe-area-inset-bottom))!important;background:rgba(2,5,10,.66)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;opacity:0!important;pointer-events:none!important}
+  #mkReviewSheet.mk-review-sheet-final.open{opacity:1!important;pointer-events:auto!important}
+  #mkReviewSheet.mk-review-sheet-final .mk-review-sheet-box{display:block!important;width:100%!important;max-height:82vh!important;overflow-y:auto!important;overflow-x:hidden!important;background:linear-gradient(180deg,#111a29,#080d15)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:22px 22px 16px 16px!important;padding:12px 10px 16px!important;transform:none!important;box-shadow:0 28px 90px rgba(0,0,0,.68)!important}
+  #mkReviewSheet.mk-review-sheet-final .mk-review-content{display:flex!important;flex-direction:column!important;gap:12px!important;max-height:none!important;overflow:visible!important;padding-bottom:4px!important}
+  #mkReviewSheet.mk-review-sheet-final #statsCard,#mkReviewSheet.mk-review-sheet-final #historyCard,#mkReviewSheet.mk-review-sheet-final #panel-record,#mkReviewSheet.mk-review-sheet-final #panel-calendar{display:block!important;position:relative!important;inset:auto!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:100%!important;max-width:none!important;max-height:none!important;margin:0!important;visibility:visible!important;opacity:1!important;transform:none!important;overflow:visible!important;z-index:auto!important}
+  #mkReviewSheet.mk-review-sheet-final #panel-record,#mkReviewSheet.mk-review-sheet-final #panel-calendar{padding:13px!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:16px!important;background:rgba(9,15,25,.88)!important;box-shadow:none!important;animation:none!important}
+  #mkReviewSheet.mk-review-sheet-final #panel-record:before,#mkReviewSheet.mk-review-sheet-final #panel-calendar:before{display:none!important}
+  #mkReviewSheet.mk-review-sheet-final .recordings,#mkReviewSheet.mk-review-sheet-final .calendar-grid-full{display:grid!important;visibility:visible!important;opacity:1!important;max-height:none!important;overflow:visible!important}
+  #mkReviewSheet.mk-review-sheet-final .calendar-weekdays{display:grid!important}
+
+  /* Definitive dashboard: card must remain visible above its own dim layer. */
+  #dashboardMenu.dashboard-menu.open{display:flex!important;position:fixed!important;inset:0!important;z-index:11900!important;align-items:flex-end!important;padding:0 8px calc(70px + env(safe-area-inset-bottom))!important;background:rgba(2,5,10,.60)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+  #dashboardMenu.dashboard-menu.open #allSeasonsCard{display:block!important;position:relative!important;width:100%!important;max-height:78vh!important;overflow-y:auto!important;opacity:1!important;visibility:visible!important;transform:none!important;z-index:11901!important;margin:0!important;border-radius:22px 22px 16px 16px!important;background:linear-gradient(180deg,#111a29,#080d15)!important;box-shadow:0 28px 90px rgba(0,0,0,.68)!important}
+  #dashboardMenu.dashboard-menu.open #allSeasonsCard.collapsed .section-body,#dashboardMenu.dashboard-menu.open #allSeasonsCard .section-body{display:block!important;visibility:visible!important;opacity:1!important}
+  #dashboardMenu.dashboard-menu.open .chart-wrap{display:block!important;position:relative!important;width:100%!important;height:220px!important;min-height:220px!important;overflow:hidden!important}
+  #dashboardMenu.dashboard-menu.open #overviewChart{display:block!important;width:100%!important;height:220px!important;min-height:220px!important;max-height:220px!important;visibility:visible!important;opacity:1!important}
+}
+</style>
+<script id="mk-mobile-definitive-fix-v6-js">
+(function(){
+  const mobile=()=>window.matchMedia('(max-width:760px)').matches;
+  let savedY=0;
+  function hardLock(){if(!mobile())return;if(!document.body.dataset.mkHardLocked){savedY=window.scrollY||0;document.body.dataset.mkHardLocked='1';document.body.style.position='fixed';document.body.style.top=(-savedY)+'px';document.body.style.left='0';document.body.style.right='0';document.body.style.width='100%';document.body.style.overflow='hidden';}}
+  function hardUnlock(){if(!document.body.dataset.mkHardLocked)return;delete document.body.dataset.mkHardLocked;document.body.style.removeProperty('position');document.body.style.removeProperty('top');document.body.style.removeProperty('left');document.body.style.removeProperty('right');document.body.style.removeProperty('width');document.body.style.removeProperty('overflow');window.scrollTo(0,savedY);}
+  function hideOther(){document.querySelectorAll('.mk-mobile-category-sheet.open,.mk-tools-sheet.open,.mk-mobile-panel-sheet,.modal.open,#focusOverlay.open').forEach(x=>x.classList.remove('open'));document.getElementById('dashboardMenu')?.classList.remove('open');}
+  function ensureReview(){
+    let rs=document.getElementById('mkReviewSheet');
+    if(!rs){rs=document.createElement('div');rs.id='mkReviewSheet';document.body.appendChild(rs)}
+    rs.className='mk-review-sheet mk-review-sheet-final';
+    rs.innerHTML='<div class="mk-review-sheet-box"><div class="mk-review-handle"></div><div class="mk-review-title">Review</div><div class="mk-review-content"></div></div>';
+    rs.addEventListener('click',e=>{if(e.target===rs)closeReview()});
+    return rs;
+  }
+  function openReview(){
+    if(!mobile())return;
+    hideOther();
+    const rs=ensureReview(), content=rs.querySelector('.mk-review-content');
+    try{typeof renderRecordings==='function'&&renderRecordings()}catch(e){console.warn(e)}
+    try{typeof renderCalendar==='function'&&renderCalendar()}catch(e){console.warn(e)}
+    ['statsCard','historyCard','panel-record','panel-calendar'].forEach(id=>{
+      const el=document.getElementById(id);if(!el)return;
+      content.appendChild(el);el.classList.add('open');el.classList.remove('collapsed');
+      el.style.setProperty('display','block','important');el.style.setProperty('visibility','visible','important');el.style.setProperty('opacity','1','important');
+    });
+    rs.classList.add('open');document.getElementById('mkMobileBackdrop')?.classList.remove('open');document.body.classList.add('mk-mobile-sheet-open');hardLock();
+    requestAnimationFrame(()=>{try{typeof renderRecordings==='function'&&renderRecordings();typeof renderCalendar==='function'&&renderCalendar();typeof renderStats==='function'&&renderStats();typeof renderHistory==='function'&&renderHistory();window.lucide&&lucide.createIcons()}catch(e){console.warn(e)}});
+  }
+  function closeReview(){document.getElementById('mkReviewSheet')?.classList.remove('open');document.body.classList.remove('mk-mobile-sheet-open');hardUnlock();}
+  window.mkOpenReviewDefinitive=openReview;window.mkCloseReviewDefinitive=closeReview;
+
+  window.mkOpenDashboardFinal=function(){
+    if(!mobile()){if(typeof toggleDashboardMenu==='function')return toggleDashboardMenu();return;}
+    document.getElementById('mkReviewSheet')?.classList.remove('open');hideOther();
+    const d=document.getElementById('dashboardMenu'),card=document.getElementById('allSeasonsCard');if(!d||!card)return;
+    card.classList.remove('collapsed');const body=card.querySelector('.section-body');if(body)body.style.setProperty('display','block','important');
+    d.classList.add('open');document.getElementById('mkMobileBackdrop')?.classList.remove('open');document.body.classList.add('mk-mobile-sheet-open');hardLock();
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      try{if(chart){chart.destroy();chart=null}}catch(e){}
+      try{typeof renderOverview==='function'&&renderOverview()}catch(e){console.error('dashboard render',e)}
+      try{window.lucide&&lucide.createIcons()}catch(e){}
+    }));
+  };
+  window.mkCloseDashboardFinal=function(){document.getElementById('dashboardMenu')?.classList.remove('open');document.body.classList.remove('mk-mobile-sheet-open');hardUnlock();};
+
+  document.addEventListener('click',e=>{
+    if(!mobile())return;
+    const r=e.target.closest('.mk-review-final-trigger');if(r){e.preventDefault();e.stopImmediatePropagation();openReview();return;}
+    const d=document.getElementById('dashboardMenu');if(d?.classList.contains('open')&&e.target===d){e.preventDefault();e.stopImmediatePropagation();window.mkCloseDashboardFinal();return;}
+  },true);
+  document.addEventListener('touchmove',e=>{
+    if(!mobile()||!document.body.dataset.mkHardLocked)return;
+    const box=e.target.closest('#mkReviewSheet .mk-review-sheet-box,#dashboardMenu #allSeasonsCard');
+    if(!box){e.preventDefault();return}
+  },{passive:false});
 })();
 </script>
