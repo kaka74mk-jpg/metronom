@@ -1889,8 +1889,8 @@ let practiceLiveIndicator=null,practiceToastTimer=null;
 let tempoModifierTimer=null, tempoAutomationRunning=false;
 let mediaRecorder=null,mediaStream=null,recordingChunks=[],recordingStartedAt=0,recordings=[]; let recordingAudioCtx=null,recordingSource=null,recordingProcessor=null,recordingBuffers=[],recordingSampleRate=44100,recordingStopping=false; let calendarCursor=new Date(); calendarCursor.setDate(1);
 const noteDefs={
- quarter:{label:"Quarter",symbol:"♩",div:1},half:{label:"Half",symbol:"𝅗𝅥",div:2},dottedQuarter:{label:"Dotted Quarter",symbol:"♩.",div:1.5},
- eighth:{label:"Eighth",symbol:"♪",div:.5},sixteenth:{label:"Sixteenth",symbol:"𝅘𝅥𝅯",div:.25},triplet:{label:"Triplet",symbol:"♫³",div:1/3},dottedEighth:{label:"Dotted Eighth",symbol:"♪.",div:.75},whole:{label:"Whole",symbol:"𝅝",div:4}
+ quarter:{label:"Quarter",symbol:"♩",div:1},half:{label:"Half",symbol:"𝅝",div:2},dottedQuarter:{label:"Dotted Quarter",symbol:"♩.",div:1.5},
+ eighth:{label:"Eighth",symbol:"♪",div:.5},sixteenth:{label:"Sixteenth",symbol:"♬",div:.25},triplet:{label:"Triplet",symbol:"♬",div:1/3},dottedEighth:{label:"Dotted Eighth",symbol:"♪.",div:.75},whole:{label:"Whole",symbol:"𝅝",div:4}
 };
 const soundDefs={classic:"Classic",soft:"Soft",sharp:"Sharp",beep:"Beep",digital:"Digital",wood:"Wood"};
 const drumDefs={off:"Off",basic:"Basic Rock",rock:"Rock",disco:"Disco",halftime:"Half Time",shuffle:"Shuffle",jazz:"Jazz",latin:"Latin",funk:"Funk"};
@@ -3938,6 +3938,101 @@ function syncReminderAfterRender(){
 })();
 </script>
 
+
+<style id="mk-mobile-final-v8">
+@media(max-width:760px){
+  /* Review v8: keep the full review stack visible and independently scrollable. */
+  #mkReviewSheet.mk-review-sheet-final .mk-review-sheet-box{max-height:88dvh!important;overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+  #mkReviewSheet.mk-review-sheet-final .mk-review-content{display:flex!important;flex-direction:column!important;gap:12px!important}
+  #mkReviewSheet.mk-review-sheet-final #practiceOverview,
+  #mkReviewSheet.mk-review-sheet-final #historyCard,
+  #mkReviewSheet.mk-review-sheet-final #statsCard,
+  #mkReviewSheet.mk-review-sheet-final #panel-record,
+  #mkReviewSheet.mk-review-sheet-final #panel-calendar{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;inset:auto!important;transform:none!important;width:100%!important;max-width:none!important;max-height:none!important;overflow:visible!important;margin:0!important}
+  #mkReviewSheet.mk-review-sheet-final #practiceOverview .section-body,
+  #mkReviewSheet.mk-review-sheet-final #historyCard .section-body,
+  #mkReviewSheet.mk-review-sheet-final #statsCard .section-body{display:block!important;visibility:visible!important;opacity:1!important}
+  #mkReviewSheet.mk-review-sheet-final #practiceOverview .overview{display:grid!important;visibility:visible!important;opacity:1!important}
+  #mkReviewSheet.mk-review-sheet-final #historyList{display:block!important;visibility:visible!important;opacity:1!important;min-height:24px!important}
+  #mkReviewSheet.mk-review-sheet-final #historyList .history-row{display:grid!important;visibility:visible!important;opacity:1!important}
+}
+</style>
+<script id="mk-mobile-final-v8-js">
+(function(){
+  const mobile=()=>window.matchMedia('(max-width:760px)').matches;
+  let lockY=0;
+  function finalSurfacesOpen(){return !!document.querySelector('#mkReviewSheet.mk-review-sheet-final.open,#dashboardMenu.open,#focusOverlay.open,.mk-tools-sheet.open,.mk-mobile-category-sheet.open,.mk-mobile-panel-sheet');}
+  function forceUnlock(){
+    if(document.body.dataset.mkV8Lock==='1'){
+      delete document.body.dataset.mkV8Lock;
+      ['position','top','left','right','width','overflow'].forEach(p=>document.body.style.removeProperty(p));
+      requestAnimationFrame(()=>window.scrollTo(0,lockY));
+    }
+    if(!finalSurfacesOpen()) document.body.classList.remove('mk-mobile-sheet-open','mk-mobile-locked');
+  }
+  function safeLock(){
+    if(!mobile())return;
+    if(document.body.dataset.mkV8Lock!=='1'){
+      lockY=window.scrollY||window.pageYOffset||0;
+      document.body.dataset.mkV8Lock='1';
+    }
+    document.body.style.position='fixed';document.body.style.top=(-lockY)+'px';document.body.style.left='0';document.body.style.right='0';document.body.style.width='100%';document.body.style.overflow='hidden';
+  }
+  /* If an older patch removes a surface without calling its matching unlock, recover automatically. */
+  setInterval(()=>{if(!mobile()){forceUnlock();return;} if(finalSurfacesOpen())safeLock(); else forceUnlock();},250);
+
+  function ensureReviewV8(){
+    let rs=document.getElementById('mkReviewSheet');
+    if(!rs){rs=document.createElement('div');rs.id='mkReviewSheet';document.body.appendChild(rs)}
+    rs.className='mk-review-sheet mk-review-sheet-final';
+    rs.innerHTML='<div class="mk-review-sheet-box"><div class="mk-review-handle"></div><div class="mk-review-title">Review</div><div class="mk-review-content"></div></div>';
+    return rs;
+  }
+  function restoreMoved(){
+    const items=window.__mkReviewV8Moved||[];
+    for(let i=items.length-1;i>=0;i--){const x=items[i];try{if(x.placeholder.parentNode)x.placeholder.parentNode.insertBefore(x.el,x.placeholder.nextSibling);x.placeholder.remove()}catch(e){}}
+    window.__mkReviewV8Moved=[];
+  }
+  function openReviewV8(){
+    if(!mobile())return;
+    restoreMoved();
+    const rs=ensureReviewV8(),box=rs.querySelector('.mk-review-content');
+    const moved=[];
+    ['practiceOverview','historyCard','statsCard','panel-record','panel-calendar'].forEach(id=>{
+      const el=document.getElementById(id);if(!el||el.parentNode===box)return;
+      const ph=document.createComment('mk-v8-'+id);el.parentNode.insertBefore(ph,el);moved.push({el,placeholder:ph});box.appendChild(el);
+      el.classList.remove('collapsed');el.classList.add('open');
+      el.style.setProperty('display','block','important');el.style.setProperty('visibility','visible','important');el.style.setProperty('opacity','1','important');
+    });
+    window.__mkReviewV8Moved=moved;
+    try{typeof renderStats==='function'&&renderStats()}catch(e){}
+    try{typeof renderHistory==='function'&&renderHistory()}catch(e){}
+    try{typeof renderRecordings==='function'&&renderRecordings()}catch(e){}
+    try{typeof renderCalendar==='function'&&renderCalendar()}catch(e){}
+    rs.classList.add('open');document.body.classList.add('mk-mobile-sheet-open');safeLock();
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{try{window.lucide&&lucide.createIcons()}catch(e){}}));
+  }
+  function closeReviewV8(){
+    const rs=document.getElementById('mkReviewSheet');if(rs)rs.classList.remove('open');
+    restoreMoved();
+    document.body.classList.remove('mk-mobile-sheet-open');forceUnlock();
+  }
+  window.openReview=openReviewV8;window.mkOpenReviewV8=openReviewV8;window.mkCloseReviewV8=closeReviewV8;
+  document.addEventListener('click',e=>{
+    if(!mobile())return;
+    const r=e.target.closest('.mk-review-final-trigger,[data-category="review"]');
+    if(r){e.preventDefault();e.stopImmediatePropagation();openReviewV8();return;}
+    const rs=document.getElementById('mkReviewSheet');if(rs?.classList.contains('open')&&e.target===rs){e.preventDefault();e.stopImmediatePropagation();closeReviewV8();}
+  },true);
+  document.addEventListener('touchmove',e=>{
+    if(!mobile()||!document.body.dataset.mkV8Lock)return;
+    const allowed=e.target.closest('#mkReviewSheet .mk-review-sheet-box,#dashboardMenu #allSeasonsCard,#focusOverlay .focus-shell,.mk-tools-sheet-box,.mk-mobile-category-sheet,.mk-mobile-panel-sheet');
+    if(!allowed)e.preventDefault();
+  },{passive:false});
+  window.addEventListener('pageshow',forceUnlock);
+  window.addEventListener('pagehide',forceUnlock);
+})();
+</script>
 </body></html>
 <!-- Mobile polish: category contents, no Tools sheet, focus-style home tempo -->
 <style id="mk-round4-fixes">
