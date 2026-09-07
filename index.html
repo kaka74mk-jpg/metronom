@@ -1792,8 +1792,6 @@ function renderSeasonDropdown(){
 function selectSeason(id){
   if(!db.practices.some(x=>x.id===id))return;
   currentId=id; localStorage.setItem("studioMetronomeCurrent",currentId);
-  sessionRunning=false; clearActiveSession();
-  restoreLastSavedSessionDisplay();
   loadPracticeSettings(currentPractice()); closeSeasonDropdown(); renderAll();
 }
 function toggleSeasonDropdown(e){
@@ -2014,20 +2012,6 @@ function restoreActiveSession(){
     return true;
   }catch(e){localStorage.removeItem(ACTIVE_SESSION_KEY);return false}
 }
-
-// Keep the last completed session visible after a page refresh. The live timer
-// itself is transient, but the completed session duration is already stored in
-// p.sessions. Previously sessionElapsed always started at 0 on a fresh page,
-// which made a correctly saved session look like it had been lost.
-function restoreLastSavedSessionDisplay(){
-  if(sessionRunning)return;
-  const p=currentPractice();
-  const sessions=Array.isArray(p?.sessions)?p.sessions:[];
-  if(!sessions.length){sessionElapsed=0;return}
-  const last=sessions[sessions.length-1];
-  const seconds=Number(last?.seconds);
-  sessionElapsed=Number.isFinite(seconds)?Math.max(0,Math.floor(seconds)):0;
-}
 function startSession(){
   if(sessionRunning)return;
   sessionRunning=true;sessionStartedAt=Date.now();sessionElapsed=0;
@@ -2049,6 +2033,16 @@ function stopSession(save=true,stopMetronome=true){
   if(navigator.vibrate)navigator.vibrate([40,50,80]);
   updateSessionTimer();
 }
+function getLastSavedSessionSeconds(practice=currentPractice()){
+  const sessions=Array.isArray(practice?.sessions)?practice.sessions:[];
+  if(!sessions.length)return 0;
+  const last=sessions[sessions.length-1];
+  return Math.max(0,Number(last?.seconds)||0);
+}
+function restoreSavedSessionTimer(){
+  if(sessionRunning)return;
+  sessionElapsed=getLastSavedSessionSeconds();
+}
 function updateSessionTimer(){
   const e=document.getElementById("sessionTime"),day=document.getElementById("daySessionTime"),card=document.getElementById("practiceTimerCard"),state=document.getElementById("sessionTimerState");
   const current=sessionRunning?Math.floor((Date.now()-sessionStartedAt)/1000):sessionElapsed;
@@ -2062,7 +2056,20 @@ function updateSessionTimer(){
   if(sessionRunning){clearTimeout(sessionTimerTick);sessionTimerTick=setTimeout(updateSessionTimer,250)}
 }
 function formatDurationLong(sec){sec=Math.max(0,Math.floor(Number(sec)||0));return `${String(Math.floor(sec/3600)).padStart(2,"0")}:${String(Math.floor((sec%3600)/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`}
-function saveSession(seconds){let p=currentPractice();if(!p)return;p.sessions.push({id:crypto.randomUUID(),date:new Date().toISOString(),seconds,bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning});p.practiceDays=p.practiceDays||{};p.practiceDays[localDateKey(new Date())]=true;saveDB()}
+function saveSession(seconds){
+  let p=currentPractice();if(!p)return;
+  p.sessions=Array.isArray(p.sessions)?p.sessions:[];
+  const rec={id:crypto.randomUUID(),date:new Date().toISOString(),seconds:Math.max(0,Math.floor(Number(seconds)||0)),bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning};
+  p.sessions.push(rec);
+  p.practiceDays=p.practiceDays||{};
+  p.practiceDays[localDateKey(new Date())]=true;
+  // Persist the completed session BEFORE any UI/cloud operation can run.
+  localStorage.setItem(DB_KEY,JSON.stringify(db));
+  markLocalChange();
+  sessionElapsed=rec.seconds;
+  renderAll();
+  debouncedSync();
+}
 
 async function toggleRecording(){
   if(mediaRecorder?.state==="recording" || recordingProcessor || mediaStream || recordingStopping){
@@ -2657,7 +2664,7 @@ function applyRemoteSnapshot(remote,source="Realtime"){
     if(currentId)localStorage.setItem("studioMetronomeCurrent",currentId);
     localStorage.setItem(DB_KEY,JSON.stringify(db));
     loadPracticeSettings(currentPractice());
-    restoreLastSavedSessionDisplay();
+    restoreSavedSessionTimer();
     renderAll();
     restoreSectionState();
     realtimeLastUpdatedAt=remoteUpdatedAt||realtimeLastUpdatedAt;
@@ -2697,7 +2704,7 @@ async function loadCloudData(){
         localStorage.setItem(DB_KEY,JSON.stringify(db));
         realtimeLastUpdatedAt=remote.updated_at||"";
         loadPracticeSettings(currentPractice());
-        restoreLastSavedSessionDisplay();
+        restoreSavedSessionTimer();
         renderAll();
         restoreSectionState();
         setSync("Synced","Cloud data loaded.");
@@ -2862,7 +2869,7 @@ function stopRealtimeSync(){
   stopCloudPolling();
   realtimeUserId=null;
 }
-loadPracticeSettings(currentPractice());restoreLastSavedSessionDisplay();renderAll();restoreSectionState();if(!restoreActiveSession())restoreLastSavedSessionDisplay();updateSessionTimer();try{loadReminderUI();schedulePracticeReminders()}catch{}
+loadPracticeSettings(currentPractice());renderAll();restoreSectionState();restoreActiveSession();restoreSavedSessionTimer();updateSessionTimer();try{loadReminderUI();schedulePracticeReminders()}catch{}
 if(sb){
   sb.auth.onAuthStateChange(async (event,session)=>{
     await loadUserEmail();
