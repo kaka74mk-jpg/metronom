@@ -1468,6 +1468,86 @@ button, input, select, textarea {
 .practice-toast.end .toast-title{color:var(--lime)}
 @media(max-width:600px){.practice-live-indicator{top:8px;font-size:7px;padding:6px 10px}.practice-toast{right:10px;bottom:10px}}
 </style>
+
+<style id="mk-mobile-pro-ui">
+/* =========================================================
+   MK Studio — Mobile Pro UI
+   Mobile becomes a focused app: one primary workspace,
+   categorized tools, bottom navigation and native-feeling sheets.
+   ========================================================= */
+@media (max-width:760px){
+  body.mk-mobile-sheet-open{overflow:hidden!important}
+
+  /* Cleaner mobile header */
+  .topbar{position:sticky;top:0;z-index:80;padding:8px 0 9px!important;background:linear-gradient(180deg,rgba(5,6,11,.98) 72%,rgba(5,6,11,0));backdrop-filter:blur(14px)}
+  .actions{gap:5px!important}
+  .actions .icon-btn{width:36px!important;height:36px!important;border-radius:11px!important}
+  .actions .icon-btn[title="Rename"]{display:none!important}
+
+  /* Remove dense inline tool pills; the category launcher replaces them. */
+  .metro-card>.tools{display:none!important}
+  .mk-mobile-categories{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:10px 0 4px}
+  .mk-mobile-category{min-width:0;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#121a28,#0b111b);color:#dfe9f5;border-radius:12px;padding:9px 5px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:8px;font-weight:850;box-shadow:0 5px 16px rgba(0,0,0,.18)}
+  .mk-mobile-category svg{width:17px;height:17px;color:var(--cyan)}
+  .mk-mobile-category:active{transform:scale(.98)}
+
+  /* Sheet backdrop */
+  .mk-mobile-backdrop{position:fixed;inset:0;z-index:9990;background:rgba(1,3,7,.68);backdrop-filter:blur(9px);opacity:0;pointer-events:none;transition:opacity .2s ease}
+  .mk-mobile-backdrop.open{opacity:1;pointer-events:auto}
+
+  /* Existing panels become polished bottom sheets on phones. */
+  .metro-card>.panel.open{display:block!important;position:fixed!important;left:8px!important;right:8px!important;bottom:calc(64px + env(safe-area-inset-bottom))!important;top:auto!important;width:auto!important;max-height:min(72vh,620px)!important;margin:0!important;padding:16px!important;overflow:auto!important;z-index:9995!important;border:1px solid rgba(255,255,255,.11)!important;border-radius:20px 20px 16px 16px!important;background:linear-gradient(180deg,#101725,#080d15)!important;box-shadow:0 24px 80px rgba(0,0,0,.62),0 0 35px rgba(0,245,255,.07)!important;animation:mkSheetIn .2s ease-out}
+  .metro-card>.panel.open:before{content:"";display:block;width:38px;height:4px;border-radius:99px;background:#3a465d;margin:-5px auto 12px;opacity:.8}
+  .metro-card>.panel.open .panel-title{font-size:13px!important;margin-bottom:12px!important;color:#f1f6ff}
+  @keyframes mkSheetIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+  /* Sheet content spacing */
+  .metro-card>.panel.open .preset-row{gap:7px}
+  .metro-card>.panel.open .preset,.metro-card>.panel.open .small-btn{min-height:38px;font-size:9px;padding:9px 11px}
+  .metro-card>.panel.open .field label{font-size:9px;margin-bottom:6px}
+  .metro-card>.panel.open .select,.metro-card>.panel.open .num{min-height:42px;font-size:11px}
+  .metro-card>.panel.open .notice{font-size:9px;padding:10px;line-height:1.65}
+
+  /* Dashboard becomes a real sheet instead of another block in the page. */
+  .dashboard-menu.open{position:fixed!important;inset:0!important;z-index:9988!important;margin:0!important;display:flex!important;align-items:flex-end!important;padding:0 8px calc(64px + env(safe-area-inset-bottom))!important;background:rgba(1,3,7,.68)!important;backdrop-filter:blur(9px)!important}
+  .dashboard-menu.open .period-card{width:100%!important;max-height:72vh!important;overflow:auto!important;margin:0!important;border-radius:20px 20px 16px 16px!important;animation:mkSheetIn .2s ease-out}
+  .dashboard-menu.open .period-card:before{content:"";display:block;width:38px;height:4px;border-radius:99px;background:#3a465d;margin:-2px auto 12px}
+
+  /* History and stats read as app sections, not desktop cards. */
+  .history.section-card{margin-top:10px!important}
+  .right .section-card{border-radius:16px!important}
+
+  /* Bottom navigation */
+  .mk-mobile-nav{position:fixed;left:0;right:0;bottom:0;z-index:10020;padding:7px 8px calc(7px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:5px;background:rgba(5,8,13,.94);border-top:1px solid rgba(255,255,255,.08);backdrop-filter:blur(18px);box-shadow:0 -14px 38px rgba(0,0,0,.42)}
+  .mk-mobile-nav button{border:0;background:transparent;color:#6f7c95;min-height:43px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:7px;font-weight:850}
+  .mk-mobile-nav button svg{width:18px;height:18px}
+  .mk-mobile-nav button.active{color:var(--cyan);background:rgba(0,245,255,.08)}
+  .mk-mobile-nav .nav-primary{color:#041013;background:linear-gradient(135deg,var(--cyan),#3cf7d2);box-shadow:0 0 18px rgba(0,245,255,.13)}
+
+  /* Make the main transport the visual hero. */
+  .metro-card{padding:10px!important;border-radius:18px!important}
+  .metro-visual{height:158px!important}
+  .tempo-display-card{width:min(340px,92%)!important;min-height:76px!important}
+  .tempo-display-card .bpm-big{font-size:46px!important}
+  .quick-bpm{padding:7px 0!important;gap:5px!important}
+  .quick-bpm button{padding:7px 10px!important;font-size:8px!important;border-radius:9px!important}
+  .start-bar{margin-top:7px!important}
+  .start-bar .start{min-height:42px!important;border-radius:12px!important;font-size:8px!important}
+
+  /* Keep modal dialogs feeling like native mobile sheets. */
+  .modal{align-items:flex-end!important;padding:0 8px calc(8px + env(safe-area-inset-bottom))!important}
+  .modal-box{width:100%!important;max-height:82vh!important;overflow:auto!important;border-radius:20px 20px 16px 16px!important;padding:17px!important;animation:mkSheetIn .2s ease-out}
+  .modal-box:before{content:"";display:block;width:38px;height:4px;border-radius:99px;background:#3a465d;margin:-5px auto 13px}
+  .modal-title{font-size:14px!important}
+  .modal-actions{gap:7px!important}
+  .modal-actions .small-btn{min-height:42px!important}
+
+  /* Focus is intentionally full-screen and distraction-free. */
+  #focusOverlay .focus-shell{width:100%!important;height:100%!important;max-height:none!important;border:0!important;border-radius:0!important;padding:18px 14px calc(18px + env(safe-area-inset-bottom))!important;background:radial-gradient(circle at 50% 20%,rgba(0,245,255,.08),transparent 38%),#03060b!important}
+}
+@media(min-width:761px){.mk-mobile-categories,.mk-mobile-nav,.mk-mobile-backdrop{display:none!important}}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -1568,6 +1648,12 @@ button, input, select, textarea {
           <button id="mainRecordBtn" class="start record" onclick="toggleRecording()"><i data-lucide="mic"></i><span>Record</span></button>
         </div>
         
+        <div class="mk-mobile-categories" id="mkMobileCategories" aria-label="Practice tools">
+          <button class="mk-mobile-category" data-category="rhythm"><i data-lucide="music-2"></i><span>Rhythm</span></button>
+          <button class="mk-mobile-category" data-category="sound"><i data-lucide="audio-lines"></i><span>Sound</span></button>
+          <button class="mk-mobile-category" data-category="technique"><i data-lucide="sparkles"></i><span>Technique</span></button>
+          <button class="mk-mobile-category" data-category="review"><i data-lucide="library"></i><span>Review</span></button>
+        </div>
         <div class="tools">
           <button class="tool" onclick="togglePanel('meter',this)"><i data-lucide="music-2"></i>Meter</button>
           <button class="tool" onclick="togglePanel('rhythm',this)"><i data-lucide="grid-2x2"></i>Rhythm</button>
@@ -3230,6 +3316,125 @@ function syncReminderAfterRender(){
   if(document.readyState==="loading"){
     document.addEventListener("DOMContentLoaded",applySeasonColor,{once:true});
   }else applySeasonColor();
+})();
+</script>
+
+
+<div class="mk-mobile-backdrop" id="mkMobileBackdrop" aria-hidden="true"></div>
+<nav class="mk-mobile-nav" id="mkMobileNav" aria-label="Mobile navigation">
+  <button class="nav-primary active" data-nav="practice"><i data-lucide="play-circle"></i><span>Practice</span></button>
+  <button data-nav="tools"><i data-lucide="sliders-horizontal"></i><span>Tools</span></button>
+  <button data-nav="progress"><i data-lucide="chart-no-axes-combined"></i><span>Progress</span></button>
+  <button data-nav="more"><i data-lucide="menu"></i><span>More</span></button>
+</nav>
+
+
+<script id="mk-mobile-pro-js">
+(function(){
+  const mobile=()=>window.matchMedia('(max-width:760px)').matches;
+  const backdrop=document.getElementById('mkMobileBackdrop');
+  const nav=document.getElementById('mkMobileNav');
+  const categoryMap={
+    rhythm:['meter','rhythm'],
+    sound:['sound','drums'],
+    technique:['special'],
+    review:['record','calendar']
+  };
+  function closeSheet(){
+    document.querySelectorAll('.metro-card>.panel.open').forEach(p=>p.classList.remove('open'));
+    document.querySelectorAll('.tool.active').forEach(b=>b.classList.remove('active'));
+    if(backdrop)backdrop.classList.remove('open');
+    document.body.classList.remove('mk-mobile-sheet-open');
+  }
+  function openPanel(name){
+    const panel=document.getElementById('panel-'+name);
+    const btn=[...document.querySelectorAll('.tool')].find(x=>new RegExp('^\\s*'+name+'\\s*$','i').test((x.textContent||'').trim()));
+    if(!panel)return;
+    document.querySelectorAll('.metro-card>.panel.open').forEach(p=>p.classList.remove('open'));
+    document.querySelectorAll('.tool.active').forEach(b=>b.classList.remove('active'));
+    panel.classList.add('open'); if(btn)btn.classList.add('active');
+    if(backdrop)backdrop.classList.add('open');
+    document.body.classList.add('mk-mobile-sheet-open');
+    if(typeof lucide!=='undefined')lucide.createIcons();
+  }
+  function openCategory(cat){
+    if(!mobile())return;
+    const names=categoryMap[cat]||[];
+    if(names.length===1){openPanel(names[0]);return;}
+    // Multi-item categories use a compact chooser sheet.
+    const labels={meter:'Meter',rhythm:'Rhythm',sound:'Sound',drums:'Drums',special:'Techniques',record:'Recordings',calendar:'Calendar'};
+    let chooser=document.getElementById('mkCategoryChooser');
+    if(!chooser){
+      chooser=document.createElement('div'); chooser.id='mkCategoryChooser'; chooser.className='mk-mobile-category-sheet';
+      chooser.innerHTML='<div class="mk-category-sheet-handle"></div><div class="mk-category-sheet-title"></div><div class="mk-category-sheet-list"></div>';
+      document.body.appendChild(chooser);
+    }
+    chooser.querySelector('.mk-category-sheet-title').textContent=cat==='rhythm'?'Rhythm tools':'Review tools';
+    chooser.querySelector('.mk-category-sheet-list').innerHTML=names.map(n=>'<button type="button" data-panel="'+n+'"><span>'+labels[n]+'</span><i data-lucide="chevron-right"></i></button>').join('');
+    chooser.classList.add('open');
+    if(backdrop)backdrop.classList.add('open'); document.body.classList.add('mk-mobile-sheet-open');
+    chooser.querySelectorAll('[data-panel]').forEach(b=>b.addEventListener('click',()=>{chooser.classList.remove('open');openPanel(b.dataset.panel)}));
+    if(typeof lucide!=='undefined')lucide.createIcons();
+  }
+  function closeCategoryChooser(){
+    const c=document.getElementById('mkCategoryChooser'); if(c)c.classList.remove('open');
+  }
+  if(backdrop)backdrop.addEventListener('click',()=>{closeCategoryChooser();closeSheet();closeDashboard();});
+  document.querySelectorAll('.mk-mobile-category').forEach(b=>b.addEventListener('click',()=>openCategory(b.dataset.category)));
+  function closeDashboard(){
+    const d=document.getElementById('dashboardMenu'); if(d)d.classList.remove('open');
+    document.body.classList.remove('mk-mobile-sheet-open'); if(backdrop)backdrop.classList.remove('open');
+  }
+  nav?.addEventListener('click',e=>{
+    const b=e.target.closest('button[data-nav]'); if(!b)return;
+    document.querySelectorAll('.mk-mobile-nav button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+    const type=b.dataset.nav;
+    if(type==='practice'){closeCategoryChooser();closeSheet();window.scrollTo({top:0,behavior:'smooth'});return;}
+    if(type==='tools'){closeCategoryChooser();closeSheet();document.getElementById('mkMobileCategories')?.scrollIntoView({behavior:'smooth',block:'center'});return;}
+    if(type==='progress'){
+      closeCategoryChooser();closeSheet();
+      const stats=document.getElementById('statsCard'); if(stats)stats.classList.remove('collapsed');
+      const history=document.getElementById('historyCard'); if(history)history.classList.remove('collapsed');
+      stats?.scrollIntoView({behavior:'smooth',block:'start'}); return;
+    }
+    if(type==='more'){
+      closeCategoryChooser();closeSheet();
+      const d=document.getElementById('dashboardMenu'); if(d)d.classList.add('open');
+      if(backdrop)backdrop.classList.add('open'); document.body.classList.add('mk-mobile-sheet-open'); return;
+    }
+  });
+  // Inline tool handlers still work; this listener promotes opened panels into sheets.
+  document.addEventListener('click',e=>{
+    if(!mobile())return;
+    const tool=e.target.closest('.tool');
+    if(tool){setTimeout(()=>{const open=document.querySelector('.metro-card>.panel.open');if(open){backdrop?.classList.add('open');document.body.classList.add('mk-mobile-sheet-open')}},0);}
+    const close=e.target.closest('.modal-close'); if(close)setTimeout(()=>document.body.classList.remove('mk-mobile-sheet-open'),0);
+  },true);
+  // Override the existing dashboard toggle only on mobile, while preserving desktop behavior.
+  const oldToggleDashboard=window.toggleDashboardMenu;
+  window.toggleDashboardMenu=function(){
+    if(!mobile()){if(typeof oldToggleDashboard==='function')oldToggleDashboard();return;}
+    const d=document.getElementById('dashboardMenu'); if(!d)return;
+    const opening=!d.classList.contains('open'); d.classList.toggle('open',opening);
+    if(opening){backdrop?.classList.add('open');document.body.classList.add('mk-mobile-sheet-open')}
+    else closeDashboard();
+  };
+  // Prevent desktop-style scroll-to-panel behavior from fighting the mobile sheet.
+  const oldOpenMeter=window.openMeterEditor;
+  window.openMeterEditor=function(){if(mobile())openPanel('meter');else if(typeof oldOpenMeter==='function')oldOpenMeter()};
+  // Category chooser styling, injected here to keep the desktop CSS untouched.
+  const style=document.createElement('style'); style.textContent=`
+    @media(max-width:760px){
+      .mk-mobile-category-sheet{position:fixed;left:8px;right:8px;bottom:calc(64px + env(safe-area-inset-bottom));z-index:9996;padding:15px 14px 14px;border:1px solid rgba(255,255,255,.11);border-radius:20px 20px 16px 16px;background:linear-gradient(180deg,#101725,#080d15);box-shadow:0 24px 80px rgba(0,0,0,.62);transform:translateY(120%);opacity:0;pointer-events:none;transition:transform .2s ease,opacity .2s ease}
+      .mk-mobile-category-sheet.open{transform:translateY(0);opacity:1;pointer-events:auto}
+      .mk-category-sheet-handle{width:38px;height:4px;border-radius:99px;background:#3a465d;margin:-3px auto 12px}
+      .mk-category-sheet-title{font-size:13px;font-weight:900;color:#f1f6ff;margin-bottom:9px}
+      .mk-category-sheet-list{display:grid;gap:6px}
+      .mk-category-sheet-list button{min-height:46px;border:1px solid rgba(255,255,255,.08);background:#0d1521;color:#dfe9f5;border-radius:12px;padding:0 12px;display:flex;align-items:center;justify-content:space-between;font:inherit;font-size:10px;font-weight:850}
+      .mk-category-sheet-list button i{width:16px;color:var(--cyan)}
+    }
+  `; document.head.appendChild(style);
+  document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons()});
 })();
 </script>
 
