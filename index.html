@@ -3525,4 +3525,125 @@ function syncReminderAfterRender(){
 })();
 </script>
 
+
+<style id="mk-round3-fixes">
+@media(max-width:760px){
+  /* Only one mobile surface may exist at a time. */
+  .mk-mobile-backdrop{z-index:10000!important}
+  .mk-tools-sheet{z-index:10020!important}
+  .mk-review-sheet{z-index:10020!important}
+  .mk-mobile-category-sheet{z-index:10021!important}
+  .modal{z-index:10030!important}
+  #focusOverlay{z-index:10040!important}
+
+  /* Focus: fill the screen and make the two main transport cards feel alive. */
+  #focusOverlay .focus-main{position:relative;display:flex!important;flex:1 1 auto!important;min-height:0!important;width:100%!important;align-items:center!important;justify-content:center!important;flex-direction:column!important;overflow:visible!important}
+  #focusOverlay .focus-bpm{position:relative;z-index:2;font-size:clamp(88px,27vw,150px)!important;font-weight:1000!important;line-height:.9!important;letter-spacing:-.06em!important;text-shadow:0 0 24px rgba(0,245,255,.35),0 0 70px rgba(0,245,255,.18)!important;transition:transform .2s ease,text-shadow .2s ease}
+  #focusOverlay .focus-beat{position:absolute!important;z-index:1;width:clamp(150px,45vw,280px)!important;height:clamp(150px,45vw,280px)!important;border-radius:50%!important;display:grid!important;place-items:center!important;color:transparent!important;background:radial-gradient(circle,rgba(0,245,255,.16) 0 18%,rgba(0,245,255,.07) 36%,transparent 68%)!important;box-shadow:0 0 35px rgba(0,245,255,.12),inset 0 0 35px rgba(0,245,255,.08)!important;opacity:.75!important}
+  #focusOverlay .focus-main:after{content:"";position:absolute;width:72%;aspect-ratio:1;border-radius:50%;border:1px solid rgba(0,245,255,.12);box-shadow:0 0 55px rgba(0,245,255,.10),inset 0 0 55px rgba(255,43,214,.05);animation:mkFocusAura 3.2s ease-in-out infinite;pointer-events:none}
+  #focusOverlay .focus-main.mk-transport-pulse .focus-bpm{transform:scale(1.08);text-shadow:0 0 28px rgba(0,245,255,.7),0 0 90px rgba(0,245,255,.35)!important}
+  #focusOverlay .focus-main.mk-transport-pulse .focus-beat{animation:mkMagicOrb .7s cubic-bezier(.2,.8,.2,1)}
+  #focusOverlay .focus-timers{flex:0 0 auto!important;width:min(92vw,680px)!important;grid-template-columns:1fr 1fr!important;gap:12px!important;margin-top:auto!important;margin-bottom:18px!important}
+  #focusOverlay .focus-timer{min-height:108px!important;padding:18px 14px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:6px!important;border-radius:20px!important;background:linear-gradient(145deg,rgba(12,24,36,.96),rgba(7,11,19,.98))!important;cursor:pointer!important;box-shadow:0 12px 35px rgba(0,0,0,.25),inset 0 0 28px rgba(0,245,255,.035)!important;transition:transform .16s ease,border-color .2s ease,box-shadow .2s ease!important}
+  #focusOverlay .focus-timer:active{transform:scale(.97)!important}
+  #focusOverlay .focus-timer svg{width:22px!important;height:22px!important}
+  #focusOverlay .focus-timer-label{text-align:center!important;font-size:9px!important}
+  #focusOverlay .focus-timer-value{font-size:clamp(26px,7vw,42px)!important;text-align:center!important}
+  #focusOverlay .focus-timer.mk-running{border-color:rgba(184,255,61,.65)!important;box-shadow:0 0 34px rgba(184,255,61,.16),inset 0 0 30px rgba(184,255,61,.05)!important}
+  #focusOverlay .focus-timer.mk-running .focus-timer-value{color:var(--lime)!important;text-shadow:0 0 22px rgba(184,255,61,.55)!important}
+  @keyframes mkMagicOrb{0%{transform:scale(.55);opacity:.25}45%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:.78}}
+  @keyframes mkFocusAura{0%,100%{transform:scale(.92);opacity:.45}50%{transform:scale(1.04);opacity:.9}}
+  @media(max-width:520px){#focusOverlay .focus-timers{grid-template-columns:1fr!important;margin-bottom:12px!important}#focusOverlay .focus-timer{min-height:92px!important}}
+}
+</style>
+<script id="mk-round3-js">
+(function(){
+  const mobile=()=>window.matchMedia('(max-width:760px)').matches;
+  const backdrop=()=>document.getElementById('mkMobileBackdrop');
+  const bodyClose=()=>document.body.classList.remove('mk-mobile-sheet-open');
+  function closeEverything(except){
+    if(!mobile())return;
+    document.querySelectorAll('.mk-tools-sheet.open,.mk-review-sheet.open,.mk-mobile-category-sheet.open').forEach(x=>{if(x!==except)x.classList.remove('open')});
+    document.querySelectorAll('.metro-card>.panel.open').forEach(x=>x.classList.remove('open'));
+    document.querySelectorAll('.tool.active').forEach(x=>x.classList.remove('active'));
+    const d=document.getElementById('dashboardMenu'); if(d)d.classList.remove('open');
+    document.querySelectorAll('.modal.open').forEach(x=>{if(x!==except)x.classList.remove('open')});
+    const f=document.getElementById('focusOverlay'); if(f && f!==except && f.classList.contains('open')){f.classList.remove('open');f.setAttribute('aria-hidden','true')}
+    bodyClose(); const b=backdrop(); if(b)b.classList.remove('open');
+  }
+  window.mkCloseMobileSurfaces=function(except){closeEverything(except)};
+
+  function wrap(name){
+    const old=window[name]; if(typeof old!=='function'||old.__mkWrapped3)return;
+    const w=function(){if(mobile())closeEverything();return old.apply(this,arguments)}; w.__mkWrapped3=true; window[name]=w;
+  }
+  ['openSettings','openProfile','openNew','openAuth','openBackup','openPractice','openDashboardMenu'].forEach(wrap);
+
+  /* If the original panel handler is used, close the Tools/Review surface first. */
+  const oldToggle=window.togglePanel;
+  if(typeof oldToggle==='function'&&!oldToggle.__mkWrapped3){
+    const w=function(name,btn){if(mobile())closeEverything();return oldToggle.apply(this,arguments)};w.__mkWrapped3=true;window.togglePanel=w;
+  }
+  const oldFocus=window.toggleFocusMode;
+  if(typeof oldFocus==='function'&&!oldFocus.__mkWrapped3){
+    const w=function(){
+      if(mobile()){
+        const f=document.getElementById('focusOverlay');
+        if(f && !f.classList.contains('open'))closeEverything(f);
+      }
+      const r=oldFocus.apply(this,arguments); setTimeout(bindFocusTransport,0); return r;
+    };w.__mkWrapped3=true;window.toggleFocusMode=w;
+  }
+
+  function pulseFocus(){
+    const main=document.querySelector('#focusOverlay .focus-main'); if(!main)return;
+    main.classList.remove('mk-transport-pulse'); void main.offsetWidth; main.classList.add('mk-transport-pulse');
+    clearTimeout(window.__mkFocusPulse);window.__mkFocusPulse=setTimeout(()=>main.classList.remove('mk-transport-pulse'),720);
+  }
+  function bindFocusTransport(){
+    const overlay=document.getElementById('focusOverlay');if(!overlay)return;
+    const main=overlay.querySelector('.focus-main');
+    if(main&&!main.__mkBound){main.__mkBound=true;main.addEventListener('click',()=>{toggleMetro();pulseFocus();updateFocusUI()})}
+    overlay.querySelectorAll('.focus-timer').forEach(card=>{
+      if(card.__mkBound)return;card.__mkBound=true;card.setAttribute('role','button');card.setAttribute('tabindex','0');
+      card.addEventListener('click',()=>{toggleSession();updateFocusUI()});
+      card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleSession();updateFocusUI()}});
+    });
+  }
+  window.mkPulseFocus= pulseFocus;
+  document.addEventListener('DOMContentLoaded',bindFocusTransport);
+  document.addEventListener('click',e=>{
+    if(!mobile())return;
+    const tool=e.target.closest('.mk-tools-grid button[data-cat]');
+    if(tool){closeEverything();return;}
+    const cat=e.target.closest('.mk-mobile-category');
+    if(cat){closeEverything();return;}
+  },true);
+
+  /* Keep the single-sheet rule even when legacy functions open a surface directly. */
+  const observer=new MutationObserver(muts=>{
+    if(!mobile())return;
+    let opened=null;
+    muts.forEach(m=>m.addedNodes&&m.addedNodes.forEach(n=>{
+      if(n.nodeType===1 && (n.classList?.contains('open')||n.querySelector?.('.open')))opened=n;
+    }));
+    const opens=[...document.querySelectorAll('.mk-tools-sheet.open,.mk-review-sheet.open,.mk-mobile-category-sheet.open,.modal.open,.metro-card>.panel.open,#focusOverlay.open,.dashboard-menu.open')];
+    if(opens.length>1){
+      const last=opens[opens.length-1];closeEverything(last);
+      if(last.classList.contains('modal')){last.classList.add('open');const b=backdrop();b?.classList.remove('open');}
+      else if(last.id==='focusOverlay'){last.classList.add('open');last.setAttribute('aria-hidden','false');}
+      else {last.classList.add('open');backdrop()?.classList.add('open');document.body.classList.add('mk-mobile-sheet-open')}
+    }
+  });
+  observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
+
+  /* Reflect transport state and add a pulse whenever Focus starts. */
+  const originalStart=window.startMetro,originalStop=window.stopMetro,originalSession=window.toggleSession;
+  if(typeof originalStart==='function'&&!originalStart.__mkFocusVisual3){
+    window.startMetro=function(){const r=originalStart.apply(this,arguments);setTimeout(()=>{updateFocusUI();pulseFocus();},20);return r};window.startMetro.__mkFocusVisual3=true;
+  }
+  if(typeof originalStop==='function'&&!originalStop.__mkFocusVisual3){window.stopMetro=function(){const r=originalStop.apply(this,arguments);setTimeout(updateFocusUI,20);return r};window.stopMetro.__mkFocusVisual3=true}
+  if(typeof originalSession==='function'&&!originalSession.__mkFocusVisual3){window.toggleSession=function(){const r=originalSession.apply(this,arguments);setTimeout(updateFocusUI,20);return r};window.toggleSession.__mkFocusVisual3=true}
+})();
+</script>
 </body></html>
