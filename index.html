@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.08.1">
+<meta name="mk-app-version" content="2026.09.08.2">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1479,7 +1479,7 @@ button, input, select, textarea {
   body.mk-mobile-sheet-open{overflow:hidden!important}
 
   /* Cleaner mobile header */
-  .topbar{position:sticky;top:0;z-index:80;padding:8px 0 9px!important;background:linear-gradient(180deg,rgba(5,6,11,.98) 72%,rgba(5,6,11,0));backdrop-filter:blur(14px)}
+  .topbar{position:sticky;top:0;z-index:80;padding:8px 0 9px!important;background:linear-gradient(180deg,rgba(5,6,11,.98) 72%,rgba(5,6,11,0))}
   .actions{gap:5px!important}
   .actions .icon-btn{width:36px!important;height:36px!important;border-radius:11px!important}
   .actions .icon-btn[title="Rename"]{display:none!important}
@@ -1492,8 +1492,8 @@ button, input, select, textarea {
   .mk-mobile-category:active{transform:scale(.98)}
 
   /* Sheet backdrop */
-  .mk-mobile-backdrop{position:fixed;inset:0;z-index:9990;background:rgba(1,3,7,.68);backdrop-filter:blur(9px);opacity:0;pointer-events:none;transition:opacity .2s ease}
-  .mk-mobile-backdrop.open{opacity:1;pointer-events:auto}
+  .mk-mobile-backdrop{position:fixed;inset:0;z-index:9990;background:rgba(1,3,7,.68);opacity:0;pointer-events:none;transition:opacity .2s ease}
+  .mk-mobile-backdrop.open{opacity:1;pointer-events:auto;backdrop-filter:blur(9px)}
 
   /* Existing panels become polished bottom sheets on phones. */
   .metro-card>.panel.open{display:block!important;position:fixed!important;left:8px!important;right:8px!important;bottom:calc(64px + env(safe-area-inset-bottom))!important;top:auto!important;width:auto!important;max-height:min(72vh,620px)!important;margin:0!important;padding:16px!important;overflow:auto!important;z-index:9995!important;border:1px solid rgba(255,255,255,.11)!important;border-radius:20px 20px 16px 16px!important;background:linear-gradient(180deg,#101725,#080d15)!important;box-shadow:0 24px 80px rgba(0,0,0,.62),0 0 35px rgba(0,245,255,.07)!important;animation:mkSheetIn .2s ease-out}
@@ -1518,7 +1518,7 @@ button, input, select, textarea {
   .right .section-card{border-radius:16px!important}
 
   /* Bottom navigation */
-  .mk-mobile-nav{position:fixed;left:0;right:0;bottom:0;z-index:10020;padding:7px 8px calc(7px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:5px;background:rgba(5,8,13,.94);border-top:1px solid rgba(255,255,255,.08);backdrop-filter:blur(18px);box-shadow:0 -14px 38px rgba(0,0,0,.42)}
+  .mk-mobile-nav{position:fixed;left:0;right:0;bottom:0;z-index:10020;padding:7px 8px calc(7px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:5px;background:rgba(5,8,13,.94);border-top:1px solid rgba(255,255,255,.08);box-shadow:0 -14px 38px rgba(0,0,0,.42)}
   .mk-mobile-nav button{border:0;background:transparent;color:#6f7c95;min-height:43px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:7px;font-weight:850}
   .mk-mobile-nav button svg{width:18px;height:18px}
   .mk-mobile-nav button.active{color:var(--cyan);background:rgba(0,245,255,.08)}
@@ -1564,7 +1564,7 @@ button, input, select, textarea {
   .practice-timer-card{padding:10px!important}.timer-grid{gap:8px!important}.timer-box{min-height:82px!important;display:flex!important;flex-direction:column!important;justify-content:center!important}.timer-value{font-size:26px!important}.timer-label{font-size:7px!important}
   .start-bar{gap:7px!important}.start-bar .start{min-height:48px!important;border-radius:15px!important;font-weight:950!important;box-shadow:0 10px 24px rgba(0,0,0,.28)!important}.start-bar .start.metro{background:linear-gradient(135deg,#00f5ff,#39e7c4)!important;color:#031014!important}.start-bar .start.session{background:linear-gradient(135deg,#b8ff3d,#68df45)!important;color:#071006!important}.start-bar .start.record{background:linear-gradient(135deg,#ff4dd8,#ff7a9e)!important;color:#180511!important}.start-bar .start:active{transform:scale(.97)!important}
   .mk-mobile-category{min-height:58px!important;border-radius:15px!important}.mk-mobile-category svg{width:19px!important;height:19px!important}
-  .mk-review-sheet{position:fixed;inset:0;z-index:10010;background:rgba(2,5,10,.76);backdrop-filter:blur(14px);display:flex;align-items:flex-end;padding:0 8px calc(72px + env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .2s ease}.mk-review-sheet.open{opacity:1;pointer-events:auto}.mk-review-sheet-box{width:100%;max-height:86vh;overflow:auto;background:linear-gradient(180deg,#111a29,#080d15);border:1px solid rgba(255,255,255,.11);border-radius:22px 22px 16px 16px;padding:12px 10px 14px;box-shadow:0 30px 90px rgba(0,0,0,.65);transform:translateY(18px);transition:transform .2s ease}.mk-review-sheet.open .mk-review-sheet-box{transform:translateY(0)}.mk-review-handle{width:42px;height:4px;border-radius:99px;background:#3a465d;margin:0 auto 10px}.mk-review-title{font-size:14px;font-weight:950;margin:0 2px 10px}.mk-review-sheet .mk-review-source{display:block!important;margin:0 0 9px!important}.mk-review-sheet .mk-review-source:last-child{margin-bottom:0!important}.mk-review-sheet .section-body{display:block!important}.mk-review-sheet .section-collapse{pointer-events:none}.mk-review-sheet .small-btn{min-height:36px}.mk-review-sheet .history-row{font-size:7px!important}
+  .mk-review-sheet{position:fixed;inset:0;z-index:10010;background:rgba(2,5,10,.76);display:flex;align-items:flex-end;padding:0 8px calc(72px + env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .2s ease}.mk-review-sheet.open{opacity:1;pointer-events:auto;backdrop-filter:blur(14px)}.mk-review-sheet-box{width:100%;max-height:86vh;overflow:auto;background:linear-gradient(180deg,#111a29,#080d15);border:1px solid rgba(255,255,255,.11);border-radius:22px 22px 16px 16px;padding:12px 10px 14px;box-shadow:0 30px 90px rgba(0,0,0,.65);transform:translateY(18px);transition:transform .2s ease}.mk-review-sheet.open .mk-review-sheet-box{transform:translateY(0)}.mk-review-handle{width:42px;height:4px;border-radius:99px;background:#3a465d;margin:0 auto 10px}.mk-review-title{font-size:14px;font-weight:950;margin:0 2px 10px}.mk-review-sheet .mk-review-source{display:block!important;margin:0 0 9px!important}.mk-review-sheet .mk-review-source:last-child{margin-bottom:0!important}.mk-review-sheet .section-body{display:block!important}.mk-review-sheet .section-collapse{pointer-events:none}.mk-review-sheet .small-btn{min-height:36px}.mk-review-sheet .history-row{font-size:7px!important}
   .mk-mobile-sheet-open{overflow:hidden!important}.mk-mobile-sheet-open .mk-review-source{display:none!important}
   .mk-magic-burst{position:relative;animation:mkMagicGlow .9s ease-out}.mk-magic-burst:after{content:"";position:absolute;inset:-8px;border-radius:inherit;border:1px solid rgba(0,245,255,.45);box-shadow:0 0 22px rgba(0,245,255,.28),0 0 70px rgba(184,255,61,.12);pointer-events:none;animation:mkMagicOrb .9s ease-out}
   #practiceTimerCard.mk-magic-burst:after{border-color:rgba(184,255,61,.5);box-shadow:0 0 25px rgba(184,255,61,.3),0 0 80px rgba(184,255,61,.12)}
@@ -1581,7 +1581,7 @@ button, input, select, textarea {
   .sync-card .app-update-box{border:0!important;background:transparent!important;padding:0!important;margin-top:7px!important;box-shadow:none!important}
   .sync-card .app-update-head{padding-top:6px;border-top:1px solid rgba(255,255,255,.06);align-items:center}
   .sync-card .app-update-detail{opacity:.75}
-  .mk-tools-sheet{position:fixed;inset:0;z-index:10012;background:rgba(2,5,10,.74);backdrop-filter:blur(14px);display:flex;align-items:flex-end;padding:0 8px calc(72px + env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .2s ease}.mk-tools-sheet.open{opacity:1;pointer-events:auto}.mk-tools-sheet-box{width:100%;padding:14px;background:linear-gradient(180deg,#111a29,#080d15);border:1px solid rgba(255,255,255,.11);border-radius:22px 22px 16px 16px;box-shadow:0 30px 90px rgba(0,0,0,.65);transform:translateY(18px);transition:transform .2s ease}.mk-tools-sheet.open .mk-tools-sheet-box{transform:translateY(0)}.mk-tools-handle{width:42px;height:4px;border-radius:99px;background:#3a465d;margin:0 auto 11px}.mk-tools-title{font-size:14px;font-weight:950;margin-bottom:10px}.mk-tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mk-tools-grid button{min-height:58px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:#0c1420;color:#dfe9f5;display:flex;align-items:center;gap:9px;padding:0 12px;font:inherit;font-size:9px;font-weight:900}.mk-tools-grid button svg{width:19px;height:19px;color:var(--cyan)}
+  .mk-tools-sheet{position:fixed;inset:0;z-index:10012;background:rgba(2,5,10,.74);display:flex;align-items:flex-end;padding:0 8px calc(72px + env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .2s ease}.mk-tools-sheet.open{opacity:1;pointer-events:auto;backdrop-filter:blur(14px)}.mk-tools-sheet-box{width:100%;padding:14px;background:linear-gradient(180deg,#111a29,#080d15);border:1px solid rgba(255,255,255,.11);border-radius:22px 22px 16px 16px;box-shadow:0 30px 90px rgba(0,0,0,.65);transform:translateY(18px);transition:transform .2s ease}.mk-tools-sheet.open .mk-tools-sheet-box{transform:translateY(0)}.mk-tools-handle{width:42px;height:4px;border-radius:99px;background:#3a465d;margin:0 auto 11px}.mk-tools-title{font-size:14px;font-weight:950;margin-bottom:10px}.mk-tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mk-tools-grid button{min-height:58px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:#0c1420;color:#dfe9f5;display:flex;align-items:center;gap:9px;padding:0 12px;font:inherit;font-size:9px;font-weight:900}.mk-tools-grid button svg{width:19px;height:19px;color:var(--cyan)}
 }
 </style>
 <style id="mk-mobile-review-fix">
@@ -3859,15 +3859,19 @@ function schedulePracticeReminders(){
   .mk-mobile-categories .mk-mobile-category-final svg{width:19px!important;height:19px!important;color:#f2b84b!important}.mk-mobile-categories .mk-mobile-category-final span{font-size:8px!important;font-weight:850!important}
 
   /* three controls: same crystal language, clearly different color identities */
-  .start-bar .start{border:1px solid rgba(255,255,255,.20)!important;backdrop-filter:blur(16px) saturate(155%)!important;-webkit-backdrop-filter:blur(16px) saturate(155%)!important;position:relative!important;overflow:hidden!important;color:#f8fbff!important;text-shadow:0 1px 8px rgba(0,0,0,.35)!important}
+  .start-bar .start{border:1px solid rgba(255,255,255,.20)!important;position:relative!important;overflow:hidden!important;color:#f8fbff!important;text-shadow:0 1px 8px rgba(0,0,0,.35)!important}
   .start-bar .start.metro{background:linear-gradient(145deg,rgba(20,164,255,.33),rgba(2,67,125,.56))!important;box-shadow:inset 0 1px rgba(255,255,255,.25),0 10px 28px rgba(0,130,255,.23)!important;border-color:rgba(90,190,255,.48)!important}
   .start-bar .start.session{background:linear-gradient(145deg,rgba(60,205,128,.30),rgba(16,94,61,.56))!important;box-shadow:inset 0 1px rgba(255,255,255,.25),0 10px 28px rgba(35,190,105,.20)!important;border-color:rgba(105,235,165,.45)!important}
   .start-bar .start.record{background:linear-gradient(145deg,rgba(236,83,111,.34),rgba(126,26,54,.58))!important;box-shadow:inset 0 1px rgba(255,255,255,.25),0 10px 28px rgba(235,55,95,.22)!important;border-color:rgba(255,120,145,.48)!important}
   .start-bar .start:before{content:""!important;position:absolute!important;left:8%!important;right:8%!important;top:1px!important;height:38%!important;border-radius:999px!important;background:linear-gradient(180deg,rgba(255,255,255,.20),rgba(255,255,255,0))!important;pointer-events:none!important}
 
   /* Definitive Review sheet, independent from old .metro-card > .panel mobile rules */
-  #mkReviewSheet.mk-review-sheet-final{display:flex!important;position:fixed!important;inset:0!important;z-index:12000!important;align-items:flex-end!important;padding:0 8px calc(70px + env(safe-area-inset-bottom))!important;background:rgba(2,5,10,.66)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;opacity:0!important;pointer-events:none!important}
-  #mkReviewSheet.mk-review-sheet-final.open{opacity:1!important;pointer-events:auto!important}
+  /* Blur only while actually visible — this used to be unconditional, which
+     kept a permanent full-screen blur layer mounted (and composited by many
+     mobile browsers even at opacity:0) for the rest of the session after the
+     very first time Review was opened. That's a heavy, needless ongoing cost. */
+  #mkReviewSheet.mk-review-sheet-final{display:flex!important;position:fixed!important;inset:0!important;z-index:12000!important;align-items:flex-end!important;padding:0 8px calc(70px + env(safe-area-inset-bottom))!important;background:rgba(2,5,10,.66)!important;opacity:0!important;pointer-events:none!important}
+  #mkReviewSheet.mk-review-sheet-final.open{opacity:1!important;pointer-events:auto!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important}
   #mkReviewSheet.mk-review-sheet-final .mk-review-sheet-box{display:block!important;width:100%!important;max-height:82vh!important;overflow-y:auto!important;overflow-x:hidden!important;background:linear-gradient(180deg,#111a29,#080d15)!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:22px 22px 16px 16px!important;padding:12px 10px 16px!important;transform:none!important;box-shadow:0 28px 90px rgba(0,0,0,.68)!important}
   #mkReviewSheet.mk-review-sheet-final .mk-review-content{display:flex!important;flex-direction:column!important;gap:12px!important;max-height:none!important;overflow:visible!important;padding-bottom:4px!important}
   #mkReviewSheet.mk-review-sheet-final #statsCard,#mkReviewSheet.mk-review-sheet-final #historyCard,#mkReviewSheet.mk-review-sheet-final #panel-record,#mkReviewSheet.mk-review-sheet-final #panel-calendar{display:block!important;position:relative!important;inset:auto!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:100%!important;max-width:none!important;max-height:none!important;margin:0!important;visibility:visible!important;opacity:1!important;transform:none!important;overflow:visible!important;z-index:auto!important}

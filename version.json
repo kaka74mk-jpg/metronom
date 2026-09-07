@@ -1,5 +1,5 @@
 {
-  "version": "2026.09.08.1",
-  "releasedAt": "2026-09-08T00:00:00Z",
-  "message": "Fix: Review sheet leaving Recordings/Calendar stuck as an overlay after closing"
+  "version": "2026.09.08.2",
+  "releasedAt": "2026-09-08T00:30:00Z",
+  "message": "Perf: remove always-on blur layers (topbar, bottom nav, start buttons, stale review sheet) that kept repainting during scroll/navigation"
 }
