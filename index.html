@@ -2781,6 +2781,493 @@ body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",san
 @media(min-width:761px){.mk-mobile-more{display:none!important}}
 </style>
 
+
+<style id="mk-native-mobile-final">
+/* =========================================================
+   MK STUDIO — NATIVE MOBILE UI
+   Visual-only responsive layer. Existing IDs / JS / data logic
+   remain intact. Desktop is intentionally untouched.
+   ========================================================= */
+@media (max-width:760px){
+  :root{
+    --mobile-nav-h:72px;
+    --mobile-safe-bottom:env(safe-area-inset-bottom,0px);
+    --mobile-gutter:14px;
+    --mobile-card:18px;
+  }
+
+  html{
+    background:#07090d;
+    overscroll-behavior-y:none;
+  }
+
+  body{
+    min-height:100svh;
+    padding-bottom:calc(var(--mobile-nav-h) + var(--mobile-safe-bottom) + 18px)!important;
+    -webkit-text-size-adjust:100%;
+    overscroll-behavior-y:none;
+  }
+
+  .app{
+    min-height:100svh!important;
+    width:100%!important;
+    overflow-x:clip!important;
+  }
+
+  .main{
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    padding:0 var(--mobile-gutter) 26px!important;
+  }
+
+  /* ---------- Native-style top app bar ---------- */
+  .topbar{
+    position:sticky!important;
+    top:0!important;
+    z-index:500!important;
+    width:calc(100% + 28px)!important;
+    margin:0 -14px 12px!important;
+    min-height:64px!important;
+    padding:10px 14px!important;
+    border:0!important;
+    border-bottom:1px solid rgba(255,255,255,.055)!important;
+    border-radius:0 0 18px 18px!important;
+    background:rgba(7,9,13,.88)!important;
+    backdrop-filter:blur(24px) saturate(135%)!important;
+    -webkit-backdrop-filter:blur(24px) saturate(135%)!important;
+    box-shadow:0 8px 28px rgba(0,0,0,.22)!important;
+  }
+
+  .title-season-wrap{min-width:0!important;flex:1 1 auto!important}
+  .title-season-trigger{
+    width:100%!important;
+    max-width:calc(100vw - 150px)!important;
+    min-height:40px!important;
+    padding:0!important;
+    gap:7px!important;
+    font-size:17px!important;
+    font-weight:900!important;
+  }
+  .title-season-trigger .season-icon,
+  .title-season-trigger svg{flex:0 0 auto}
+  .current-meta{display:block!important;font-size:8px!important;color:#66738b!important;margin-top:-1px!important}
+  .topbar .actions{gap:6px!important;flex:0 0 auto!important}
+  .topbar .actions .icon-btn{
+    display:grid!important;
+    width:38px!important;height:38px!important;
+    border-radius:12px!important;
+    background:#10151e!important;
+    border:1px solid rgba(255,255,255,.075)!important;
+  }
+  .topbar .actions .icon-btn[title="New Season"],
+  .topbar .actions .icon-btn[title="Rename"]{display:none!important}
+
+  /* Season selector becomes a native-looking sheet. */
+  .season-dropdown{
+    position:fixed!important;
+    left:10px!important;
+    right:10px!important;
+    top:calc(64px + env(safe-area-inset-top,0px))!important;
+    width:auto!important;
+    max-height:62svh!important;
+    overflow:auto!important;
+    z-index:10060!important;
+    border-radius:18px!important;
+    background:rgba(12,16,24,.98)!important;
+    border:1px solid rgba(255,255,255,.09)!important;
+    box-shadow:0 24px 70px rgba(0,0,0,.55)!important;
+    backdrop-filter:blur(24px)!important;
+  }
+  .season-option{
+    min-height:56px!important;
+    padding:9px 11px!important;
+    border-radius:12px!important;
+  }
+
+  /* ---------- Home hierarchy: instrument first ---------- */
+  .practice-overview{
+    margin:0 0 10px!important;
+    border-radius:16px!important;
+  }
+  .practice-overview .section-collapse{
+    min-height:42px!important;
+    padding:0 12px!important;
+  }
+
+  .overview{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:6px!important;
+  }
+  .kpi{
+    min-width:0!important;
+    padding:9px 7px!important;
+    border-radius:12px!important;
+  }
+  .kpi .v{font-size:16px!important}
+  .kpi .l{font-size:7px!important}
+
+  .layout{
+    display:block!important;
+    width:100%!important;
+    margin:0!important;
+  }
+  .layout > div{width:100%!important}
+  .right{display:none!important}
+
+  .metro-card{
+    width:100%!important;
+    padding:12px!important;
+    margin:0!important;
+    border-radius:20px!important;
+    box-shadow:0 16px 48px rgba(0,0,0,.28)!important;
+  }
+
+  .metro-visual{
+    width:100%!important;
+    height:164px!important;
+    margin:0!important;
+    border-radius:16px!important;
+  }
+
+  .visual-studio{
+    width:calc(100% - 22px)!important;
+    max-width:360px!important;
+    padding:12px!important;
+    border-radius:16px!important;
+  }
+
+  .tempo-display-card{
+    width:min(330px,94%)!important;
+    min-height:76px!important;
+    padding:9px 14px!important;
+    border-radius:14px!important;
+  }
+  .tempo-display-card .bpm-big{
+    font-size:clamp(48px,15vw,60px)!important;
+  }
+
+  .metro-header-row{
+    width:100%!important;
+    margin:7px auto 4px!important;
+  }
+  .metro-header-row .mk-pro-tools button{
+    height:34px!important;
+    min-width:34px!important;
+    border-radius:10px!important;
+  }
+
+  .practice-timer-card{
+    margin-top:-27px!important;
+    width:calc(100% - 12px)!important;
+    max-width:360px!important;
+  }
+
+  .timer-grid{
+    gap:6px!important;
+  }
+  .timer-box{
+    border-radius:10px!important;
+    padding:7px 6px!important;
+  }
+  .timer-box .timer-value{font-size:19px!important}
+
+  /* Bigger, thumb-friendly tempo controls. */
+  .slider-row{
+    grid-template-columns:40px minmax(0,1fr) 40px!important;
+    gap:7px!important;
+    margin-top:10px!important;
+  }
+  .slider-row .round{
+    width:40px!important;height:40px!important;
+    border-radius:12px!important;
+  }
+  .range{
+    height:7px!important;
+  }
+  .range::-webkit-slider-thumb{
+    width:23px!important;height:23px!important;
+  }
+  .range::-moz-range-thumb{
+    width:23px!important;height:23px!important;border:0!important;border-radius:50%!important;
+  }
+  .bpm-number{
+    font-size:9px!important;
+    margin-top:1px!important;
+  }
+
+  .volume-row{
+    min-height:44px!important;
+    margin-top:8px!important;
+    padding:7px 8px!important;
+    border-radius:12px!important;
+  }
+  .volume-row .mute-btn{
+    width:36px!important;height:36px!important;
+    min-width:36px!important;
+    border-radius:11px!important;
+  }
+  .volume-range{
+    height:6px!important;
+  }
+  .volume-range::-webkit-slider-thumb{
+    width:20px!important;height:20px!important;
+  }
+
+  /* Primary actions: app-like transport controls. */
+  .start-bar{
+    grid-template-columns:1fr 1fr!important;
+    gap:7px!important;
+    margin-top:9px!important;
+  }
+  .start-bar .start{
+    min-height:46px!important;
+    border-radius:13px!important;
+    font-size:9px!important;
+  }
+  .start-bar .start.record{
+    min-height:44px!important;
+    grid-column:1/-1!important;
+  }
+
+  /* Tool shelf becomes an actual app control grid. */
+  .tools{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:6px!important;
+    padding:9px 0 2px!important;
+    overflow:visible!important;
+  }
+  .tool{
+    min-height:52px!important;
+    padding:7px 4px!important;
+    border-radius:12px!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    gap:4px!important;
+    font-size:7px!important;
+    text-align:center!important;
+  }
+  .tool svg{width:17px!important;height:17px!important}
+
+  .panel{
+    margin-top:7px!important;
+    max-height:55svh!important;
+    overflow:auto!important;
+    border-radius:14px!important;
+  }
+
+  /* ---------- Collapsed secondary sections ---------- */
+  .history,
+  .mk-mobile-more{
+    border-radius:16px!important;
+  }
+
+  .history{
+    margin:10px 0 0!important;
+    padding:0!important;
+  }
+  .history .section-collapse{
+    min-height:48px!important;
+    padding:0 13px!important;
+  }
+
+  .mk-mobile-more{
+    margin-top:9px!important;
+  }
+  .mk-mobile-more>button{
+    min-height:48px!important;
+    border-radius:15px!important;
+    padding:0 13px!important;
+    font-size:8px!important;
+  }
+
+  /* ---------- Native bottom navigation ---------- */
+  .mk-mobile-nav{
+    display:grid!important;
+    position:fixed!important;
+    left:8px!important;
+    right:8px!important;
+    bottom:calc(7px + var(--mobile-safe-bottom))!important;
+    height:var(--mobile-nav-h)!important;
+    z-index:10050!important;
+    grid-template-columns:repeat(5,1fr)!important;
+    gap:3px!important;
+    padding:6px!important;
+    border:1px solid rgba(255,255,255,.085)!important;
+    border-radius:22px!important;
+    background:rgba(10,14,22,.94)!important;
+    backdrop-filter:blur(24px) saturate(145%)!important;
+    -webkit-backdrop-filter:blur(24px) saturate(145%)!important;
+    box-shadow:0 16px 50px rgba(0,0,0,.48),0 0 28px rgba(0,245,255,.035)!important;
+  }
+
+  .mk-mobile-nav-item{
+    min-width:0!important;
+    min-height:58px!important;
+    border:0!important;
+    border-radius:16px!important;
+    background:transparent!important;
+    color:#69758c!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:4px!important;
+    font-size:7px!important;
+    font-weight:850!important;
+    letter-spacing:.02em!important;
+    -webkit-user-select:none!important;
+    user-select:none!important;
+  }
+  .mk-mobile-nav-item svg{
+    width:20px!important;height:20px!important;
+    stroke-width:2!important;
+  }
+  .mk-mobile-nav-item.active{
+    color:var(--cyan)!important;
+    background:rgba(88,230,255,.085)!important;
+  }
+  .mk-mobile-focus{
+    position:relative!important;
+    margin-top:-17px!important;
+    min-height:62px!important;
+    border:1px solid rgba(88,230,255,.25)!important;
+    border-radius:19px!important;
+    background:linear-gradient(145deg,#12202a,#0d151d)!important;
+    box-shadow:0 10px 26px rgba(0,0,0,.36),0 0 22px rgba(88,230,255,.07)!important;
+  }
+  .mk-mobile-focus svg{
+    width:23px!important;height:23px!important;
+  }
+
+  .mk-mobile-fab{
+    width:48px!important;height:48px!important;
+    right:18px!important;
+    bottom:calc(var(--mobile-nav-h) + 18px + var(--mobile-safe-bottom))!important;
+    border-radius:16px!important;
+  }
+
+  /* ---------- Native bottom sheets ---------- */
+  .modal{
+    align-items:flex-end!important;
+    padding:0!important;
+    background:rgba(0,0,0,.58)!important;
+    backdrop-filter:blur(8px)!important;
+  }
+  .modal-box{
+    width:100%!important;
+    max-width:none!important;
+    max-height:88svh!important;
+    overflow:auto!important;
+    padding:0 15px calc(18px + var(--mobile-safe-bottom))!important;
+    border-radius:22px 22px 0 0!important;
+    border-left:0!important;border-right:0!important;border-bottom:0!important;
+    background:#0d121b!important;
+    box-shadow:0 -18px 60px rgba(0,0,0,.42)!important;
+  }
+  .modal-box::before{
+    content:"";
+    display:block;
+    width:38px;height:4px;
+    margin:9px auto 5px;
+    border-radius:999px;
+    background:#39465a;
+  }
+  .modal-head{
+    position:sticky!important;
+    top:0!important;
+    z-index:10!important;
+    margin:0 -15px 14px!important;
+    padding:11px 15px 12px!important;
+    background:rgba(13,18,27,.94)!important;
+    backdrop-filter:blur(18px)!important;
+    border-bottom:1px solid rgba(255,255,255,.045)!important;
+  }
+  .modal-title{font-size:14px!important}
+  .modal-close{
+    width:36px!important;height:36px!important;
+    display:grid!important;place-items:center!important;
+    border-radius:11px!important;
+    background:#151d29!important;
+    font-size:22px!important;
+  }
+  .modal-actions{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:7px!important;
+    margin-top:14px!important;
+  }
+  .modal-actions button{
+    min-height:44px!important;
+    border-radius:12px!important;
+  }
+
+  /* Focus is the real full-screen mobile workspace. */
+  #focusOverlay .focus-shell{
+    width:100vw!important;
+    height:100svh!important;
+    max-height:none!important;
+    padding:calc(12px + env(safe-area-inset-top,0px)) 14px calc(14px + var(--mobile-safe-bottom))!important;
+    border:0!important;
+    border-radius:0!important;
+    background:
+      radial-gradient(circle at 50% 18%,rgba(88,230,255,.08),transparent 32%),
+      #05080d!important;
+  }
+  #focusOverlay .focus-top{margin:0 0 12px!important}
+  #focusOverlay .focus-main{
+    min-height:190px!important;
+    border-radius:20px!important;
+  }
+  #focusOverlay .focus-bpm{
+    font-size:clamp(68px,20vw,104px)!important;
+  }
+  #focusOverlay .focus-timers{
+    gap:7px!important;
+  }
+  #focusOverlay .focus-timer{
+    min-height:62px!important;
+    border-radius:14px!important;
+    padding:10px 7px!important;
+  }
+  #focusOverlay .focus-controls{
+    grid-template-columns:1fr 1fr 42px 74px 42px!important;
+    gap:5px!important;
+  }
+  #focusOverlay .focus-icon-action{
+    height:44px!important;
+    border-radius:12px!important;
+  }
+  #focusOverlay .focus-tempo-value{
+    height:44px!important;
+    border-radius:12px!important;
+  }
+
+  /* Better touch interaction, no hover artifacts. */
+  button,.tool,.season-option,.timer-box,.tempo-display-card{
+    touch-action:manipulation;
+  }
+  button:active,.tool:active,.mk-mobile-nav-item:active{
+    transform:scale(.975);
+  }
+
+  /* Hide desktop-only density on the home screen. */
+  .market-ticker{font-size:8px!important}
+  .chart-wrap{height:145px!important}
+}
+
+@media(max-width:390px){
+  :root{--mobile-gutter:11px}
+  .main{padding-left:var(--mobile-gutter)!important;padding-right:var(--mobile-gutter)!important}
+  .topbar{width:calc(100% + 22px)!important;margin-left:-11px!important;margin-right:-11px!important;padding-left:11px!important;padding-right:11px!important}
+  .tools{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .tool{min-height:49px!important;font-size:6.5px!important}
+  .tempo-display-card .bpm-big{font-size:48px!important}
+  .mk-mobile-nav{left:5px!important;right:5px!important}
+}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -4637,6 +5124,412 @@ function syncReminderAfterRender(){
   window.addEventListener("resize",()=>{
     if(window.innerWidth<=760) setupMore();
   });
+})();
+</script>
+
+
+<script id="mk-native-mobile-final-js">
+(function(){
+  "use strict";
+
+  function makeMobileNav(){
+    if(document.getElementById("mkNativeMobileNav")) return;
+
+    const nav=document.createElement("nav");
+    nav.id="mkNativeMobileNav";
+    nav.className="mk-mobile-nav";
+    nav.setAttribute("aria-label","Mobile navigation");
+
+    nav.innerHTML=`
+      <button class="mk-mobile-nav-item active" data-tab="practice" type="button">
+        <i data-lucide="music-2"></i><span>Practice</span>
+      </button>
+      <button class="mk-mobile-nav-item" data-tab="seasons" type="button">
+        <i data-lucide="layers-3"></i><span>Seasons</span>
+      </button>
+      <button class="mk-mobile-nav-item mk-mobile-focus" data-tab="focus" type="button">
+        <i data-lucide="play"></i><span>Focus</span>
+      </button>
+      <button class="mk-mobile-nav-item" data-tab="history" type="button">
+        <i data-lucide="history"></i><span>History</span>
+      </button>
+      <button class="mk-mobile-nav-item" data-tab="more" type="button">
+        <i data-lucide="menu"></i><span>More</span>
+      </button>
+    `;
+    document.body.appendChild(nav);
+
+    nav.addEventListener("click",function(e){
+      const item=e.target.closest(".mk-mobile-nav-item");
+      if(!item) return;
+      const tab=item.dataset.tab;
+
+      nav.querySelectorAll(".mk-mobile-nav-item").forEach(x=>x.classList.remove("active"));
+      item.classList.add("active");
+
+      if(tab==="practice"){
+        closeMobileOverlays();
+        window.scrollTo({top:0,behavior:"smooth"});
+      }
+
+      if(tab==="seasons"){
+        closeMobileOverlays();
+        const trigger=document.querySelector(".title-season-trigger");
+        if(trigger) trigger.click();
+      }
+
+      if(tab==="focus"){
+        closeMobileOverlays();
+        const focus=document.getElementById("focusOverlay");
+        if(focus){
+          focus.classList.add("open");
+          focus.setAttribute("aria-hidden","false");
+        }
+      }
+
+      if(tab==="history"){
+        closeMobileOverlays();
+        const card=document.getElementById("historyCard");
+        if(card){
+          card.classList.remove("collapsed");
+          card.classList.add("open");
+          card.scrollIntoView({behavior:"smooth",block:"start"});
+        }
+      }
+
+      if(tab==="more"){
+        const more=document.getElementById("mkMobileMore");
+        if(more) more.classList.toggle("open");
+        const open=more?.classList.contains("open");
+        if(open){
+          closeMobileOverlays("more");
+          more.scrollIntoView({behavior:"smooth",block:"nearest"});
+        }
+      }
+    });
+
+    if(window.lucide) lucide.createIcons();
+  }
+
+  function closeMobileOverlays(keep){
+    document.querySelectorAll(".modal.open").forEach(x=>x.classList.remove("open"));
+    const season=document.getElementById("seasonDropdown");
+    if(season && keep!=="seasons") season.classList.remove("open");
+  }
+
+  function mobileOnly(){
+    return window.matchMedia("(max-width:760px)").matches;
+  }
+
+  function updateNavVisibility(){
+    const nav=document.getElementById("mkNativeMobileNav");
+    if(nav) nav.style.display=mobileOnly() ? "grid" : "none";
+  }
+
+  window.addEventListener("load",function(){
+    makeMobileNav();
+    updateNavVisibility();
+    setTimeout(function(){
+      if(window.lucide) lucide.createIcons();
+    },60);
+  });
+
+  window.addEventListener("resize",updateNavVisibility);
+
+  /* Keep the Focus tab active when the existing Focus overlay is opened. */
+  document.addEventListener("click",function(e){
+    if(!mobileOnly()) return;
+    const nav=document.getElementById("mkNativeMobileNav");
+    if(!nav) return;
+
+    if(e.target.closest("#focusOverlay .focus-close")){
+      nav.querySelectorAll(".mk-mobile-nav-item").forEach(x=>x.classList.remove("active"));
+      nav.querySelector('[data-tab="practice"]')?.classList.add("active");
+    }
+  });
+
+  /* Escape should always return to Practice state. */
+  document.addEventListener("keydown",function(e){
+    if(e.key!=="Escape" || !mobileOnly()) return;
+    document.querySelector('#mkNativeMobileNav [data-tab="practice"]')?.click();
+  });
+})();
+</script>
+
+
+<style id="mk-mobile-clean-home-v2">
+@media (max-width:760px){
+  /* ===== CLEAN MOBILE HOME ===== */
+  body{
+    overflow-x:hidden;
+    padding-bottom:calc(78px + env(safe-area-inset-bottom));
+  }
+
+  .mk-mobile-clean-home{
+    display:block!important;
+  }
+
+  /* Keep only the essential practice controls on Home */
+  .layout{
+    display:block!important;
+  }
+  .layout > main{
+    width:100%!important;
+    max-width:none!important;
+  }
+
+  /* Secondary/advanced blocks are moved into More on mobile */
+  .layout > main > .card:not(.mk-mobile-home-card),
+  .layout > main > .section-card:not(.mk-mobile-home-card){
+    /* JS will move eligible cards; fallback keeps them visually secondary */
+  }
+
+  /* Remove desktop sidebar from the Home flow */
+  .right{
+    display:none!important;
+  }
+
+  /* Every mobile sheet gets its own stacking layer */
+  .mk-mobile-sheet,
+  .modal,
+  .overlay,
+  [role="dialog"]{
+    z-index:9999!important;
+  }
+
+  .mk-mobile-sheet{
+    position:fixed!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    top:auto!important;
+    max-height:calc(100dvh - 12px)!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:calc(22px + env(safe-area-inset-bottom))!important;
+    box-sizing:border-box!important;
+  }
+
+  /* Prevent sheet controls from hiding behind fixed nav */
+  .mk-mobile-sheet .modal-content,
+  .mk-mobile-sheet .sheet-content{
+    padding-bottom:24px!important;
+  }
+
+  /* Native modal backdrop must sit behind sheet */
+  .mk-mobile-backdrop{
+    z-index:9998!important;
+  }
+
+  /* Sign-in / sync controls must always remain clickable */
+  #authModal,#loginModal,#signInModal,#syncModal,
+  .auth-modal,.login-modal{
+    z-index:10020!important;
+  }
+  #authModal button,#loginModal button,#signInModal button,#syncModal button,
+  .auth-modal button,.login-modal button{
+    position:relative;
+    z-index:10030!important;
+    pointer-events:auto!important;
+  }
+
+  /* Fixed bottom navigation is the lowest app layer */
+  #mkNativeMobileNav{
+    z-index:9000!important;
+  }
+
+  /* When any modal is open, temporarily hide bottom nav so it can never cover a modal option */
+  body.mk-mobile-modal-open #mkNativeMobileNav{
+    display:none!important;
+  }
+
+  /* Make long modal forms usable on iPhone */
+  input,select,textarea,button{
+    font-size:16px;
+  }
+  .modal input,.modal select,.modal textarea,
+  [role="dialog"] input,[role="dialog"] select,[role="dialog"] textarea{
+    min-height:46px;
+  }
+
+  /* Compact cards on the Home page */
+  .card{
+    border-radius:16px!important;
+  }
+
+  /* Home should not expose the whole desktop dashboard */
+  .mk-mobile-secondary-slot{
+    display:none!important;
+  }
+}
+@media (max-width:390px){
+  body{padding-bottom:calc(74px + env(safe-area-inset-bottom));}
+}
+</style>
+
+<script id="mk-mobile-clean-home-v2-js">
+(function(){
+  const MOBILE = 760;
+
+  function isMobile(){
+    return window.innerWidth <= MOBILE;
+  }
+
+  function findTextElement(root, patterns){
+    const els = root.querySelectorAll('button,a,[role="button"],h1,h2,h3,h4,.card-title,.section-title,.title');
+    for(const el of els){
+      const t=(el.textContent||'').trim().toLowerCase();
+      if(patterns.some(p=>t.includes(p))) return el;
+    }
+    return null;
+  }
+
+  function moveCardByTitle(patterns, slot){
+    if(!slot) return;
+    const candidates = document.querySelectorAll('main .card, main .section-card, main .panel, aside .card, aside .section-card');
+    for(const card of candidates){
+      if(card.closest('#mkMobileMore') || card.dataset.mkMoved==='1') continue;
+      const hit=findTextElement(card, patterns);
+      if(hit){
+        card.dataset.mkMoved='1';
+        card.classList.add('mk-mobile-moved-card');
+        slot.appendChild(card);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function ensureMobileMore(){
+    if(document.getElementById('mkMobileMoreV2')) return;
+
+    const wrap=document.createElement('div');
+    wrap.id='mkMobileMoreV2';
+    wrap.innerHTML=`
+      <div class="mk-mobile-v2-backdrop"></div>
+      <section class="mk-mobile-v2-sheet" aria-label="More">
+        <div class="mk-mobile-v2-grab"></div>
+        <div class="mk-mobile-v2-head">
+          <strong>More</strong>
+          <button type="button" class="mk-mobile-v2-close" aria-label="Close">×</button>
+        </div>
+        <div class="mk-mobile-v2-list">
+          <button type="button" data-v2-action="seasons"><span>Seasons</span><b>›</b></button>
+          <button type="button" data-v2-action="history"><span>History</span><b>›</b></button>
+          <button type="button" data-v2-action="recording"><span>Recording Studio</span><b>›</b></button>
+          <button type="button" data-v2-action="sync"><span>Sync / Sign in</span><b>›</b></button>
+          <button type="button" data-v2-action="backup"><span>Backup & Data</span><b>›</b></button>
+          <button type="button" data-v2-action="settings"><span>Settings</span><b>›</b></button>
+          <button type="button" data-v2-action="profile"><span>Profile</span><b>›</b></button>
+        </div>
+      </section>`;
+    document.body.appendChild(wrap);
+
+    const style=document.createElement('style');
+    style.id='mk-mobile-clean-home-v2-more-css';
+    style.textContent=`
+      @media(max-width:760px){
+        #mkMobileMoreV2{display:none;position:fixed;inset:0;z-index:10000}
+        #mkMobileMoreV2.open{display:block}
+        .mk-mobile-v2-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.58)}
+        .mk-mobile-v2-sheet{
+          position:absolute;left:0;right:0;bottom:0;
+          max-height:88dvh;overflow:auto;
+          background:var(--bg-card,#15171c);
+          border:1px solid var(--border-color,#30343b);
+          border-radius:22px 22px 0 0;
+          padding:10px 14px calc(24px + env(safe-area-inset-bottom));
+          box-shadow:0 -18px 50px rgba(0,0,0,.35);
+        }
+        .mk-mobile-v2-grab{width:42px;height:4px;border-radius:9px;background:#70757d;margin:2px auto 14px}
+        .mk-mobile-v2-head{display:flex;align-items:center;justify-content:space-between;padding:4px 2px 12px}
+        .mk-mobile-v2-close{border:0;background:transparent;color:inherit;font-size:30px;line-height:1;padding:2px 8px}
+        .mk-mobile-v2-list{display:grid;gap:8px}
+        .mk-mobile-v2-list button{
+          min-height:54px;width:100%;display:flex;align-items:center;justify-content:space-between;
+          padding:0 16px;border-radius:14px;border:1px solid var(--border-color,#30343b);
+          background:var(--bg-card2,#1c1f25);color:var(--text-primary,#fff);
+          font-size:15px;text-align:left;
+        }
+        .mk-mobile-v2-list b{font-size:24px;font-weight:400;opacity:.6}
+      }
+    `;
+    document.head.appendChild(style);
+
+    const close=()=>wrap.classList.remove('open');
+    wrap.querySelector('.mk-mobile-v2-backdrop').onclick=close;
+    wrap.querySelector('.mk-mobile-v2-close').onclick=close;
+
+    wrap.querySelectorAll('[data-v2-action]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const a=btn.dataset.v2Action;
+        close();
+        setTimeout(()=>runMobileAction(a),60);
+      });
+    });
+  }
+
+  function runMobileAction(a){
+    try{
+      if(a==='seasons'){
+        const el=document.querySelector('.title-season-trigger');
+        if(el) el.click(); else if(typeof toggleDashboardMenu==='function') toggleDashboardMenu();
+      }else if(a==='history'){
+        const h=document.getElementById('historyCard');
+        if(h){ h.scrollIntoView({behavior:'smooth',block:'start'}); }
+      }else if(a==='recording'){
+        const el=findTextElement(document.body,['recording studio','recording']);
+        if(el) el.click();
+      }else if(a==='sync'){
+        const el=findTextElement(document.body,['sign in','sync']);
+        if(el) el.click();
+      }else if(a==='backup'){
+        if(typeof openBackup==='function') openBackup();
+      }else if(a==='settings'){
+        if(typeof openSettings==='function') openSettings();
+      }else if(a==='profile'){
+        if(typeof openProfile==='function') openProfile();
+      }
+    }catch(e){}
+  }
+
+  function wireModalState(){
+    const observer=new MutationObserver(()=>{
+      if(!isMobile()) return;
+      const open = !!document.querySelector(
+        '.modal.show,.modal.open,.modal[style*="display: block"],.overlay.show,.overlay.open,[role="dialog"][aria-hidden="false"]'
+      );
+      document.body.classList.toggle('mk-mobile-modal-open',open);
+    });
+    observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class','style','aria-hidden']});
+  }
+
+  function setup(){
+    if(!isMobile()) return;
+    ensureMobileMore();
+
+    // If an older More panel exists, make its main action route to the new sheet.
+    const oldMore=document.getElementById('mkMobileMore');
+    if(oldMore){
+      oldMore.style.display='none';
+      oldMore.setAttribute('aria-hidden','true');
+    }
+
+    const nav=document.getElementById('mkNativeMobileNav');
+    if(nav){
+      const more=nav.querySelector('[data-nav="more"]') || nav.querySelector('button:last-child');
+      if(more){
+        more.onclick=(e)=>{
+          e.preventDefault();
+          document.getElementById('mkMobileMoreV2').classList.add('open');
+        };
+      }
+    }
+  }
+
+  window.addEventListener('resize',setup);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>{setup();wireModalState();});
+  else {setup();wireModalState();}
 })();
 </script>
 
