@@ -405,6 +405,17 @@ button,input,select{font:inherit}button{cursor:pointer}
 </style>
 
 <style>
+
+/* Tempo header: season/meter identity with Focus + Tap above the tempo slider */
+.metro-header-row{display:flex;align-items:center;justify-content:center;gap:8px;width:min(520px,94%);margin:4px auto 3px}
+.metro-header-row .market-below-tempo{margin:0!important;flex:1;min-width:0}
+.metro-header-row .mk-pro-tools{display:flex;align-items:center;gap:5px;flex:0 0 auto}
+.metro-header-row .mk-pro-tools button{height:30px;padding:0 9px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:#0b121d;color:#dfe9f5;font:inherit;font-size:8px;font-weight:850;cursor:pointer;white-space:nowrap}
+.metro-header-row .mk-pro-tools button:hover{border-color:rgba(0,245,255,.35);box-shadow:0 0 12px rgba(0,245,255,.08)}
+.slider-row{display:flex!important;align-items:center!important;gap:8px!important}
+.slider-row .round{flex:0 0 32px}
+@media(max-width:600px){.metro-header-row{gap:5px}.metro-header-row .mk-pro-tools button{padding:0 7px;font-size:7px}.slider-row{gap:6px!important}}
+
 /* Clickable transport cards: the visual BPM card controls the metronome,
    and both practice timer cards control the current season/session. */
 .tempo-display-card{
@@ -1411,6 +1422,41 @@ button, input, select, textarea {
   .tempo-display-card .bpm-big{font-size:58px!important}
 }
 </style>
+
+<style>
+/* === Practice activity feedback + lightweight runtime === */
+.practice-live-indicator{
+  position:fixed;left:50%;top:12px;transform:translateX(-50%) translateY(-8px);
+  z-index:12000;display:flex;align-items:center;gap:8px;padding:7px 12px;
+  border:1px solid rgba(184,255,61,.38);border-radius:999px;
+  background:rgba(5,10,14,.92);backdrop-filter:blur(12px);
+  color:var(--lime);font-size:8px;font-weight:900;letter-spacing:.12em;
+  box-shadow:0 0 22px rgba(184,255,61,.12);opacity:0;pointer-events:none;
+  transition:opacity .18s ease,transform .18s ease;
+}
+.practice-live-indicator.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.practice-live-indicator .live-dot{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime);animation:practiceLiveBlink 1.1s ease-in-out infinite}
+@keyframes practiceLiveBlink{0%,100%{opacity:.45;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
+.practice-timer-card.running{
+  border-color:rgba(184,255,61,.72)!important;
+  box-shadow:0 0 34px rgba(184,255,61,.18),inset 0 0 24px rgba(184,255,61,.05)!important;
+}
+.practice-timer-card.running .timer-state{color:var(--lime)!important;animation:practiceStatePulse 1.5s ease-in-out infinite}
+@keyframes practiceStatePulse{0%,100%{opacity:.62}50%{opacity:1}}
+.metro-card.is-running{box-shadow:0 0 38px rgba(0,245,255,.16),var(--shadow)!important}
+.metro-card.is-running .tempo-display-card{border-color:rgba(0,245,255,.72)!important;box-shadow:0 0 30px rgba(0,245,255,.16),inset 0 0 22px rgba(0,245,255,.05)!important}
+.practice-toast{
+  position:fixed;right:18px;bottom:18px;z-index:12001;max-width:min(330px,calc(100vw - 36px));
+  padding:11px 14px;border:1px solid rgba(0,245,255,.3);border-radius:12px;
+  background:rgba(7,12,19,.94);backdrop-filter:blur(12px);color:var(--text);
+  font-size:9px;font-weight:850;box-shadow:0 15px 45px rgba(0,0,0,.4),0 0 24px rgba(0,245,255,.1);
+  opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .18s ease,transform .18s ease;
+}
+.practice-toast.show{opacity:1;transform:translateY(0)}
+.practice-toast .toast-title{color:var(--cyan);font-size:8px;letter-spacing:.12em;margin-bottom:3px}
+.practice-toast.end .toast-title{color:var(--lime)}
+@media(max-width:600px){.practice-live-indicator{top:8px;font-size:7px;padding:6px 10px}.practice-toast{right:10px;bottom:10px}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -1482,15 +1528,18 @@ button, input, select, textarea {
           <div class="tempo-status-row"><div class="tempo-direction-indicator" id="tempoDirectionIndicator" aria-live="polite"><span class="tempo-arrow" id="tempoArrow">•</span><span id="tempoDirectionText">STEADY</span></div></div>
           <div class="timer-grid"><div class="timer-box season-toggle" onclick="toggleSession()" role="button" tabindex="0" aria-label="Start or stop season" title="Click to start / stop season"><span class="timer-label">Today in Season</span><span class="timer-value" id="daySessionTime">00:00:00</span></div><div class="timer-box current season-toggle" onclick="toggleSession()" role="button" tabindex="0" aria-label="Start or stop season" title="Click to start / stop season"><span class="timer-label">Current Session</span><span class="timer-value" id="sessionTime">00:00:00</span></div></div><div class="timer-state" id="sessionTimerState">Ready</div>
         </div>
-        <div class="market-ticker market-below-tempo"><i data-lucide="store"></i><span id="tickerSeason">MY PRACTICE</span><b id="tickerRhythm">4/4 • ♩</b></div>
-        <div class="mk-pro-tools" id="mkProTools">
-          <button onclick="toggleFocusMode()">⛶ Focus</button>
-          <button onclick="openProPanel('tapTempoPanel')">⌁ Tap</button>
+        <div class="metro-header-row">
+          <div class="market-ticker market-below-tempo"><i data-lucide="store"></i><span id="tickerSeason">MY PRACTICE</span><b id="tickerRhythm">4/4 • ♩</b></div>
+          <div class="mk-pro-tools" id="mkProTools">
+            <button onclick="toggleFocusMode()" title="Focus mode">⛶ Focus</button>
+            <button onclick="openProPanel('tapTempoPanel')" title="Tap tempo">⌁ Tap</button>
+          </div>
         </div>
 
         <div class="slider-row">
-          <button class="round" onclick="changeBpm(-1)">−</button>
+          <button class="round" onclick="changeBpm(-1)" title="Decrease tempo">−</button>
           <input class="range" id="bpmRange" type="range" min="20" max="300" value="80" oninput="setBpm(this.value)">
+          <button class="round" onclick="changeBpm(1)" title="Increase tempo">+</button>
           <div class="bpm-number"><span id="bpmValue">80</span> BPM</div>
         </div>
         <div class="volume-row">
@@ -1671,7 +1720,9 @@ const DB_KEY="studioMetronome_neon_v7";
 let db=loadDB(), currentId=localStorage.getItem("studioMetronomeCurrent")||db.practices[0]?.id;
 let bpm=80,targetBpm=120,meterTime="4/4",meterNote="quarter",rhythmPattern=[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],sound="classic",drums="off",special="normal";
 let customNotes=JSON.parse(localStorage.getItem("metroCustomNotes")||"[]");
-let audioCtx=null,metroRunning=false,sessionRunning=false,sessionStartedAt=0,sessionElapsed=0,nextBeatTime=0,beatIndex=0,schedulerTimer=null,sessionRAF=null,chart=null,period="week";
+let audioCtx=null,metroRunning=false,sessionRunning=false,sessionStartedAt=0,sessionElapsed=0,nextBeatTime=0,beatIndex=0,schedulerTimer=null,sessionTimerTick=null,chart=null,period="week";
+const ACTIVE_SESSION_KEY="mkStudioActiveSession_v1";
+let practiceLiveIndicator=null,practiceToastTimer=null;
 let tempoModifierTimer=null, tempoAutomationRunning=false;
 let mediaRecorder=null,mediaStream=null,recordingChunks=[],recordingStartedAt=0,recordings=[]; let recordingAudioCtx=null,recordingSource=null,recordingProcessor=null,recordingBuffers=[],recordingSampleRate=44100,recordingStopping=false; let calendarCursor=new Date(); calendarCursor.setDate(1);
 const noteDefs={
@@ -1853,8 +1904,15 @@ function syncTransportCards(){
   }
 }
 function toggleMetro(){metroRunning?stopMetro():startMetro()}
-function startMetro(){initAudio();metroRunning=true;beatIndex=0;nextBeatTime=audioCtx.currentTime+.05;schedulerTimer=setInterval(scheduler,20);document.getElementById("metroBtn").innerHTML='<i data-lucide="square"></i><span>Stop Metronome</span>';lucide.createIcons();syncTransportCards();if(!tempoAutomationRunning&&settings().autoTempo?.change)startTempoAutomation()}
-function stopMetro(){metroRunning=false;clearInterval(schedulerTimer);schedulerTimer=null;document.getElementById("metroBtn").innerHTML='<i data-lucide="play"></i><span>Start Metronome</span>';lucide.createIcons();syncTransportCards();if(tempoAutomationRunning)stopTempoAutomation()}
+function startMetro(){initAudio();metroRunning=true;beatIndex=0;nextBeatTime=audioCtx.currentTime+.05;schedulerTimer=setInterval(scheduler,40);document.getElementById("metroBtn").innerHTML='<i data-lucide="square"></i><span>Stop Metronome</span>';lucide.createIcons();syncTransportCards();if(!tempoAutomationRunning&&settings().autoTempo?.change)startTempoAutomation()}
+function stopMetro(){
+  const wasRunning=metroRunning;
+  metroRunning=false;clearInterval(schedulerTimer);schedulerTimer=null;
+  document.getElementById("metroBtn").innerHTML='<i data-lucide="play"></i><span>Start Metronome</span>';lucide.createIcons();
+  if(tempoAutomationRunning)stopTempoAutomation();
+  syncTransportCards();
+  if(wasRunning&&sessionRunning)stopSession(true,false);
+}
 function scheduler(){if(!metroRunning)return;while(nextBeatTime<audioCtx.currentTime+.12){scheduleBeat(nextBeatTime);let pulse=getPulseSeconds();nextBeatTime+=pulse;beatIndex++}}
 function getPulseSeconds(){let n=noteDefs[meterNote]||customNotes.find(x=>x.id===meterNote);let div=n?.div||1;let den=Number(meterTime.split("/")[1])||4;let quarterSec=60/bpm;return quarterSec*div*(4/den)}
 function playNoise(time,duration,vol=.2){let buffer=audioCtx.createBuffer(1,Math.max(1,Math.floor(audioCtx.sampleRate*duration)),audioCtx.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=Math.random()*2-1;let src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buffer;g.gain.setValueAtTime(vol*(metroMuted?0:Number(document.getElementById("volume").value)),time);g.gain.exponentialRampToValueAtTime(.001,time+duration);src.connect(g);g.connect(audioCtx.destination);src.start(time)}
@@ -1892,13 +1950,87 @@ function scheduleBeat(t){
   }
 }
 function getBeatsPerBar(){let num=Number(meterTime.split("/")[0])||4;let n=noteDefs[meterNote]||customNotes.find(x=>x.id===meterNote);let div=n?.div||1;return Math.max(1,Math.round(num/div))}
-function highlightBeat(i){document.querySelectorAll(".led").forEach((x,j)=>x.classList.toggle("on",j===i%document.querySelectorAll(".led").length))}
+const metroLeds=[];
+function highlightBeat(i){
+  const leds=metroLeds.length?metroLeds:document.querySelectorAll(".led");
+  if(!leds.length)return;
+  const idx=i%leds.length;
+  for(let j=0;j<leds.length;j++)leds[j].classList.toggle("on",j===idx);
+}
 
 function toggleSession(){sessionRunning?stopSession(true):startSession()}
 function getTodaySeasonSeconds(){const key=localDateKey(new Date()),p=currentPractice();return (p?.sessions||[]).filter(s=>localDateKey(s.date)===key).reduce((a,s)=>a+(Number(s.seconds)||0),0)}
-function startSession(){sessionRunning=true;sessionStartedAt=Date.now();sessionElapsed=0;document.getElementById("sessionBtn").innerHTML='<i data-lucide="square"></i><span>End Practice</span>';lucide.createIcons();updateSessionTimer()}
-function stopSession(save=true){if(!sessionRunning)return;sessionElapsed=Math.floor((Date.now()-sessionStartedAt)/1000);sessionRunning=false;stopMetro();document.getElementById("sessionBtn").innerHTML='<i data-lucide="timer"></i><span>Start Practice</span>';lucide.createIcons();if(save&&sessionElapsed>=1)saveSession(sessionElapsed);updateSessionTimer()}
-function updateSessionTimer(){const e=document.getElementById("sessionTime"),day=document.getElementById("daySessionTime"),card=document.getElementById("practiceTimerCard"),state=document.getElementById("sessionTimerState");const current=sessionRunning?Math.floor((Date.now()-sessionStartedAt)/1000):sessionElapsed;const todayTotal=getTodaySeasonSeconds()+(sessionRunning?current:0);e.textContent=formatDurationLong(current);if(day)day.textContent=formatDurationLong(todayTotal);if(card)card.classList.toggle("running",sessionRunning);if(state)state.textContent=sessionRunning?"● Recording practice time":"Ready";if(sessionRunning)sessionRAF=requestAnimationFrame(updateSessionTimer);if(document.getElementById("focusOverlay")?.classList.contains("open")&&typeof updateFocusUI==="function")updateFocusUI()}
+function ensurePracticeLiveUI(){
+  if(!practiceLiveIndicator){
+    practiceLiveIndicator=document.createElement("div");
+    practiceLiveIndicator.className="practice-live-indicator";
+    practiceLiveIndicator.innerHTML='<span class="live-dot"></span><span>PRACTICE ACTIVE • CLICK TIMER TO STOP</span>';
+    document.body.appendChild(practiceLiveIndicator);
+  }
+  return practiceLiveIndicator;
+}
+function showPracticeToast(title,detail,end=false){
+  let t=document.getElementById("practiceToast");
+  if(!t){t=document.createElement("div");t.id="practiceToast";t.className="practice-toast";document.body.appendChild(t)}
+  t.className="practice-toast "+(end?"end ":"")+"show";
+  t.innerHTML=`<div class="toast-title">${title}</div><div>${detail||""}</div>`;
+  clearTimeout(practiceToastTimer);practiceToastTimer=setTimeout(()=>t.classList.remove("show"),3200);
+}
+function syncPracticeLiveUI(){
+  const ind=ensurePracticeLiveUI();
+  ind.classList.toggle("show",!!sessionRunning);
+  document.body.classList.toggle("practice-active",!!sessionRunning);
+  document.title=sessionRunning?"● PRACTICING • MK Studio":"MK Studio";
+}
+function persistActiveSession(){
+  if(!sessionRunning||!currentId)return;
+  localStorage.setItem(ACTIVE_SESSION_KEY,JSON.stringify({practiceId:currentId,startAt:sessionStartedAt,baseElapsed:sessionElapsed,savedAt:Date.now()}));
+}
+function clearActiveSession(){localStorage.removeItem(ACTIVE_SESSION_KEY)}
+function restoreActiveSession(){
+  try{
+    const a=JSON.parse(localStorage.getItem(ACTIVE_SESSION_KEY)||"null");
+    if(!a||a.practiceId!==currentId||!a.startAt)return false;
+    sessionStartedAt=Number(a.startAt)||Date.now();
+    sessionElapsed=Math.max(0,Number(a.baseElapsed)||0);
+    sessionRunning=true;
+    syncPracticeLiveUI();
+    return true;
+  }catch(e){localStorage.removeItem(ACTIVE_SESSION_KEY);return false}
+}
+function startSession(){
+  if(sessionRunning)return;
+  sessionRunning=true;sessionStartedAt=Date.now();sessionElapsed=0;
+  persistActiveSession();
+  document.getElementById("sessionBtn").innerHTML='<i data-lucide="square"></i><span>End Practice</span>';
+  lucide.createIcons();syncPracticeLiveUI();showPracticeToast("PRACTICE STARTED","Your practice time is being tracked.");updateSessionTimer();
+  if(navigator.vibrate)navigator.vibrate(35);
+}
+function stopSession(save=true,stopMetronome=true){
+  if(!sessionRunning)return;
+  sessionElapsed=Math.floor((Date.now()-sessionStartedAt)/1000);
+  sessionRunning=false;clearActiveSession();
+  if(sessionTimerTick){clearTimeout(sessionTimerTick);sessionTimerTick=null}
+  if(stopMetronome)stopMetro();
+  document.getElementById("sessionBtn").innerHTML='<i data-lucide="timer"></i><span>Start Practice</span>';
+  lucide.createIcons();
+  if(save&&sessionElapsed>=1)saveSession(sessionElapsed);
+  syncPracticeLiveUI();showPracticeToast("PRACTICE SAVED",`${formatDurationLong(sessionElapsed)} recorded for this session.`,true);
+  if(navigator.vibrate)navigator.vibrate([40,50,80]);
+  updateSessionTimer();
+}
+function updateSessionTimer(){
+  const e=document.getElementById("sessionTime"),day=document.getElementById("daySessionTime"),card=document.getElementById("practiceTimerCard"),state=document.getElementById("sessionTimerState");
+  const current=sessionRunning?Math.floor((Date.now()-sessionStartedAt)/1000):sessionElapsed;
+  const todayTotal=getTodaySeasonSeconds()+(sessionRunning?current:0);
+  if(e)e.textContent=formatDurationLong(current);
+  if(day)day.textContent=formatDurationLong(todayTotal);
+  if(card)card.classList.toggle("running",sessionRunning);
+  if(state)state.textContent=sessionRunning?"● Recording practice time":"Ready";
+  syncPracticeLiveUI();
+  if(document.getElementById("focusOverlay")?.classList.contains("open")&&typeof updateFocusUI==="function")updateFocusUI();
+  if(sessionRunning){clearTimeout(sessionTimerTick);sessionTimerTick=setTimeout(updateSessionTimer,250)}
+}
 function formatDurationLong(sec){sec=Math.max(0,Math.floor(Number(sec)||0));return `${String(Math.floor(sec/3600)).padStart(2,"0")}:${String(Math.floor((sec%3600)/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`}
 function saveSession(seconds){let p=currentPractice();if(!p)return;p.sessions.push({id:crypto.randomUUID(),date:new Date().toISOString(),seconds,bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning});p.practiceDays=p.practiceDays||{};p.practiceDays[localDateKey(new Date())]=true;saveDB()}
 
@@ -2305,8 +2437,8 @@ function restoreSectionState(){
 }
 function pulseMetroCard(accent=false){
   const card=document.querySelector(".tempo-display-card"); if(!card)return;
-  card.classList.remove("beat-pulse","beat-accent"); void card.offsetWidth;
-  card.classList.add(accent?"beat-accent":"beat-pulse");
+  card.classList.remove("beat-pulse","beat-accent");
+  requestAnimationFrame(()=>{if(metroRunning)card.classList.add(accent?"beat-accent":"beat-pulse")});
   clearTimeout(window.__metroPulseClear);
   window.__metroPulseClear=setTimeout(()=>card.classList.remove("beat-pulse","beat-accent"),240);
   const focusBeat=document.getElementById("focusBeat");
@@ -2330,7 +2462,7 @@ function toggleMute(){
   if(b){b.classList.toggle("active",metroMuted);b.innerHTML=metroMuted?'<i data-lucide="volume-x"></i><span>Muted</span>':'<i data-lucide="volume-2"></i><span>Mute</span>';lucide.createIcons()}
   settings().muted=metroMuted;saveDB();
 }
-function renderAll(){let p=currentPractice();if(p)loadPracticeSettings(p);renderPracticeList();renderHeader();setBpm(bpm,false);updateVolumeUI(false);updateTarget();renderVisual();renderMeter();renderRhythm();renderOptions();renderStats();renderHistory();renderOverview();renderCalendar();renderRecordings();const mb=document.getElementById("muteBtn");if(mb){mb.classList.toggle("active",metroMuted);mb.innerHTML=metroMuted?'<i data-lucide="volume-x"></i><span>Muted</span>':'<i data-lucide="volume-2"></i><span>Mute</span>'}lucide.createIcons()}
+function renderAll(){let p=currentPractice();if(p)loadPracticeSettings(p);renderPracticeList();renderHeader();setBpm(bpm,false);updateVolumeUI(false);updateTarget();renderVisual();metroLeds.length=0;document.querySelectorAll(".led").forEach(x=>metroLeds.push(x));renderMeter();renderRhythm();renderOptions();renderStats();renderHistory();renderOverview();renderCalendar();renderRecordings();updateSessionTimer();const mb=document.getElementById("muteBtn");if(mb){mb.classList.toggle("active",metroMuted);mb.innerHTML=metroMuted?'<i data-lucide="volume-x"></i><span>Muted</span>':'<i data-lucide="volume-2"></i><span>Mute</span>'}lucide.createIcons()}
 function togglePanel(name,btn){let p=document.getElementById("panel-"+name),open=p.classList.contains("open");document.querySelectorAll(".panel").forEach(x=>x.classList.remove("open"));document.querySelectorAll(".tool").forEach(x=>x.classList.remove("active"));if(!open){p.classList.add("open");btn.classList.add("active")}}
 
 function openNew(){document.getElementById("practiceModal").classList.add("open");setTimeout(()=>document.getElementById("newName").focus(),80)}
@@ -2567,7 +2699,11 @@ function setSync(a,b){
 }
 
 document.addEventListener("keydown",e=>{if(["INPUT","SELECT","TEXTAREA"].includes(e.target.tagName))return;if(e.code==="Space"){e.preventDefault();toggleMetro()}if(e.key==="ArrowUp")changeBpm(1);if(e.key==="ArrowDown")changeBpm(-1);if(e.key.toLowerCase()==="r")toggleRecording()});
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&audioCtx?.state==="suspended")audioCtx.resume()});
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden&&audioCtx?.state==="suspended")audioCtx.resume();
+  if(sessionRunning)persistActiveSession();
+});
+window.addEventListener("pagehide",()=>{if(sessionRunning)persistActiveSession()});
 ;
 
 let realtimeChannel=null;
@@ -2624,7 +2760,7 @@ function stopRealtimeSync(){
   stopCloudPolling();
   realtimeUserId=null;
 }
-loadPracticeSettings(currentPractice());renderAll();restoreSectionState();try{loadReminderUI();schedulePracticeReminders()}catch{}
+loadPracticeSettings(currentPractice());renderAll();restoreSectionState();restoreActiveSession();updateSessionTimer();try{loadReminderUI();schedulePracticeReminders()}catch{}
 if(sb){
   sb.auth.onAuthStateChange(async (event,session)=>{
     await loadUserEmail();
@@ -2734,9 +2870,7 @@ function togglePracticeFromFocus(){
       return r;
     };
   }
-  setInterval(function(){
-    if(document.getElementById("focusOverlay")?.classList.contains("open"))updateFocusUI();
-  },500);
+  /* Focus UI is updated by transport/session events; no permanent polling loop. */
 })();
 
 
