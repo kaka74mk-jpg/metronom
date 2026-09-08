@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.08.12">
+<meta name="mk-app-version" content="2026.09.08.10">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1596,67 +1596,6 @@ button, input, select, textarea {
 
 
 
-
-<style>
-/* === Mobile final polish === */
-
-/* Focus / metronome visual box: keep everything centered and inside card */
-@media(max-width:760px){
-  .metro-visual{
-    height:150px!important;
-    padding:0!important;
-    overflow:hidden!important;
-  }
-  .visual-studio,
-  .tempo-display-card{
-    width:calc(100% - 20px)!important;
-    max-width:100%!important;
-    min-width:0!important;
-    margin:0 auto!important;
-  }
-  .tempo-display-card .bpm-big{
-    font-size:42px!important;
-  }
-  .tempo-display-card .leds{
-    transform:none!important;
-  }
-
-  /* profile controls must stay above cards but below real modals */
-  .profile-grid,
-  .profile-item{
-    position:relative;
-    z-index:1;
-    overflow:hidden;
-  }
-
-  .modal,
-  .mk-pro-modal{
-    z-index:99999!important;
-  }
-
-  /* Main transport buttons: readable text */
-  .start.metro{
-    color:#00151a!important;
-    text-shadow:0 1px 1px rgba(255,255,255,.25);
-  }
-  .start.session{
-    background:linear-gradient(135deg,#24334b,#121a29)!important;
-    color:#ffffff!important;
-    border-color:rgba(0,245,255,.25)!important;
-  }
-}
-
-/* prevent modal overlap artifacts */
-.modal-box{
-  position:relative;
-  z-index:100000;
-}
-
-/* Update badge should not falsely stay stale */
-.app-update-box.update-found{
-  animation:none!important;
-}
-</style>
 </head>
 <body>
 <div class="app">
@@ -3808,6 +3747,57 @@ if(old) window.openCategory=function(cat){
 };
 })();
 </script>
+
+<style id="mk-mobile-v16-final-polish">
+@media(max-width:760px){
+  /* Focus Mode: replace the stretched/egg-shaped BPM orb with a clean mobile card. */
+  #focusOverlay .focus-main{
+    width:100%!important;
+    max-width:520px!important;
+    height:150px!important;
+    min-height:150px!important;
+    max-height:150px!important;
+    aspect-ratio:auto!important;
+    flex:0 0 150px!important;
+    margin:4px auto!important;
+    border-radius:18px!important;
+    padding:10px 16px!important;
+    box-sizing:border-box!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
+  #focusOverlay .focus-bpm{
+    font-size:clamp(58px,17vw,82px)!important;
+    line-height:.9!important;
+  }
+  #focusOverlay .focus-beat{font-size:14px!important;margin-top:5px!important}
+
+  /* Home Start buttons: guaranteed readable text on every phone theme. */
+  #metroBtn,#sessionBtn{
+    color:#ffffff!important;
+    -webkit-text-fill-color:#ffffff!important;
+    text-shadow:0 1px 3px rgba(0,0,0,.55)!important;
+    font-weight:900!important;
+  }
+  #metroBtn{
+    background:linear-gradient(135deg,#087f89,#075c67)!important;
+    border:1px solid rgba(0,245,255,.55)!important;
+  }
+  #sessionBtn{
+    background:linear-gradient(135deg,#252f43,#151d2d)!important;
+    border:1px solid rgba(184,255,61,.28)!important;
+  }
+  #metroBtn span,#sessionBtn span{color:#fff!important;-webkit-text-fill-color:#fff!important}
+}
+@media(max-width:390px){
+  #focusOverlay .focus-main{height:132px!important;min-height:132px!important;max-height:132px!important;flex-basis:132px!important}
+  #focusOverlay .focus-bpm{font-size:58px!important}
+  #metroBtn,#sessionBtn{font-size:9px!important}
+}
+</style>
+
 </body></html>
 <!-- Mobile polish: category contents, no Tools sheet, focus-style home tempo -->
 <style id="mk-round4-fixes">
