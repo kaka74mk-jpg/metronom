@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.08.12">
+<meta name="mk-app-version" content="2026.09.08.10">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1592,6 +1592,10 @@ button, input, select, textarea {
   .mk-mobile-category,.practice-timer-card,.metro-visual,.focus-timer,.focus-main{will-change:transform,filter}
 }
 </style>
+
+
+
+
 </head>
 <body>
 <div class="app">
@@ -1979,13 +1983,26 @@ function renderOptions(){
   renderOptionGroup("drumOptions",drumDefs,drums,v=>{drums=v;saveSetting("drums",v)});
   renderOptionGroup("specialOptions",specialDefs,special,v=>{
     special=v;
-    saveSetting("special",v);
-    if(v==="accelerando"||v==="ritardando"){updateTempoDirectionIndicator(v==="accelerando"?"up":"down");
-      showTechniqueTempo(v);
-    }else{
-      stopTempoAutomation();
-      hideTechniqueTempo();
+    const isMobile=window.matchMedia?.("(max-width:760px)").matches;
+    if(isMobile){
+      // Do not call saveDB() here: it runs renderAll(), replacing the mobile
+      // bottom-sheet contents while the user is interacting with it.
+      settings().special=v;
+      localStorage.setItem(DB_KEY,JSON.stringify(db));
+      markLocalChange();
+      debouncedSync();
+      if(v==="accelerando"||v==="ritardando"){
+        requestAnimationFrame(()=>{showTechniqueTempo(v);syncTechniqueTempoUI()});
+      }else{
+        stopTempoAutomation();
+        hideTechniqueTempo();
+      }
+      renderOptions();
+      return;
     }
+    saveSetting("special",v);
+    if(v==="accelerando"||v==="ritardando"){updateTempoDirectionIndicator(v==="accelerando"?"up":"down");showTechniqueTempo(v)}
+    else{stopTempoAutomation();hideTechniqueTempo()}
   });
   syncTechniqueTempoUI();
 }
@@ -2169,7 +2186,9 @@ function startSession(){
   triggerTransportMagic("practiceTimerCard");
   persistActiveSession();
   document.getElementById("sessionBtn").innerHTML='<i data-lucide="square"></i><span>End Practice</span>';
-  lucide.createIcons();syncPracticeLiveUI();showPracticeToast("PRACTICE STARTED","Your practice time is being tracked.");updateSessionTimer();
+  lucide.createIcons();syncPracticeLiveUI();
+  if(!window.matchMedia?.("(max-width:760px)").matches)showPracticeToast("PRACTICE STARTED","Your practice time is being tracked.");
+  updateSessionTimer();
   if(navigator.vibrate)navigator.vibrate(35);
 }
 function stopSession(save=true,stopMetronome=true){
@@ -2181,7 +2200,20 @@ function stopSession(save=true,stopMetronome=true){
   document.getElementById("sessionBtn").innerHTML='<i data-lucide="timer"></i><span>Start Practice</span>';
   lucide.createIcons();
   if(save&&sessionElapsed>=1)saveSession(sessionElapsed);
-  syncPracticeLiveUI();showPracticeToast("PRACTICE SAVED",`${formatDurationLong(sessionElapsed)} recorded for this session.`,true);
+  syncPracticeLiveUI();
+  // Mobile must leave no stale live state after Stop.
+  if(window.matchMedia?.("(max-width:760px)").matches){
+    const card=document.getElementById("practiceTimerCard"),state=document.getElementById("sessionTimerState");
+    card?.classList.remove("running","is-running","session-live","mk-magic-burst");
+    state?.classList.remove("session-live");
+    if(state)state.textContent="Ready";
+    document.querySelectorAll(".timer-box.season-running").forEach(x=>x.classList.remove("season-running"));
+    document.getElementById("practiceToast")?.classList.remove("show");
+    document.getElementById("practiceToast")?.remove();
+    practiceLiveIndicator?.classList.remove("show");
+    document.body.classList.remove("practice-active");
+    document.title="MK Studio";
+  }
   if(navigator.vibrate)navigator.vibrate([40,50,80]);
   updateSessionTimer();
 }
@@ -2203,6 +2235,15 @@ function updateSessionTimer(){
   if(day)day.textContent=formatDurationLong(todayTotal);
   if(card)card.classList.toggle("running",sessionRunning);
   if(state)state.textContent=sessionRunning?"● Recording practice time":"Ready";
+  if(!sessionRunning&&window.matchMedia?.("(max-width:760px)").matches){
+    card?.classList.remove("running","is-running","session-live","mk-magic-burst");
+    state?.classList.remove("session-live");
+    document.querySelectorAll(".timer-box.season-running").forEach(x=>x.classList.remove("season-running"));
+    document.getElementById("practiceToast")?.classList.remove("show");
+    document.getElementById("practiceToast")?.remove();
+    practiceLiveIndicator?.classList.remove("show");
+    document.body.classList.remove("practice-active");
+  }
   syncPracticeLiveUI();
   if(document.getElementById("focusOverlay")?.classList.contains("open")&&typeof updateFocusUI==="function")updateFocusUI();
   if(sessionRunning){clearTimeout(sessionTimerTick);sessionTimerTick=setTimeout(updateSessionTimer,250)}
@@ -2302,7 +2343,13 @@ function encodeAudioBufferToMp3(audioBuffer){
   return encodeMp3([channel],audioBuffer.sampleRate||44100);
 }
 function updateRecordingUI(active){
-  const main=document.getElementById("mainRecordBtn"),btn=document.getElementById("recordBtn"),badge=document.getElementById("recordLiveBadge");
+  const main=document.getElementById("mainRecordBtn"),btn=document.getElementById("recordBtn"),badge=document.getElementById("recordLiveBadge"),metro=document.getElementById("tempoDisplayCard");
+  if(metro){
+    metro.classList.toggle("is-recording",!!active);
+    let dot=metro.querySelector(".mk-recording-dot");
+    if(!dot){dot=document.createElement("span");dot.className="mk-recording-dot";dot.setAttribute("aria-hidden","true");metro.appendChild(dot)}
+    dot.hidden=!active;
+  }
   if(main){main.classList.toggle("recording-active",active);main.innerHTML=active?'<i data-lucide="square"></i><span>Recording…</span>':'<i data-lucide="mic"></i><span>Record</span>'}
   if(btn){btn.classList.toggle("recording-active",active);btn.innerHTML=active?'<i data-lucide="square"></i><span>Recording…</span>':'<i data-lucide="mic"></i><span>Start Recording</span>'}
   if(badge){badge.classList.toggle("live",active);badge.innerHTML=active?'<span></span> RECORDING':'<span></span> READY'}
@@ -4754,3 +4801,69 @@ main .sync-card{display:block!important}
 }
 </style>
 
+
+<style id="mk-mobile-final-bugfix">
+@media(max-width:760px){
+  /* Technique automation stays inside the mobile bottom sheet and can scroll. */
+  #panel-special.open #techniqueTempoBox{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;width:100%!important;box-sizing:border-box!important;margin-top:12px!important;z-index:2!important}
+  #panel-special.open .technique-tempo-grid{grid-template-columns:1fr 1fr!important}
+  #panel-special.open .technique-tempo-grid .technique-tempo-btn{grid-column:1/-1!important;width:100%!important;min-height:42px!important}
+  #panel-special.open input{min-height:42px!important;font-size:16px!important}
+  #panel-special.open{max-height:min(78vh,680px)!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:28px!important}
+  /* No stale practice notification after Stop on phones. */
+  .practice-live-indicator,.practice-toast{display:none!important}
+  .practice-timer-card:not(.running){border-color:rgba(0,245,255,.28)!important;box-shadow:0 0 24px rgba(0,245,255,.08),inset 0 0 20px rgba(255,255,255,.02)!important}
+  .practice-timer-card:not(.running) .timer-state{color:var(--muted)!important;animation:none!important}
+  /* Recording marker inside the main metronome card. */
+  #tempoDisplayCard{position:relative!important}
+  #tempoDisplayCard .mk-recording-dot{position:absolute!important;top:9px!important;right:10px!important;width:8px!important;height:8px!important;border-radius:50%!important;background:#ff304f!important;box-shadow:0 0 8px rgba(255,48,79,.95),0 0 18px rgba(255,48,79,.5)!important;animation:mkRecordBlink .9s ease-in-out infinite!important;z-index:50!important}
+  #tempoDisplayCard .mk-recording-dot[hidden]{display:none!important}
+  @keyframes mkRecordBlink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(.72)}}
+  /* Focus: keep the orb and controls inside the phone viewport. */
+  #focusOverlay .focus-shell{width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;padding:12px 10px calc(12px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important;overflow:hidden!important;gap:7px!important}
+  #focusOverlay .focus-top{margin:0!important;flex:0 0 auto!important}
+  #focusOverlay .focus-main{width:min(62vw,260px)!important;height:min(62vw,260px)!important;min-height:0!important;aspect-ratio:1!important;flex:0 0 auto!important;margin:2px auto!important}
+  #focusOverlay .focus-bpm{font-size:clamp(58px,18vw,92px)!important}
+  #focusOverlay .focus-timers{width:100%!important;grid-template-columns:1fr 1fr!important;gap:6px!important;flex:0 0 auto!important}
+  #focusOverlay .focus-timer{min-height:58px!important;padding:8px!important}
+  #focusOverlay .focus-timer-value{font-size:20px!important}
+  #focusOverlay .focus-controls{grid-template-columns:1fr 1fr 42px 78px 42px!important;gap:5px!important;flex:0 0 auto!important}
+  #focusOverlay .focus-icon-action,#focusOverlay .focus-tempo-value{height:42px!important}
+}
+@media(max-width:390px){#focusOverlay .focus-main{width:54vw!important;height:54vw!important}#focusOverlay .focus-timers{gap:5px!important}#focusOverlay .focus-timer{min-height:52px!important}#focusOverlay .focus-controls{grid-template-columns:1fr 1fr 38px 70px 38px!important}}
+</style>
+
+<style id="mk-mobile-v15-final-ui-fix">
+@media(max-width:760px){
+  /* 1) Home metronome BPM: keep 3-digit values fully inside the orb. */
+  #tempoDisplayCard{overflow:visible!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;padding:8px!important}
+  #tempoDisplayCard .bpm-big{display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;text-align:center!important;white-space:nowrap!important;overflow:visible!important;line-height:1!important;font-variant-numeric:tabular-nums!important;letter-spacing:-.075em!important;font-size:clamp(50px,15vw,64px)!important}
+  @media(max-width:390px){#tempoDisplayCard .bpm-big{font-size:50px!important;letter-spacing:-.07em!important}}
+
+  /* 2) Focus Mode is a true full-screen surface, not a top-half card. */
+  #focusOverlay{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-height:none!important;display:none!important;align-items:stretch!important;justify-content:stretch!important;padding:0!important;margin:0!important;overflow:hidden!important}
+  #focusOverlay.open{display:block!important}
+  #focusOverlay .focus-shell{position:absolute!important;inset:0!important;width:100vw!important;max-width:none!important;height:100dvh!important;min-height:100dvh!important;max-height:none!important;margin:0!important;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important;border:0!important;border-radius:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important;align-items:stretch!important;gap:10px!important}
+  #focusOverlay .focus-top{width:100%!important;flex:0 0 auto!important}
+  #focusOverlay .focus-main{flex:1 1 auto!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important}
+  #focusOverlay .focus-timers{flex:0 0 auto!important;width:100%!important;grid-template-columns:1fr 1fr!important}
+  #focusOverlay .focus-controls{flex:0 0 auto!important;width:100%!important}
+
+  /* 3) Remove the stray sheet/handle line from every mobile surface. */
+  .metro-card>.panel.open:before,
+  .modal-box:before,
+  .dashboard-menu.open .period-card:before,
+  .mk-mobile-category-sheet:before,
+  .mk-tools-sheet:before,
+  .mk-mobile-panel-sheet:before{content:none!important;display:none!important}
+
+  /* 4) Recording Studio: force the real Record panel to become a visible mobile sheet. */
+  #panel-record.open{display:block!important;position:fixed!important;left:8px!important;right:8px!important;top:auto!important;bottom:calc(64px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:min(78vh,680px)!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;z-index:22010!important;margin:0!important;padding:16px!important;box-sizing:border-box!important;border:1px solid rgba(255,255,255,.11)!important;border-radius:20px 20px 16px 16px!important;background:linear-gradient(180deg,#101725,#080d15)!important;box-shadow:0 24px 80px rgba(0,0,0,.62),0 0 35px rgba(0,245,255,.07)!important;visibility:visible!important;opacity:1!important;transform:none!important}
+  #panel-record.open:before{content:none!important;display:none!important}
+  #panel-record.open .recording-head{display:flex!important}
+  #panel-record.open .recording-console{display:grid!important;grid-template-columns:1fr 1fr!important}
+  #panel-record.open .recording-console .rec-status{grid-column:1/-1!important}
+  #panel-record.open .recordings{display:grid!important}
+  body:has(#panel-record.open){overflow:hidden!important}
+}
+</style>
