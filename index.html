@@ -4559,3 +4559,71 @@ function schedulePracticeReminders(){
  });
 })();
 </script>
+
+<style id="mk-v13-fixes">
+/* v13 cleanup */
+.mk-mobile-backdrop::before,.mk-mobile-backdrop::after{display:none!important}
+#focusOverlay .focus-record-btn{display:none!important}
+#focusOverlay .focus-controls{grid-template-columns:1fr 1fr 44px 88px 44px!important}
+</style>
+<script id="mk-v13-fixes-js">
+(function(){
+  function onlyOne(id){
+    document.querySelectorAll('.modal.open,.panel.open,#focusOverlay.open,.mk-tools-sheet.open,.mk-review-modal.open').forEach(x=>{
+      if(x.id!==id)x.classList.remove('open');
+    });
+  }
+  function openRecordFixed(){
+    onlyOne('panel-record');
+    const p=document.getElementById('panel-record');
+    if(p){
+      document.querySelectorAll('.panel').forEach(x=>x.classList.remove('open'));
+      p.classList.add('open');
+      p.scrollIntoView({behavior:'smooth',block:'center'});
+      const b=[...document.querySelectorAll('.tool')].find(x=>/Recordings|Record/i.test(x.textContent||''));
+      b?.classList.add('active');
+    }
+  }
+  window.openRecordFixed=openRecordFixed;
+  // Record category always opens studio, never starts recording
+  document.addEventListener('click',e=>{
+    const r=e.target.closest('[data-category="record"],.mk-record-final-trigger');
+    if(r){e.preventDefault();e.stopImmediatePropagation();openRecordFixed();}
+  },true);
+  // Remove accidental focus record button injected by older patches
+  function cleanFocus(){document.querySelectorAll('#focusOverlay .focus-record-btn').forEach(x=>x.remove())}
+  // Review: render moved nodes correctly inside active view
+  function fixReview(){
+    const modal=document.getElementById('settingsModal');
+    if(!modal)return;
+    modal.querySelectorAll('.mk-v11-review-option').forEach(btn=>{
+      btn.onclick=()=>{
+        const key=btn.dataset.view;
+        const map={calendar:'panel-calendar',state:'statsCard',history:'historyCard'};
+        const el=document.getElementById(map[key]);
+        if(!el)return;
+        modal.querySelectorAll('.mk-v11-review-view').forEach(v=>v.classList.remove('open'));
+        const host=modal.querySelector('[data-content="'+key+'"]');
+        if(host){host.classList.add('open');host.style.display='block';}
+        el.style.display='block';
+        if(key==='calendar'&&window.renderCalendar)window.renderCalendar();
+        if(key==='state'&&window.renderStats)window.renderStats();
+        if(key==='history'&&window.renderHistory)window.renderHistory();
+      };
+    });
+  }
+  // Sync status back to bottom of home
+  function restoreSync(){
+    const card=document.querySelector('.sync-card');
+    const main=document.querySelector('main');
+    if(card&&main&&!main.contains(card))main.appendChild(card);
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    cleanFocus();restoreSync();fixReview();
+    const old=window.openRecord;
+    window.openRecord=openRecordFixed;
+    const obs=new MutationObserver(()=>{cleanFocus();fixReview();});
+    obs.observe(document.body,{subtree:true,childList:true});
+  });
+})();
+</script>
