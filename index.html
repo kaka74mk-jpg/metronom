@@ -3798,6 +3798,88 @@ if(old) window.openCategory=function(cat){
 }
 </style>
 
+
+<style id="mk-focus-v5-profile-layer-fix">
+/* Focus Mode v5 visual refresh */
+#focusOverlay.mk-pro-modal{
+  background:
+    radial-gradient(circle at 50% 25%,rgba(0,245,255,.12),transparent 35%),
+    radial-gradient(circle at 50% 90%,rgba(255,43,214,.08),transparent 30%),
+    #03060b!important;
+  backdrop-filter:blur(12px);
+}
+#focusOverlay .focus-shell{
+  width:min(680px,94vw)!important;
+  height:min(820px,92vh)!important;
+  border-radius:30px!important;
+  background:linear-gradient(180deg,rgba(16,24,40,.96),rgba(5,9,18,.98))!important;
+  border:1px solid rgba(0,245,255,.22)!important;
+  box-shadow:0 30px 100px rgba(0,0,0,.7),0 0 50px rgba(0,245,255,.08)!important;
+}
+#focusOverlay .focus-main{
+  width:260px!important;
+  height:260px!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle,rgba(0,245,255,.12),rgba(10,16,26,.8))!important;
+  border:1px solid rgba(0,245,255,.18)!important;
+  box-shadow:inset 0 0 45px rgba(0,245,255,.08),0 0 50px rgba(0,245,255,.08)!important;
+}
+#focusOverlay .focus-bpm{
+  font-size:clamp(70px,15vw,150px)!important;
+}
+#focusOverlay .focus-beat{
+  color:#00f5ff!important;
+  filter:drop-shadow(0 0 15px rgba(0,245,255,.8));
+}
+#focusOverlay .focus-timer{
+  background:rgba(10,16,26,.85)!important;
+  border:1px solid rgba(255,43,214,.25)!important;
+  border-radius:16px!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+#focusOverlay .focus-controls{
+  padding:12px;
+  border-radius:20px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+}
+#focusOverlay .focus-icon-action{
+  min-width:48px;
+  height:44px;
+  border-radius:14px!important;
+}
+
+/* Profile / modal stacking fix */
+.profile-section,.profile-card,#profilePanel{
+  position:relative;
+  z-index:30;
+}
+.modal.open{
+  z-index:9000!important;
+}
+.mk-pro-modal.open{
+  z-index:9500!important;
+}
+.mk-pro-panel.open{
+  z-index:9600!important;
+}
+
+@media(max-width:760px){
+ #focusOverlay .focus-shell{
+   width:100vw!important;
+   height:100dvh!important;
+   border-radius:0!important;
+   padding:18px!important;
+ }
+ #focusOverlay .focus-main{
+   width:190px!important;
+   height:190px!important;
+ }
+ #focusOverlay .focus-bpm{
+   font-size:64px!important;
+ }
+}
+</style>
 </body></html>
 <!-- Mobile polish: category contents, no Tools sheet, focus-style home tempo -->
 <style id="mk-round4-fixes">
