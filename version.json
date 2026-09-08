@@ -1,5 +1,5 @@
 {
-  "version": "2026.09.08.12",
+  "version": "2026.09.08.84",
   "releasedAt": "2026-09-08T12:00:00Z",
   "message": "Mobile UI fixes: Focus Mode fullscreen layout, BPM display, Recording Studio visibility, mobile panels, practice timer reset, and recording indicator."
 }
