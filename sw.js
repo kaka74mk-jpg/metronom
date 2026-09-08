@@ -1,4 +1,4 @@
-const CACHE_NAME = "mk-studio-v13";
+const CACHE_NAME = "mk-studio-v14";
 
 const APP_SHELL = [
   "./",
@@ -9,7 +9,9 @@ const APP_SHELL = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.addAll(APP_SHELL)
+    )
   );
 });
 
@@ -35,7 +37,7 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
 
-  // Always get the latest version info and service worker
+  // Always get latest version and service worker
   if (
     url.pathname.endsWith("/version.json") ||
     url.pathname.endsWith("/sw.js")
