@@ -1,5 +1,5 @@
 {
-  "version": "2026.09.08.10",
-  "releasedAt": "2026-09-08T12:00:00Z",
-  "message": "Bugfix: Sync status card visible on Home again, Review modal (Calendar/Current Season State/Current Season History) content now actually renders, Recording Studio opens with content, and the My Practice overview card is no longer hidden on mobile"
+  "version": "2026.09.08.11",
+  "releasedAt": "2026-09-08T15:00:00Z",
+  "message": "Focus Mode redesigned with a magical metronome orb, practice status notifications removed, and app updates now require user confirmation before installation."
 }

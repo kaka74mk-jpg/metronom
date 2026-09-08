@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.08.10">
+<meta name="mk-app-version" content="2026.09.08.11">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1554,7 +1554,7 @@ button, input, select {
         <div class="sync-chips"><span id="syncChipCloud">Cloud <b>OFF</b></span><span id="syncChipRealtime">Realtime <b>OFF</b></span><button class="sync-now-btn" onclick="syncNow()"><i data-lucide="refresh-cw"></i> Sync now</button></div>
         <div class="app-update-box" id="appUpdateBox">
           <div class="app-update-head">
-            <div><div class="app-update-title">APP VERSION</div><div class="app-update-version" id="appVersionLabel">v2026.09.07.3</div></div>
+            <div><div class="app-update-title">APP VERSION</div><div class="app-update-version" id="appVersionLabel">v2026.09.08.11</div></div>
             <button class="app-update-btn" id="appUpdateBtn" onclick="checkForAppUpdate(true)"><i data-lucide="refresh-cw"></i><span>Check update</span></button>
           </div>
           <div class="app-update-detail" id="appUpdateDetail">Every device can check the live GitHub version here.</div>
@@ -1860,27 +1860,18 @@ function highlightBeat(i){
 
 function toggleSession(){sessionRunning?stopSession(true):startSession()}
 function getTodaySeasonSeconds(){const key=localDateKey(new Date()),p=currentPractice();return (p?.sessions||[]).filter(s=>localDateKey(s.date)===key).reduce((a,s)=>a+(Number(s.seconds)||0),0)}
-function ensurePracticeLiveUI(){
-  if(!practiceLiveIndicator){
-    practiceLiveIndicator=document.createElement("div");
-    practiceLiveIndicator.className="practice-live-indicator";
-    practiceLiveIndicator.innerHTML='<span class="live-dot"></span><span>PRACTICE ACTIVE • CLICK TIMER TO STOP</span>';
-    document.body.appendChild(practiceLiveIndicator);
-  }
-  return practiceLiveIndicator;
-}
-function showPracticeToast(title,detail,end=false){
-  let t=document.getElementById("practiceToast");
-  if(!t){t=document.createElement("div");t.id="practiceToast";t.className="practice-toast";document.body.appendChild(t)}
-  t.className="practice-toast "+(end?"end ":"")+"show";
-  t.innerHTML=`<div class="toast-title">${title}</div><div>${detail||""}</div>`;
-  clearTimeout(practiceToastTimer);practiceToastTimer=setTimeout(()=>t.classList.remove("show"),3200);
+function ensurePracticeLiveUI(){ return null; }
+function showPracticeToast(){
+  const t=document.getElementById("practiceToast");
+  if(t)t.classList.remove("show");
 }
 function syncPracticeLiveUI(){
-  const ind=ensurePracticeLiveUI();
-  ind.classList.toggle("show",!!sessionRunning);
-  document.body.classList.toggle("practice-active",!!sessionRunning);
-  document.title=sessionRunning?"● PRACTICING • MK Studio":"MK Studio";
+  const ind=document.getElementById("practiceLiveIndicator");
+  if(ind)ind.classList.remove("show");
+  const toast=document.getElementById("practiceToast");
+  if(toast)toast.classList.remove("show");
+  document.body.classList.remove("practice-active");
+  document.title="MK Studio";
 }
 function persistActiveSession(){
   if(!sessionRunning||!currentId)return;
@@ -1904,7 +1895,7 @@ function startSession(){
   triggerTransportMagic("practiceTimerCard");
   persistActiveSession();
   document.getElementById("sessionBtn").innerHTML='<i data-lucide="square"></i><span>End Practice</span>';
-  lucide.createIcons();syncPracticeLiveUI();showPracticeToast("PRACTICE STARTED","Your practice time is being tracked.");updateSessionTimer();
+  lucide.createIcons();syncPracticeLiveUI();updateSessionTimer();
   if(navigator.vibrate)navigator.vibrate(35);
 }
 function stopSession(save=true,stopMetronome=true){
@@ -1916,7 +1907,7 @@ function stopSession(save=true,stopMetronome=true){
   document.getElementById("sessionBtn").innerHTML='<i data-lucide="timer"></i><span>Start Practice</span>';
   lucide.createIcons();
   if(save&&sessionElapsed>=1)saveSession(sessionElapsed);
-  syncPracticeLiveUI();showPracticeToast("PRACTICE SAVED",`${formatDurationLong(sessionElapsed)} recorded for this session.`,true);
+  syncPracticeLiveUI();
   if(navigator.vibrate)navigator.vibrate([40,50,80]);
   updateSessionTimer();
 }
@@ -2726,13 +2717,28 @@ function setSync(a,b){
 }
 
 /* ===== GitHub app update manager ===== */
-const MK_APP_VERSION=(document.querySelector('meta[name="mk-app-version"]')?.content||"2026.09.07.3").trim();
+const MK_APP_VERSION=(document.querySelector('meta[name="mk-app-version"]')?.content||"2026.09.08.11").trim();
 let mkRemoteAppVersion="",mkUpdateCheckInFlight=null;
 function compareAppVersions(a,b){const pa=String(a||"").replace(/^v/i,"").split(/[.+-]/).map(x=>parseInt(x,10)||0),pb=String(b||"").replace(/^v/i,"").split(/[.+-]/).map(x=>parseInt(x,10)||0);for(let i=0;i<Math.max(pa.length,pb.length);i++){const d=(pa[i]||0)-(pb[i]||0);if(d)return d}return 0}
-function setAppUpdateUI(state,detail,remote=""){const box=document.getElementById("appUpdateBox"),btn=document.getElementById("appUpdateBtn"),label=document.getElementById("appVersionLabel"),msg=document.getElementById("appUpdateDetail");if(label)label.textContent=`v${MK_APP_VERSION}${remote&&remote!==MK_APP_VERSION?` → v${remote}`:""}`;if(msg)msg.textContent=detail||"";if(btn){btn.classList.toggle("ready",state==="available");btn.style.display=state==="available"||state==="error"?"inline-flex":"none";btn.innerHTML=state==="available"?'<i data-lucide="download"></i><span>Update now</span>':'<i data-lucide="refresh-cw"></i><span>Check again</span>';btn.onclick=state==="available"?applyAppUpdate:()=>checkForAppUpdate(true);btn.disabled=false}if(box)box.classList.toggle("update-found",state==="available");try{lucide.createIcons()}catch{}}
+function setAppUpdateUI(state,detail,remote=""){const box=document.getElementById("appUpdateBox"),btn=document.getElementById("appUpdateBtn"),label=document.getElementById("appVersionLabel"),msg=document.getElementById("appUpdateDetail");if(label)label.textContent=`v${MK_APP_VERSION}${remote&&remote!==MK_APP_VERSION?` → v${remote}`:""}`;if(msg)msg.textContent=detail||"";if(btn){btn.classList.toggle("ready",state==="available");btn.style.display=state==="available"||state==="error"?"inline-flex":"none";btn.innerHTML=state==="available"?'<i data-lucide="download"></i><span>Update available</span>':'<i data-lucide="refresh-cw"></i><span>Check again</span>';btn.onclick=state==="available"?confirmAppUpdate:()=>checkForAppUpdate(true);btn.disabled=false}if(box)box.classList.toggle("update-found",state==="available");try{lucide.createIcons()}catch{}}
 async function fetchRemoteAppVersion(){const res=await fetch(`./version.json?mk_update_check=${Date.now()}`,{cache:"no-store",headers:{"Cache-Control":"no-cache"}});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();return String(data?.version||"").trim()}
 async function checkForAppUpdate(showMessage=false){if(mkUpdateCheckInFlight)return mkUpdateCheckInFlight;mkUpdateCheckInFlight=(async()=>{const btn=document.getElementById("appUpdateBtn");if(btn){btn.disabled=true;btn.innerHTML='<i data-lucide="loader-circle"></i><span>Checking…</span>';try{lucide.createIcons()}catch{}}try{const remote=await fetchRemoteAppVersion();if(!remote)throw new Error("Missing version");mkRemoteAppVersion=remote;if(compareAppVersions(remote,MK_APP_VERSION)>0){setAppUpdateUI("available",`A newer MK Studio build is live on GitHub (v${remote}). Update this device now.`,remote);return true}setAppUpdateUI("current",`This device is up to date. Live version: v${remote}.`,remote);return false}catch(e){console.warn("App update check failed",e);setAppUpdateUI("error",showMessage?"Could not check GitHub right now. Your data and sync are still available.":"GitHub update check unavailable.");return false}finally{mkUpdateCheckInFlight=null}})();return mkUpdateCheckInFlight}
-function applyAppUpdate(){try{sessionStorage.setItem("mkStudioUpdateRequested","1")}catch{}location.replace(`./?mk_update=${Date.now()}`)}
+let mkSWRegistration=null;
+function confirmAppUpdate(){
+  const remote=mkRemoteAppVersion||"the latest version";
+  const ok=window.confirm(`A new MK Studio update is available (v${remote}).\n\nDo you want to update now?`);
+  if(!ok)return;
+  applyAppUpdate();
+}
+async function applyAppUpdate(){
+  try{sessionStorage.setItem("mkStudioUpdateRequested","1")}catch{}
+  const reg=mkSWRegistration||(("serviceWorker" in navigator)?await navigator.serviceWorker.getRegistration():null);
+  if(reg){
+    try{await reg.update()}catch{}
+    if(reg.waiting){reg.waiting.postMessage({type:"SKIP_WAITING"});return;}
+  }
+  location.replace(`./?mk_update=${Date.now()}`);
+}
 
 document.addEventListener("keydown",e=>{if(["INPUT","SELECT","TEXTAREA"].includes(e.target.tagName))return;if(e.code==="Space"){e.preventDefault();toggleMetro()}if(e.key==="ArrowUp")changeBpm(1);if(e.key==="ArrowDown")changeBpm(-1);if(e.key.toLowerCase()==="r")toggleRecording()});
 document.addEventListener("visibilitychange",()=>{
@@ -2975,14 +2981,17 @@ window.addEventListener("DOMContentLoaded",()=>{
     navigator.serviceWorker.addEventListener("controllerchange",()=>{
       if(mkControllerReloaded)return;
       mkControllerReloaded=true;
-      if(!sessionStorage.getItem("mkStudioSWReloaded")){sessionStorage.setItem("mkStudioSWReloaded","1");location.reload();}
+      if(sessionStorage.getItem("mkStudioUpdateRequested")){
+        try{sessionStorage.removeItem("mkStudioUpdateRequested")}catch{}
+        location.reload();
+      }
     });
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" })
         .then(async (registration) => {
+          mkSWRegistration=registration;
           console.log("Service Worker registered:", registration.scope);
           try{await registration.update()}catch{}
-          setTimeout(()=>{try{sessionStorage.removeItem("mkStudioSWReloaded")}catch{}},8000);
           checkForAppUpdate(false);
         })
         .catch((error) => {console.error("Service Worker registration failed:", error);checkForAppUpdate(false);});
@@ -3701,3 +3710,93 @@ function schedulePracticeReminders(){
      round2/v10/v11/v13 patches fighting each other. See notes on each
      rule below for the exact conflict being resolved.
      =================================================================== -->
+
+<style id="mk-focus-magic-orb-v15">
+/* Focus Mode — large mystical metronome orb */
+#focusOverlay .focus-main{
+  width:292px!important;height:292px!important;min-height:292px!important;
+  margin:18px auto 8px!important;padding:0!important;
+  flex:0 0 292px!important;
+  border-radius:50%!important;
+  border:1px solid rgba(120,245,255,.38)!important;
+  background:
+    radial-gradient(circle at 34% 27%,rgba(255,255,255,.26) 0 2%,rgba(130,240,255,.12) 7%,transparent 24%),
+    radial-gradient(circle at 50% 50%,rgba(0,245,255,.20) 0,rgba(0,245,255,.09) 28%,rgba(98,36,255,.12) 47%,rgba(5,8,20,.96) 73%)!important;
+  box-shadow:
+    inset 0 0 38px rgba(255,255,255,.055),
+    inset 0 0 80px rgba(0,245,255,.12),
+    0 0 24px rgba(0,245,255,.16),
+    0 0 70px rgba(117,49,255,.12)!important;
+  isolation:isolate!important;overflow:visible!important;
+  transform:translateZ(0);
+}
+#focusOverlay .focus-main:before{
+  inset:-10px!important;width:auto!important;height:auto!important;
+  border:1px solid rgba(0,245,255,.18)!important;border-radius:50%!important;
+  box-shadow:0 0 0 8px rgba(0,245,255,.025),0 0 0 20px rgba(161,61,255,.035),0 0 45px rgba(0,245,255,.12)!important;
+  animation:mkOrbRingFloat 4s ease-in-out infinite!important;
+}
+#focusOverlay .focus-main:after{
+  width:76%!important;height:76%!important;left:12%!important;top:12%!important;
+  transform:none!important;border-radius:50%!important;
+  border:1px solid rgba(255,255,255,.07)!important;
+  background:
+    conic-gradient(from 0deg,transparent 0 12%,rgba(0,245,255,.20) 15%,transparent 20% 42%,rgba(255,43,214,.18) 47%,transparent 54% 78%,rgba(184,255,61,.10) 83%,transparent 90%)!important;
+  filter:blur(.2px);opacity:.7!important;
+  animation:mkOrbSpin 9s linear infinite!important;
+}
+#focusOverlay .focus-main>*{position:relative!important;z-index:4!important}
+#focusOverlay .focus-main .focus-bpm{
+  font-size:clamp(88px,14vw,126px)!important;
+  line-height:.78!important;letter-spacing:-.08em!important;
+  color:#f4ffff!important;
+  text-shadow:0 0 18px rgba(0,245,255,.75),0 0 42px rgba(0,245,255,.30),0 0 80px rgba(116,52,255,.22)!important;
+}
+#focusOverlay .focus-main .focus-beat{
+  margin:15px 0 0!important;font-size:25px!important;color:#8ff8ff!important;
+  filter:drop-shadow(0 0 10px rgba(0,245,255,.9));
+}
+#focusOverlay .focus-main .focus-info{margin:7px 0 0!important;color:#a9f9ff!important;text-shadow:0 0 10px rgba(0,245,255,.35)}
+#focusOverlay .focus-main[aria-pressed="true"]{
+  border-color:rgba(129,250,255,.85)!important;
+  box-shadow:
+    inset 0 0 48px rgba(0,245,255,.13),
+    inset 0 0 105px rgba(93,45,255,.12),
+    0 0 32px rgba(0,245,255,.34),
+    0 0 90px rgba(103,45,255,.20),
+    0 0 150px rgba(255,43,214,.08)!important;
+}
+#focusOverlay .focus-main[aria-pressed="true"]:before{animation:mkOrbRingFloat 2.2s ease-in-out infinite,mkOrbPulseRing 1.1s ease-in-out infinite!important}
+#focusOverlay .focus-main[aria-pressed="true"]:after{animation:mkOrbSpin 4s linear infinite!important}
+#focusOverlay .focus-main.focus-beat-hit{animation:mkOrbBeat .20s cubic-bezier(.2,.8,.2,1)!important}
+#focusOverlay .focus-main.focus-accent{animation:mkOrbAccent .34s cubic-bezier(.2,.8,.2,1)!important}
+@keyframes mkOrbSpin{to{transform:rotate(360deg)}}
+@keyframes mkOrbRingFloat{0%,100%{transform:scale(.985);opacity:.42}50%{transform:scale(1.025);opacity:.78}}
+@keyframes mkOrbPulseRing{0%,100%{box-shadow:0 0 0 8px rgba(0,245,255,.025),0 0 0 20px rgba(161,61,255,.035),0 0 45px rgba(0,245,255,.12)}50%{box-shadow:0 0 0 13px rgba(0,245,255,.035),0 0 0 28px rgba(161,61,255,.055),0 0 70px rgba(0,245,255,.24)}}
+@keyframes mkOrbBeat{0%{transform:scale(1)}35%{transform:scale(1.025);filter:brightness(1.18)}100%{transform:scale(1)}}
+@keyframes mkOrbAccent{0%{transform:scale(1)}35%{transform:scale(1.045);filter:brightness(1.28)}100%{transform:scale(1)}}
+@media(max-width:600px){
+  #focusOverlay .focus-main{width:238px!important;height:238px!important;min-height:238px!important;flex-basis:238px!important;margin:14px auto 6px!important}
+  #focusOverlay .focus-main .focus-bpm{font-size:78px!important}
+  #focusOverlay .focus-main .focus-beat{font-size:21px!important;margin-top:12px!important}
+}
+@media(max-width:380px){
+  #focusOverlay .focus-main{width:210px!important;height:210px!important;min-height:210px!important;flex-basis:210px!important}
+  #focusOverlay .focus-main .focus-bpm{font-size:68px!important}
+}
+/* No persistent practice notifications on the main page. */
+.practice-live-indicator,.practice-toast{display:none!important;opacity:0!important;pointer-events:none!important}
+</style>
+<script id="mk-focus-magic-orb-v15-js">
+(function(){
+  function syncOrb(){
+    const el=document.getElementById('focusMetroCard');
+    if(el)el.classList.toggle('focus-running',!!window.metroRunning);
+  }
+  const old=window.updateFocusUI;
+  if(typeof old==='function'&&!old.__mkOrbV15){
+    window.updateFocusUI=function(){const r=old.apply(this,arguments);syncOrb();return r};
+    window.updateFocusUI.__mkOrbV15=true;
+  }
+})();
+</script>
