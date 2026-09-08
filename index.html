@@ -4510,3 +4510,52 @@ function schedulePracticeReminders(){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
 </script>
+
+<style id="mk-v12-fixes">
+/* remove the small black bridge between home and mobile modals */
+.mk-mobile-backdrop,.mk-mobile-category-sheet,.mk-tools-sheet{border:0!important;box-shadow:none!important}
+.mk-mobile-category-sheet:before,.mk-tools-sheet:before{display:none!important}
+/* focus cleanup */
+#focusSeasonBtn,#focusPracticeBtn{display:none!important}
+#focusOverlay .focus-controls{grid-template-columns:44px 1fr 44px 44px!important;}
+#focusOverlay .focus-record-btn{height:42px;border-radius:12px;background:linear-gradient(135deg,#ff416c,#ff8a65);color:white;border:0;font-weight:900;display:flex;align-items:center;justify-content:center;gap:5px}
+</style>
+<script id="mk-v12-fixes-js">
+(function(){
+ function openRecord(){
+   if(typeof window.openPanel==='function'){window.openPanel('record');return;}
+   const p=document.getElementById('panel-record'); if(p)p.classList.add('open');
+ }
+ // replace category record action
+ const old=window.openCategory;
+ window.openCategory=function(cat){
+   if(cat==='record'){openRecord();return;}
+   return old?old.apply(this,arguments):undefined;
+ };
+ // review content routing
+ window.mkOpenReviewItem=function(type){
+   const map={calendar:'panel-calendar',state:'statsCard',history:'historyCard'};
+   const el=document.getElementById(map[type]);
+   if(!el)return;
+   document.querySelectorAll('#mkReviewModal .mk-review-view').forEach(x=>x.style.display='none');
+   el.style.display='block';
+ };
+ document.addEventListener('click',function(e){
+   const b=e.target.closest('[data-review-item]');
+   if(b) window.mkOpenReviewItem(b.dataset.reviewItem);
+ });
+ // add record button to focus
+ document.addEventListener('DOMContentLoaded',()=>{
+   const c=document.querySelector('#focusOverlay .focus-controls');
+   if(c && !c.querySelector('.focus-record-btn')){
+    const b=document.createElement('button'); b.className='focus-record-btn'; b.innerHTML='<i data-lucide="mic"></i><span>Record</span>'; b.onclick=openRecord; c.prepend(b);
+   }
+   // make review cards selectable if they exist
+   const modal=document.getElementById('mkReviewModal');
+   if(modal){
+    modal.querySelectorAll('[data-content]').forEach(x=>x.dataset.reviewItem=x.dataset.content);
+   }
+   try{lucide.createIcons()}catch(e){}
+ });
+})();
+</script>
