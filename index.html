@@ -5059,3 +5059,73 @@ main .sync-card{display:block!important}
   #focusOverlay .focus-main{transition:none!important}
 }
 </style>
+<style id="mk-v20-focus-circle-layout">
+@media(max-width:760px){
+  #focusOverlay{padding:16px 14px calc(18px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important;overflow:hidden!important}
+  #focusOverlay .focus-main{
+    width:min(82vw,360px)!important;height:min(82vw,360px)!important;min-width:0!important;min-height:0!important;
+    flex:0 0 auto!important;margin:0 auto!important;border-radius:50%!important;aspect-ratio:1/1!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+  }
+  #focusOverlay .focus-main:before{inset:7px!important;border-radius:50%!important}
+  #focusOverlay .focus-main:after{width:180px!important;height:180px!important;border-radius:50%!important}
+  #focusOverlay .focus-bottom,
+  #focusOverlay .focus-controls,
+  #focusOverlay .focus-info{box-sizing:border-box!important}
+  #focusOverlay .focus-speed,
+  #focusOverlay .tempo-control,
+  #focusOverlay [class*="speed"]{text-align:center!important;margin-left:auto!important;margin-right:auto!important}
+  #focusOverlay .focus-timers,
+  #focusOverlay .timers,
+  #focusOverlay .focus-bottom-row{
+    width:100%!important;display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:12px!important;
+  }
+}
+@media(max-width:390px){
+  #focusOverlay .focus-main{width:min(78vw,310px)!important;height:min(78vw,310px)!important}
+}
+</style>
+<style id="mk-v21-focus-final-layout">
+@media(max-width:760px){
+  #focusOverlay .focus-shell{
+    width:calc(100vw - 18px)!important;max-width:none!important;height:calc(100vh - 18px)!important;max-height:none!important;
+    padding:14px 12px calc(12px + env(safe-area-inset-bottom))!important;gap:0!important;
+    display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-content:flex-start!important;
+    justify-content:center!important;overflow:hidden!important;
+  }
+  #focusOverlay .focus-top{position:static!important;width:100%!important;height:34px!important;flex:0 0 34px!important;margin:0 0 8px!important}
+  #focusOverlay .focus-main{
+    order:2!important;width:min(70vw,330px)!important;height:min(70vw,330px)!important;min-height:0!important;flex:0 0 min(70vw,330px)!important;
+    margin:0 100%!important;transform:translateX(-50%)!important;left:50%!important;position:relative!important;
+    border-radius:50%!important;aspect-ratio:1/1!important;
+  }
+  #focusOverlay .focus-controls{display:contents!important}
+  #focusOverlay .focus-icon-action.tempo,
+  #focusOverlay .focus-tempo-value{
+    order:3!important;flex:0 0 auto!important;margin-top:12px!important;height:42px!important;box-sizing:border-box!important;
+  }
+  #focusOverlay .focus-icon-action.tempo{width:42px!important}
+  #focusOverlay .focus-tempo-value{width:86px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+  #focusOverlay .focus-timers{
+    order:4!important;width:100%!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;
+    margin:10px 0 0!important;flex:0 0 auto!important;
+  }
+  #focusOverlay .focus-timer{min-width:0!important;min-height:54px!important;padding:7px 5px!important;box-sizing:border-box!important}
+  #focusOverlay .focus-timer-value{font-size:18px!important}
+  #focusOverlay .focus-icon-action.season,
+  #focusOverlay .focus-icon-action.metro{
+    order:5!important;flex:0 0 auto!important;width:calc(50% - 4px)!important;height:38px!important;margin-top:9px!important;box-sizing:border-box!important;
+  }
+  #focusOverlay .focus-icon-action.season{margin-left:0!important}
+  #focusOverlay .focus-icon-action.metro{margin-right:0!important}
+}
+@media(max-width:390px){
+  #focusOverlay .focus-main{width:min(64vw,285px)!important;height:min(64vw,285px)!important;flex-basis:min(64vw,285px)!important}
+  #focusOverlay .focus-timers{margin-top:8px!important}
+  #focusOverlay .focus-timer{min-height:50px!important}
+  #focusOverlay .focus-icon-action.tempo,#focusOverlay .focus-tempo-value{height:38px!important;margin-top:9px!important}
+  #focusOverlay .focus-icon-action.tempo{width:38px!important}
+  #focusOverlay .focus-tempo-value{width:76px!important}
+  #focusOverlay .focus-icon-action.season,#focusOverlay .focus-icon-action.metro{height:36px!important;margin-top:7px!important}
+}
+</style>
