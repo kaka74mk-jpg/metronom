@@ -1689,14 +1689,13 @@ button, input, select, textarea {
         <div class="start-bar">
           <button id="metroBtn" class="start metro" onclick="toggleMetro()"><i data-lucide="play"></i><span>Start Metronome</span></button>
           <button id="sessionBtn" class="start session" onclick="toggleSession()"><i data-lucide="timer"></i><span>Start Practice</span></button>
-          <button id="mainRecordBtn" class="start record" onclick="toggleRecording()"><i data-lucide="mic"></i><span>Record</span></button>
         </div>
         
         <div class="mk-mobile-categories" id="mkMobileCategories" aria-label="Practice tools">
           <button class="mk-mobile-category" data-category="rhythm"><i data-lucide="music-2"></i><span>Rhythm</span></button>
           <button class="mk-mobile-category" data-category="sound"><i data-lucide="audio-lines"></i><span>Sound</span></button>
           <button class="mk-mobile-category" data-category="technique"><i data-lucide="sparkles"></i><span>Technique</span></button>
-          <button class="mk-mobile-category-final mk-review-final-trigger" data-final-review="1"><i data-lucide="library"></i><span>Review</span></button>
+          <button class="mk-mobile-category-final mk-record-final-trigger" data-final-record="1"><i data-lucide="mic"></i><span>Record</span></button>
         </div>
         <div class="tools">
           <button class="tool" onclick="togglePanel('meter',this)"><i data-lucide="music-2"></i>Meter</button>
@@ -1838,23 +1837,11 @@ button, input, select, textarea {
 <div class="season-custom" style="margin-top:8px"><div class="field"><label>Season Color</label><input id="editSeasonColor" type="color" value="#00f5ff"></div><div class="field"><label>Season Icon</label><select id="editSeasonIcon" class="select"><option value="music-2">Music</option><option value="guitar">Guitar</option><option value="piano">Piano</option><option value="drum">Drums</option><option value="mic-2">Mic</option><option value="headphones">Headphones</option><option value="star">Star</option><option value="zap">Practice</option></select></div></div>
 <div class="modal-actions"><button class="small-btn" style="color:var(--danger);margin-right:auto" onclick="deleteCurrentSeason()"><i data-lucide="trash-2"></i> Delete Season</button><button class="small-btn" onclick="closeEditSeason()">Cancel</button><button class="small-btn" style="background:var(--cyan);color:#001014" onclick="saveSeasonEdits()">Save Changes</button></div></div></div>
 
-<div class="modal" id="profileModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">Profile</div><button class="modal-close" onclick="closeProfile()">×</button></div><div class="profile-grid"><div class="profile-item"><div class="label">Login Email</div><div class="value" id="profileEmail">—</div></div><div class="profile-item"><div class="label">Total Sessions</div><div class="value" id="profileSessions">0</div></div><div class="profile-item"><div class="label">Total Time</div><div class="value" id="profileTime">0m</div></div><div class="profile-item"><div class="label">تعداد Season</div><div class="value" id="profileSeasons">0</div></div><div class="profile-item"><div class="label">Practice Days</div><div class="value" id="profileDays">0</div></div><div class="profile-item"><div class="label">Best BPM</div><div class="value" id="profileBest">—</div></div></div><div class="modal-actions"><button class="small-btn" id="authActionBtn" onclick="openAuth()">Sign In</button><button class="small-btn" onclick="openBackup()">Backup</button><button class="small-btn" style="color:var(--danger)" onclick="resetAll()">Reset All</button></div></div></div>
+<div class="modal" id="profileModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">Profile</div><button class="modal-close" onclick="closeProfile()">×</button></div><div class="profile-grid"><div class="profile-item"><div class="label">Login Email</div><div class="value" id="profileEmail">—</div></div><div class="profile-item"><div class="label">Total Sessions</div><div class="value" id="profileSessions">0</div></div><div class="profile-item"><div class="label">Total Time</div><div class="value" id="profileTime">0m</div></div><div class="profile-item"><div class="label">تعداد Season</div><div class="value" id="profileSeasons">0</div></div><div class="profile-item"><div class="label">Practice Days</div><div class="value" id="profileDays">0</div></div><div class="profile-item"><div class="label">Best BPM</div><div class="value" id="profileBest">—</div></div></div><div class="modal-actions"><button class="small-btn" id="authActionBtn" onclick="openAuth()">Sign In</button><button class="small-btn" onclick="openBackup()">Backup</button><button class="small-btn" onclick="syncNow()">Sync</button><button class="small-btn" style="color:var(--danger)" onclick="resetAll()">Reset All</button></div></div></div>
 
 <div class="modal" id="authModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">MK Studio Account</div><button class="modal-close" onclick="closeAuth()">×</button></div><div class="field"><label>Email</label><input id="authEmail" class="num" type="email" autocomplete="email" placeholder="you@example.com"></div><div class="field" style="margin-top:8px"><label>Password</label><input id="authPassword" class="num" type="password" autocomplete="current-password" placeholder="••••••••"></div><div class="notice" id="authStatus">Sign in to sync your Seasons and practice history across devices.</div><div class="modal-actions"><button class="small-btn" onclick="signIn()">Sign In</button><button class="small-btn" onclick="signUp()">Create Account</button></div></div></div>
 
-<div class="modal" id="settingsModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">Settings</div><button class="modal-close" onclick="closeSettings()">×</button></div>
-<div class="notice">Use the controls inside MK Studio for metronome settings. Sync, backup and practice reminders live here.</div>
-<div class="reminder-box">
-  <div class="reminder-head"><div><b>Daily Practice Reminders</b><span>Get up to three reminders each day.</span></div><label class="switch"><input id="reminderEnabled" type="checkbox" onchange="saveReminderSettings()"><span></span></label></div>
-  <div class="reminder-times">
-    <label>Morning<input id="reminderTime1" type="time" value="09:00" onchange="saveReminderSettings()"></label>
-    <label>Afternoon<input id="reminderTime2" type="time" value="15:00" onchange="saveReminderSettings()"></label>
-    <label>Evening<input id="reminderTime3" type="time" value="20:00" onchange="saveReminderSettings()"></label>
-  </div>
-  <button class="small-btn reminder-permission" onclick="requestReminderPermission()">Enable browser notifications</button>
-  <div class="notice" id="reminderStatus">Reminders work while notifications are allowed. If the browser is closed, reliable background reminders require push notifications/service infrastructure.</div>
-</div>
-<div class="modal-actions"><button class="small-btn" onclick="openBackup()">Backup</button><button class="small-btn" onclick="syncNow()">Sync</button></div></div></div>
+<div class="modal" id="settingsModal"><div class="modal-box mk-v11-review-box"><div class="modal-head"><div class="modal-title">Review</div><button class="modal-close" onclick="closeSettings()">×</button></div><div id="mkSettingsReviewBody"></div></div></div>
 
 <div class="modal" id="backupModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">Backup</div><button class="modal-close" onclick="closeBackup()">×</button></div><div class="modal-actions"><button class="small-btn" onclick="exportData()">Export JSON</button><button class="small-btn" onclick="document.getElementById('importFile').click()">Import JSON</button></div><input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)"></div></div>
 
@@ -3401,7 +3388,7 @@ function schedulePracticeReminders(){
 <nav class="mk-mobile-nav" id="mkMobileNav" aria-label="Mobile navigation">
   <button class="nav-primary active" data-nav="practice"><i data-lucide="home"></i><span>Home</span></button>
   <button data-nav="focus"><i data-lucide="scan-focus"></i><span>Focus</span></button>
-  <button data-nav="settings"><i data-lucide="settings-2"></i><span>Settings</span></button>
+  <button data-nav="review"><i data-lucide="library"></i><span>Review</span></button>
 </nav>
 
 
@@ -3697,7 +3684,7 @@ function schedulePracticeReminders(){
     rhythm:[['meter','music-2','Meter','Time signature & note values'],['rhythm','grid-2x2','Rhythm','Build and edit rhythm patterns']],
     sound:[['sound','audio-lines','Sound','Metronome sound & voice'],['drums','drum','Drums','Practice drum patterns']],
     technique:[['special','sparkles','Techniques','Special practice techniques']],
-    review:[['record','mic','Recordings','Capture and review practice takes'],['calendar','calendar-days','Calendar','Practice calendar & monthly summary']]
+    review:[['record','mic','Record','Open recording studio']]
   };
   function closeAllSurfaces(){
     // Close Review through its real controller first so moved cards (Recordings,
@@ -3742,7 +3729,7 @@ function schedulePracticeReminders(){
     }
     let sheet=document.getElementById('mkCategoryChooser');
     if(!sheet){sheet=document.createElement('div');sheet.id='mkCategoryChooser';sheet.className='mk-mobile-category-sheet';document.body.appendChild(sheet)}
-    const names={rhythm:'Rhythm',sound:'Sound',technique:'Technique',review:'Review'};
+    const names={rhythm:'Rhythm',sound:'Sound',technique:'Technique',review:'Record'};
     const subs={rhythm:'Choose a rhythm workspace',sound:'Choose a sound workspace',technique:'Choose a technique',review:'Review your practice'};
     const items=categoryData[cat]||[];
     sheet.innerHTML='<div class="mk-category-sheet-handle"></div><div class="mk-category-sheet-title">'+names[cat]+'</div><div class="mk-category-sheet-subtitle">'+subs[cat]+'</div><div class="mk-category-sheet-list">'+items.map(x=>'<button type="button" data-panel="'+x[0]+'"><span class="mk-cat-action-icon"><i data-lucide="'+x[1]+'"></i></span><span class="mk-cat-action-copy"><b>'+x[2]+'</b><small>'+x[3]+'</small></span><i data-lucide="chevron-right"></i></button>').join('')+'</div>';
@@ -4342,5 +4329,184 @@ function schedulePracticeReminders(){
     };
     w.__mkV10Fx=true;window.updateFocusUI=w;
   }
+})();
+</script>
+
+
+<!-- MK Studio v11 navigation/layout refinement -->
+<style id="mk-v11-ui">
+@media(max-width:760px){
+  /* The main dashboard no longer shows the giant Record CTA or the sync card. */
+  #mainRecordBtn{display:none!important}
+  main .sync-card{display:none!important}
+
+  /* Bottom navigation: Home / Focus / Review only. */
+  .mk-mobile-nav{grid-template-columns:repeat(3,1fr)!important;z-index:10020!important}
+  .mk-mobile-nav button[data-nav="review"]{display:flex!important}
+  .mk-mobile-nav button[data-nav="settings"]{display:none!important}
+
+  /* Review now uses the Settings modal shell, but is presented as a clean app modal. */
+  #settingsModal{align-items:center!important;justify-content:center!important;padding:16px!important;z-index:16000!important}
+  #settingsModal .modal-box{width:min(520px,100%)!important;max-height:90dvh!important;overflow:auto!important;border-radius:22px!important;padding:18px!important}
+  #settingsModal .modal-box:before{display:none!important}
+  #settingsModal .mk-v11-review-options{display:grid;gap:9px}
+  #settingsModal .mk-v11-review-option{width:100%;min-height:64px;border:1px solid rgba(255,255,255,.08);border-radius:15px;background:linear-gradient(145deg,#111927,#0b111b);color:#eaf2ff;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;cursor:pointer;font:inherit}
+  #settingsModal .mk-v11-review-option .left{display:flex;align-items:center;gap:11px}
+  #settingsModal .mk-v11-review-option .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(0,245,255,.08);color:var(--cyan)}
+  #settingsModal .mk-v11-review-option b{display:block;font-size:10px}.mk-v11-review-option span{display:block;color:var(--muted);font-size:8px;margin-top:3px}
+  #settingsModal .mk-v11-review-view{display:none}.mk-v11-review-view.open{display:block}
+  #settingsModal .mk-v11-review-back{border:0;background:none;color:var(--muted);font:inherit;font-size:9px;cursor:pointer;padding:0}
+  #settingsModal .mk-v11-review-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+  #settingsModal .mk-v11-review-view .card,#settingsModal .mk-v11-review-view .panel{margin:0!important}
+
+  /* Focus must sit above the bottom nav; no navigation strip should cover its controls. */
+  #focusOverlay{z-index:22000!important}
+  #focusOverlay.open ~ .mk-mobile-nav{z-index:1!important;pointer-events:none!important;opacity:0!important}
+  #focusOverlay .focus-shell{position:relative!important;width:min(520px,94vw)!important;height:auto!important;max-height:calc(100dvh - 28px)!important;min-height:0!important;padding:16px!important;gap:10px!important;overflow:hidden!important;border-radius:22px!important;display:flex!important;flex-direction:column!important;justify-content:flex-start!important;box-sizing:border-box!important}
+  #focusOverlay .focus-top{flex:0 0 auto!important;width:100%!important;position:relative!important;z-index:100!important;margin:0 0 4px!important}
+  #focusOverlay .focus-main{flex:0 0 auto!important;width:100%!important;min-height:clamp(150px,32dvh,245px)!important;z-index:2!important}
+  #focusOverlay .focus-timers{flex:0 0 auto!important;width:100%!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin:0!important;z-index:3!important}
+  #focusOverlay .focus-controls{position:relative!important;z-index:20!important;flex:0 0 auto!important;width:100%!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 42px 78px 42px!important;gap:6px!important;margin:0!important;padding-top:4px!important}
+  #focusOverlay .focus-icon-action,#focusOverlay .focus-tempo-value{position:relative!important;z-index:21!important;pointer-events:auto!important}
+  #focusOverlay .focus-icon-action{height:44px!important}
+  #focusOverlay .focus-tempo-value{height:44px!important}
+  @media(max-width:430px){
+    #focusOverlay .focus-shell{width:96vw!important;padding:13px!important;gap:8px!important}
+    #focusOverlay .focus-main{min-height:135px!important}
+    #focusOverlay .focus-bpm{font-size:clamp(58px,18vw,82px)!important}
+    #focusOverlay .focus-timers{grid-template-columns:1fr!important;gap:6px!important}
+    #focusOverlay .focus-timer{min-height:58px!important}
+    #focusOverlay .focus-controls{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 38px 66px 38px!important;gap:4px!important}
+    #focusOverlay .focus-icon-action,#focusOverlay .focus-tempo-value{height:42px!important}
+  }
+}
+</style>
+<script id="mk-v11-ui-js">
+(function(){
+  const mobile=()=>matchMedia('(max-width:760px)').matches;
+  const qs=s=>document.querySelector(s);
+  function unlock(){
+    document.body.classList.remove('mk-mobile-sheet-open','mk-mobile-locked','mk-mobile-final-lock');
+    ['position','top','left','right','width','overflow'].forEach(k=>document.body.style.removeProperty(k));
+    document.documentElement.style.removeProperty('overflow');
+  }
+  function closeEverySurface(except){
+    // Dedicated V10 overlays
+    if(except!=='record')try{window.mkCloseRecordingV10?.()}catch{}
+    if(except!=='review')try{window.mkCloseReviewV10?.()}catch{}
+    // Legacy review / sheets / panels
+    try{window.mkCloseReviewV7?.()}catch{}
+    document.querySelectorAll('.mk-tools-sheet.open,.mk-review-modal.open,.mk-mobile-category-sheet.open,.dashboard-menu.open,.metro-card>.panel.open').forEach(x=>x.classList.remove('open'));
+    document.querySelectorAll('.modal.open').forEach(x=>{if(except!=='review'||x.id!=='settingsModal')x.classList.remove('open')});
+    const f=qs('#focusOverlay');
+    if(f&&except!=='focus'){f.classList.remove('open');f.setAttribute('aria-hidden','true')}
+    document.querySelectorAll('.tool.active').forEach(x=>x.classList.remove('active'));
+    qs('#mkMobileBackdrop')?.classList.remove('open');
+    if(except!=='review'&&qs('#settingsModal'))qs('#settingsModal').classList.remove('open');
+    unlock();
+  }
+
+  let moved=[];
+  function restoreReviewNodes(){
+    moved.reverse().forEach(({el,ph})=>{try{if(ph.parentNode)ph.parentNode.insertBefore(el,ph.nextSibling);ph.remove()}catch{}}); moved=[];
+  }
+  function moveReviewNode(id,target){
+    const el=document.getElementById(id); if(!el||!target)return;
+    const ph=document.createComment('mk-v11-'+id); el.parentNode.insertBefore(ph,el); moved.push({el,ph}); target.appendChild(el);
+    el.classList.remove('open','collapsed');el.style.removeProperty('display');el.style.removeProperty('visibility');el.style.removeProperty('opacity');
+  }
+  function openReview(){
+    if(!mobile())return;
+    closeEverySurface('review');
+    const m=document.getElementById('settingsModal'); if(!m)return;
+    restoreReviewNodes();
+    const box=m.querySelector('.modal-box');
+    box.innerHTML='<div class="modal-head"><div class="modal-title">Review</div><button class="modal-close" type="button" aria-label="Close">×</button></div><div id="mkSettingsReviewBody"></div>';
+    const body=box.querySelector('#mkSettingsReviewBody');
+    body.innerHTML='<div class="mk-v11-review-options">'+
+      '<button class="mk-v11-review-option" data-view="calendar"><div class="left"><div class="ico"><i data-lucide="calendar-days"></i></div><div><b>Calendar</b><span>Practice calendar and monthly summary</span></div></div><i data-lucide="chevron-right"></i></button>'+
+      '<button class="mk-v11-review-option" data-view="state"><div class="left"><div class="ico"><i data-lucide="chart-no-axes-combined"></i></div><div><b>Current Season State</b><span>Current season statistics</span></div></div><i data-lucide="chevron-right"></i></button>'+
+      '<button class="mk-v11-review-option" data-view="history"><div class="left"><div class="ico"><i data-lucide="history"></i></div><div><b>Current Season History</b><span>Recent practice sessions</span></div></div><i data-lucide="chevron-right"></i></button>'+
+      '</div><div class="mk-v11-review-view" data-content="calendar"></div><div class="mk-v11-review-view" data-content="state"></div><div class="mk-v11-review-view" data-content="history"></div>';
+    moveReviewNode('panel-calendar',body.querySelector('[data-content="calendar"]'));
+    moveReviewNode('statsCard',body.querySelector('[data-content="state"]'));
+    moveReviewNode('historyCard',body.querySelector('[data-content="history"]'));
+    const st=document.getElementById('statsCard')?.querySelector('.section-collapse b'); if(st)st.textContent='Current Season State';
+    const show=key=>{
+      body.querySelector('.mk-v11-review-options').style.display='none';
+      body.querySelectorAll('.mk-v11-review-view').forEach(v=>v.classList.toggle('open',v.dataset.content===key));
+      const view=body.querySelector('[data-content="'+key+'"]');
+      const head=document.createElement('div');head.className='mk-v11-review-head';
+      head.innerHTML='<button class="mk-v11-review-back">‹ Review</button><b>'+({calendar:'Calendar',state:'Current Season State',history:'Current Season History'}[key])+'</b><span style="width:36px"></span>';
+      view.prepend(head);
+      head.querySelector('button').onclick=()=>{head.remove();view.classList.remove('open');body.querySelector('.mk-v11-review-options').style.display='grid'};
+      try{if(key==='calendar')window.renderCalendar?.();if(key==='state')window.renderStats?.();if(key==='history')window.renderHistory?.();window.lucide?.createIcons()}catch{}
+    };
+    body.querySelectorAll('.mk-v11-review-option').forEach(b=>b.onclick=()=>show(b.dataset.view));
+    box.querySelector('.modal-close').onclick=closeReview;
+    m.onclick=e=>{if(e.target===m)closeReview()};
+    m.classList.add('open');m.setAttribute('aria-hidden','false');document.body.classList.add('mk-mobile-sheet-open');
+    try{window.lucide?.createIcons()}catch{}
+  }
+  function closeReview(){
+    const m=document.getElementById('settingsModal'); if(!m)return;
+    restoreReviewNodes();m.classList.remove('open');m.setAttribute('aria-hidden','true');unlock();
+  }
+  function openRecord(){
+    if(!mobile())return;
+    closeEverySurface('record');
+    // Use the existing dedicated recording studio, but never auto-start recording.
+    if(typeof window.openRecordingStudio==='function')window.openRecordingStudio();
+  }
+
+  function moveSyncToProfile(){
+    const card=document.querySelector('main .sync-card');
+    const profile=document.getElementById('profileModal');
+    if(card&&profile){
+      const actions=profile.querySelector('.modal-actions');
+      if(actions)actions.parentNode.insertBefore(card,actions); else profile.querySelector('.modal-box')?.appendChild(card);
+      card.dataset.mkProfileMoved='1';
+      card.style.removeProperty('display');
+    }
+  }
+
+  function setup(){
+    moveSyncToProfile();
+    // Backup + sync are profile actions. Settings/Review no longer contains them.
+    const settings=document.getElementById('settingsModal');
+    const oldOpenSettings=window.openSettings;
+    window.openSettings=function(){if(mobile()){openReview();return;}return oldOpenSettings?.apply(this,arguments)};
+    const oldOpenProfile=window.openProfile;
+    if(typeof oldOpenProfile==='function'&&!oldOpenProfile.__mkV11){window.openProfile=function(){closeEverySurface('profile');return oldOpenProfile.apply(this,arguments)};window.openProfile.__mkV11=true}
+    const oldOpenBackup=window.openBackup;
+    if(typeof oldOpenBackup==='function'&&!oldOpenBackup.__mkV11){window.openBackup=function(){closeEverySurface('backup');return oldOpenBackup.apply(this,arguments)};window.openBackup.__mkV11=true}
+    const oldOpenAuth=window.openAuth;
+    if(typeof oldOpenAuth==='function'&&!oldOpenAuth.__mkV11){window.openAuth=function(){closeEverySurface('auth');return oldOpenAuth.apply(this,arguments)};window.openAuth.__mkV11=true}
+
+    // Bottom nav: only the clicked destination remains open.
+    const nav=document.getElementById('mkMobileNav');
+    nav?.addEventListener('click',e=>{
+      const b=e.target.closest('button[data-nav]');if(!b||!mobile())return;
+      const type=b.dataset.nav;
+      if(type==='review'){e.preventDefault();e.stopImmediatePropagation();openReview();return}
+      if(type==='focus'){e.preventDefault();e.stopImmediatePropagation();closeEverySurface('focus');window.toggleFocusMode?.();return}
+      if(type==='practice'){closeEverySurface('home');window.scrollTo({top:0,behavior:'smooth'});return}
+    },true);
+
+    // Fourth mobile category is Record.
+    document.addEventListener('click',e=>{
+      if(!mobile())return;
+      const r=e.target.closest('.mk-record-final-trigger,[data-category="record"]');
+      if(r){e.preventDefault();e.stopImmediatePropagation();openRecord()}
+    },true);
+
+    // Any click on a modal/surface closes competing surfaces first.
+    document.addEventListener('click',e=>{
+      if(!mobile())return;
+      if(e.target.closest('#focusOverlay .focus-close'))setTimeout(()=>closeEverySurface('none'),0);
+    },true);
+    try{window.lucide?.createIcons()}catch{}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
 </script>

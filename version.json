@@ -1,5 +1,5 @@
 {
-  "version": "2026.09.08.5",
-  "releasedAt": "2026-09-08T09:30:00Z",
-  "message": "UI refinement: Profile reminders, dedicated Review navigator, Recording Studio modal, modal exclusivity, subtle Focus metronome effects"
+  "version": "2026.09.08.6",
+  "releasedAt": "2026-09-08T10:10:00Z",
+  "message": "Mobile navigation refinement: Profile owns Backup/Sync, Record replaces Review in practice tools, Review becomes the bottom modal with Calendar/Current Season State/Current Season History, exclusive modal switching, and Focus layout fix"
 }
