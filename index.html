@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.08.4">
+<meta name="mk-app-version" content="2026.09.08.10">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -4700,3 +4700,57 @@ if(old) window.openCategory=function(cat){
   });
 })();
 </script>
+
+<!-- ===================================================================
+     v14 bugfixes (2026.09.08): four mobile regressions caused by the
+     round2/v10/v11/v13 patches fighting each other. See notes on each
+     rule below for the exact conflict being resolved.
+     =================================================================== -->
+<style id="mk-v14-bugfixes">
+/* Fix 1 — Sync status card was invisible everywhere:
+   v11's setup() moves .sync-card into the Profile modal AND adds
+   `main .sync-card{display:none!important}`. v13's restoreSync() then
+   moves the card back into <main> (so Sync stays on Home, as requested),
+   but the v11 rule above still matches it there and hides it. Same
+   selector/specificity as the v11 rule, so being later in the document
+   makes this win the cascade. */
+main .sync-card{display:block!important}
+
+/* Fix 2 & 3 — Review modal (Calendar / Current Season State / Current
+   Season History) and the Recording Studio opened empty:
+   createOverlay() in the v10 script only ever assigns the class
+   "mk-v10-overlay" to the dynamically-created overlay element, but the
+   CSS meant to reveal the moved-in content only targets the
+   never-applied classes ".mk-v10-review" / ".mk-v10-record":
+     #historyCard,#statsCard,#panel-calendar,#panel-record{display:none!important}
+     .mk-v10-review #historyCard, ... {display:block!important}   <- selector never matches
+     .mk-v10-record #panel-record{display:block!important}         <- selector never matches
+   These rules target every real container the content can end up in
+   (the live v11 #settingsModal review UI, the v10 overlay used for the
+   Recording Studio, and the older #mkReviewModal), each more specific
+   than the plain #id rule above, so they win regardless of source order. */
+#settingsModal #historyCard,
+#settingsModal #statsCard,
+#settingsModal #panel-calendar,
+.mk-v10-overlay #panel-record,
+.mk-v10-overlay #historyCard,
+.mk-v10-overlay #statsCard,
+.mk-v10-overlay #panel-calendar,
+#mkReviewModal #practiceOverview,
+#mkReviewModal #historyCard,
+#mkReviewModal #statsCard,
+#mkReviewModal #panel-calendar,
+#mkReviewModal #panel-record{
+  display:block!important;
+}
+
+/* Fix 4 — "My Practice" overview card missing from the top of the page:
+   an early patch (#mk-mobile-round2) left `.practice-overview{display:
+   none!important}` active for every mobile width, and no later round
+   ever removed it. Same selector/specificity, later in the document,
+   so this wins the cascade and restores the card. */
+@media(max-width:760px){
+  .practice-overview{display:block!important}
+}
+</style>
+
