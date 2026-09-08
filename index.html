@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.08.10">
+<meta name="mk-app-version" content="2026.09.08.12">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -4917,4 +4917,41 @@ main .sync-card{display:block!important}
   #panel-record.open .recordings{display:grid!important}
   body:has(#panel-record.open){overflow:hidden!important}
 }
+</style>
+
+<style id="mk-v17-focus-orb-effect">
+@media(max-width:760px){
+  /* Subtle animated Focus Mode metronome frame for phones. */
+  #focusOverlay .focus-main{
+    position:relative!important;
+    overflow:hidden!important;
+    border:1px solid rgba(0,245,255,.22)!important;
+    border-radius:22px!important;
+    background:radial-gradient(circle at 50% 48%,rgba(0,245,255,.16),rgba(0,245,255,.055) 38%,rgba(7,13,23,.97) 76%)!important;
+    box-shadow:0 0 0 1px rgba(0,245,255,.05),0 0 28px rgba(0,245,255,.10),inset 0 0 34px rgba(0,245,255,.055)!important;
+    transition:box-shadow .18s ease,border-color .18s ease,transform .12s ease!important;
+  }
+  #focusOverlay .focus-main:before{
+    content:"";position:absolute;inset:7px;border-radius:17px;
+    border:1px solid rgba(0,245,255,.08);
+    pointer-events:none;opacity:.7;
+  }
+  #focusOverlay .focus-main:after{
+    content:"";position:absolute;inset:-35%;border-radius:50%;
+    background:radial-gradient(circle,rgba(0,245,255,.09) 0 10%,transparent 55%);
+    animation:mkFocusBreath 3.2s ease-in-out infinite;
+    pointer-events:none;z-index:0!important;
+  }
+  #focusOverlay .focus-main > *{position:relative!important;z-index:2!important}
+  #focusOverlay .focus-main.focus-running{
+    border-color:rgba(0,245,255,.38)!important;
+    box-shadow:0 0 0 1px rgba(0,245,255,.08),0 0 38px rgba(0,245,255,.17),inset 0 0 42px rgba(0,245,255,.075)!important;
+  }
+  #focusOverlay .focus-main.focus-beat-hit{
+    transform:scale(1.012)!important;
+    border-color:rgba(184,255,61,.55)!important;
+    box-shadow:0 0 0 1px rgba(184,255,61,.12),0 0 48px rgba(184,255,61,.18),inset 0 0 42px rgba(0,245,255,.08)!important;
+  }
+}
+@keyframes mkFocusBreath{0%,100%{transform:scale(.82);opacity:.35}50%{transform:scale(1.08);opacity:.8}}
 </style>
