@@ -1,5 +1,5 @@
 {
-  "version": "2026.09.08.4",
-  "releasedAt": "2026-09-08T02:00:00Z",
-  "message": "Rebuild: Review is now a single clean bottom modal (with a real close button) instead of three overlapping legacy sheet controllers"
+  "version": "2026.09.08.5",
+  "releasedAt": "2026-09-08T09:30:00Z",
+  "message": "UI refinement: Profile reminders, dedicated Review navigator, Recording Studio modal, modal exclusivity, subtle Focus metronome effects"
 }

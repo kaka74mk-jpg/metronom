@@ -4014,3 +4014,333 @@ function schedulePracticeReminders(){
   window.addEventListener('visibilitychange',cleanup,{passive:true});
 })();
 </script>
+
+
+<!-- MK Studio v10 UI refinements: Profile alarms, Review navigator, Recording modal, modal exclusivity -->
+<style id="mk-v10-ui-refinements">
+@media (max-width:760px){
+  /* Settings is a normal centered modal now, not a bottom sheet. */
+  #settingsModal{align-items:center!important;justify-content:center!important;padding:16px!important}
+  #settingsModal .modal-box{width:min(470px,100%)!important;max-height:88dvh!important;overflow:auto!important;border-radius:20px!important}
+}
+
+/* Review and Recording are dedicated overlays, never stacked bottom sheets. */
+.mk-v10-overlay{
+  position:fixed;inset:0;z-index:14000;display:none;align-items:center;justify-content:center;
+  padding:16px;background:rgba(0,0,0,.78);backdrop-filter:blur(14px);
+}
+.mk-v10-overlay.open{display:flex}
+.mk-v10-box{
+  position:relative;width:min(520px,100%);max-height:90dvh;overflow:auto;
+  background:#0d121d;border:1px solid #26334b;border-radius:22px;
+  box-shadow:0 24px 90px rgba(0,0,0,.65);padding:18px;
+}
+.mk-v10-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.mk-v10-title{font-size:15px;font-weight:950;color:#eef3ff}
+.mk-v10-close{
+  width:36px;height:36px;border:1px solid rgba(255,255,255,.09);border-radius:10px;
+  background:#0a101a;color:#9aa7bb;display:grid;place-items:center;font-size:22px;cursor:pointer
+}
+.mk-v10-close:hover{color:#fff;border-color:rgba(0,245,255,.35)}
+.mk-review-options{display:grid;gap:8px}
+.mk-review-option{
+  width:100%;min-height:62px;border:1px solid rgba(255,255,255,.08);border-radius:14px;
+  background:linear-gradient(145deg,#111927,#0b111b);color:#eaf2ff;padding:12px 14px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;cursor:pointer
+}
+.mk-review-option:hover,.mk-review-option.active{border-color:rgba(0,245,255,.38);box-shadow:0 0 22px rgba(0,245,255,.08)}
+.mk-review-option .left{display:flex;align-items:center;gap:11px}
+.mk-review-option .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(0,245,255,.08);color:var(--cyan)}
+.mk-review-option b{display:block;font-size:10px}.mk-review-option span{display:block;color:var(--muted);font-size:8px;margin-top:3px}
+.mk-review-view{display:none}.mk-review-view.open{display:block}
+.mk-review-back{border:0;background:none;color:var(--muted);font:inherit;font-size:9px;cursor:pointer;padding:0}
+.mk-review-back:hover{color:var(--cyan)}
+.mk-review-view .card,.mk-review-view .panel{margin:0!important}
+.mk-review-view .section-head{margin-bottom:10px}
+
+/* Keep the three Review sources off the main dashboard; they live only in Review. */
+#historyCard,#statsCard,#panel-calendar{display:none!important}
+#panel-record{display:none!important}
+.mk-v10-review #historyCard,.mk-v10-review #statsCard,.mk-v10-review #panel-calendar{display:block!important}
+.mk-v10-record #panel-record{display:block!important}
+
+/* Profile owns reminders. */
+#profileModal .reminder-box{margin-top:12px}
+#profileModal .reminder-box + .modal-actions{margin-top:12px}
+</style>
+
+<script id="mk-v10-ui-refinements-js">
+(function(){
+  const mobile=()=>window.matchMedia('(max-width:760px)').matches;
+  let reviewMoved=[], recordMoved=null;
+
+  function bodyUnlock(){
+    document.body.classList.remove('mk-mobile-sheet-open','mk-mobile-locked','mk-mobile-final-lock');
+    ['position','top','left','right','width','overflow'].forEach(k=>document.body.style.removeProperty(k));
+    document.documentElement.style.removeProperty('overflow');
+  }
+
+  function closeLegacySurfaces(){
+    try{window.mkCloseReviewV7?.()}catch(e){}
+    try{window.mkCloseDashboardV7?.()}catch(e){}
+    document.querySelectorAll('.mk-tools-sheet.open,.mk-review-modal.open,.mk-mobile-category-sheet.open,.dashboard-menu.open,.metro-card>.panel.open').forEach(x=>x.classList.remove('open'));
+    document.querySelectorAll('.modal.open').forEach(x=>x.classList.remove('open'));
+    const f=document.getElementById('focusOverlay');
+    if(f){f.classList.remove('open');f.setAttribute('aria-hidden','true')}
+    document.querySelectorAll('.tool.active').forEach(x=>x.classList.remove('active'));
+    document.getElementById('mkMobileBackdrop')?.classList.remove('open');
+    bodyUnlock();
+  }
+
+  function createOverlay(id, title){
+    let o=document.getElementById(id);
+    if(!o){
+      o=document.createElement('div'); o.id=id; o.className='mk-v10-overlay';
+      o.innerHTML='<div class="mk-v10-box" role="dialog" aria-modal="true"><div class="mk-v10-head"><div class="mk-v10-title"></div><button class="mk-v10-close" type="button" aria-label="Close">×</button></div><div class="mk-v10-body"></div></div>';
+      document.body.appendChild(o);
+      o.querySelector('.mk-v10-title').textContent=title;
+      o.querySelector('.mk-v10-close').addEventListener('click',()=>id==='mkV10Review'?closeReviewV10():closeRecordV10());
+      o.addEventListener('click',e=>{if(e.target===o)(id==='mkV10Review'?closeReviewV10():closeRecordV10())});
+    }
+    return o;
+  }
+
+  function restoreReview(){
+    [...reviewMoved].reverse().forEach(({el,ph})=>{
+      try{if(ph?.parentNode)ph.parentNode.insertBefore(el,ph.nextSibling); ph?.remove()}catch(e){}
+    });
+    reviewMoved=[];
+  }
+
+  function closeReviewV10(){
+    const o=document.getElementById('mkV10Review');
+    restoreReview();
+    if(o)o.classList.remove('open');
+    bodyUnlock();
+  }
+
+  function openReviewV10(){
+    closeLegacyExcept('review');
+    const o=createOverlay('mkV10Review','Review');
+    const body=o.querySelector('.mk-v10-body');
+    restoreReview();
+    body.innerHTML=`
+      <div class="mk-review-options">
+        <button class="mk-review-option" data-view="history"><div class="left"><div class="ico"><i data-lucide="history"></i></div><div><b>Current Season History</b><span>View recent practice sessions</span></div></div><i data-lucide="chevron-right"></i></button>
+        <button class="mk-review-option" data-view="state"><div class="left"><div class="ico"><i data-lucide="chart-no-axes-combined"></i></div><div><b>Current Season State</b><span>View current season statistics</span></div></div><i data-lucide="chevron-right"></i></button>
+        <button class="mk-review-option" data-view="calendar"><div class="left"><div class="ico"><i data-lucide="calendar-days"></i></div><div><b>Calendar</b><span>View practice calendar and monthly summary</span></div></div><i data-lucide="chevron-right"></i></button>
+      </div>
+      <div class="mk-review-view" data-view-content="history"></div>
+      <div class="mk-review-view" data-view-content="state"></div>
+      <div class="mk-review-view" data-view-content="calendar"></div>`;
+    const sources={history:'historyCard',state:'statsCard',calendar:'panel-calendar'};
+    Object.entries(sources).forEach(([key,id])=>{
+      const el=document.getElementById(id); if(!el)return;
+      const ph=document.createComment('mk-v10-review-'+id);
+      el.parentNode.insertBefore(ph,el);
+      reviewMoved.push({el,ph});
+      const target=body.querySelector('[data-view-content="'+key+'"]');
+      target.appendChild(el);
+      el.classList.remove('collapsed','open');
+      el.style.removeProperty('display');
+      el.style.removeProperty('visibility');
+      el.style.removeProperty('opacity');
+    });
+    const state=document.getElementById('statsCard');
+    const stateTitle=state?.querySelector('.section-collapse b'); if(stateTitle)stateTitle.textContent='Current Season State';
+
+    const show=(key)=>{
+      body.querySelector('.mk-review-options').style.display='none';
+      body.querySelectorAll('.mk-review-view').forEach(v=>v.classList.toggle('open',v.dataset.viewContent===key));
+      body.querySelectorAll('.mk-review-option').forEach(b=>b.classList.remove('active'));
+      const head=document.createElement('div'); head.className='mk-v10-head';
+      const title={history:'Current Season History',state:'Current Season State',calendar:'Calendar'}[key];
+      head.innerHTML='<button class="mk-review-back">‹ Review</button><div class="mk-v10-title">'+title+'</div><span style="width:36px"></span>';
+      const view=body.querySelector('[data-view-content="'+key+'"]');
+      view.insertBefore(head,view.firstChild);
+      head.querySelector('.mk-review-back').onclick=()=>{head.remove();view.classList.remove('open');body.querySelector('.mk-review-options').style.display='grid';};
+      try{if(key==='history')renderHistory(); if(key==='state')renderStats(); if(key==='calendar')renderCalendar(); lucide.createIcons()}catch(e){}
+    };
+    body.querySelectorAll('.mk-review-option').forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));
+    o.classList.add('open');
+    document.body.classList.add('mk-mobile-sheet-open');
+    try{lucide.createIcons();renderHistory();renderStats();renderCalendar()}catch(e){}
+  }
+
+  function restoreRecord(){
+    if(!recordMoved)return;
+    try{if(recordMoved.ph?.parentNode)recordMoved.ph.parentNode.insertBefore(recordMoved.el,recordMoved.ph.nextSibling);recordMoved.ph?.remove()}catch(e){}
+    recordMoved=null;
+  }
+  function closeRecordV10(){
+    const o=document.getElementById('mkV10Record');
+    restoreRecord();
+    if(o)o.classList.remove('open');
+    bodyUnlock();
+  }
+  function openRecordV10(){
+    closeLegacyExcept('record');
+    const o=createOverlay('mkV10Record','Recording Studio');
+    const body=o.querySelector('.mk-v10-body');
+    restoreRecord();
+    const el=document.getElementById('panel-record');
+    if(!el)return;
+    const ph=document.createComment('mk-v10-record');
+    el.parentNode.insertBefore(ph,el); recordMoved={el,ph};
+    body.appendChild(el);
+    el.style.removeProperty('display'); el.style.removeProperty('visibility'); el.style.removeProperty('opacity');
+    try{renderRecordings();lucide.createIcons()}catch(e){}
+    o.classList.add('open');
+    document.body.classList.add('mk-mobile-sheet-open');
+  }
+
+  function closeLegacyExcept(which){
+    if(which!=='review')closeReviewV10();
+    if(which!=='record')closeRecordV10();
+    // Do not call the old all-surface closer here: it can close the overlay we just prepared.
+    document.querySelectorAll('.mk-tools-sheet.open,.mk-mobile-category-sheet.open,.dashboard-menu.open,.metro-card>.panel.open').forEach(x=>x.classList.remove('open'));
+    document.querySelectorAll('.modal.open').forEach(x=>x.classList.remove('open'));
+    const f=document.getElementById('focusOverlay');
+    if(f && which!=='focus'){f.classList.remove('open');f.setAttribute('aria-hidden','true')}
+    document.getElementById('mkMobileBackdrop')?.classList.remove('open');
+    document.querySelectorAll('.tool.active').forEach(x=>x.classList.remove('active'));
+    bodyUnlock();
+  }
+
+  function setup(){
+    // Move alarms/reminders from Settings into Profile.
+    const profile=document.getElementById('profileModal'), settings=document.getElementById('settingsModal');
+    const reminder=settings?.querySelector('.reminder-box');
+    if(profile && reminder){
+      const actions=profile.querySelector('.modal-actions');
+      if(actions)profile.querySelector('.modal-box').insertBefore(reminder,actions);
+      else profile.querySelector('.modal-box').appendChild(reminder);
+    }
+    // Settings should contain only its general sync/backup actions.
+    settings?.querySelector('.notice')?.remove();
+
+    // Main Record button opens the studio first; it never starts recording directly.
+    const mainRec=document.getElementById('mainRecordBtn');
+    if(mainRec){
+      mainRec.onclick=null;
+      mainRec.setAttribute('onclick','openRecordingStudio()');
+    }
+    // The old Recordings/Calendar tool buttons are redundant: Review owns Calendar,
+    // while the big Record button owns Recording Studio.
+    document.querySelectorAll('.tools .tool').forEach(b=>{
+      const t=(b.textContent||'').trim();
+      if(/^Recordings$/i.test(t)||/^Calendar$/i.test(t))b.remove();
+    });
+
+    // Make Profile/Settings/Focus mutually exclusive on mobile too.
+    ['openProfile','openSettings','openBackup','openAuth'].forEach(name=>{
+      const old=window[name];
+      if(typeof old==='function' && !old.__mkV10){
+        const w=function(){closeLegacyExcept('normal');return old.apply(this,arguments)};
+        w.__mkV10=true; window[name]=w;
+      }
+    });
+
+    window.openRecordingStudio=openRecordV10;
+    window.mkOpenReviewV10=openReviewV10;
+    window.mkCloseReviewV10=closeReviewV10;
+    window.mkCloseRecordingV10=closeRecordV10;
+
+    // Review entry points all use the new three-choice screen.
+    document.addEventListener('click',e=>{
+      if(!mobile())return;
+      const r=e.target.closest('[data-category="review"],.mk-review-final-trigger');
+      if(r){e.preventDefault();e.stopImmediatePropagation();openReviewV10();return}
+    },true);
+
+    // Backdrop closes both dedicated overlays.
+    document.addEventListener('click',e=>{
+      if(e.target===document.getElementById('mkV10Review'))closeReviewV10();
+      if(e.target===document.getElementById('mkV10Record'))closeRecordV10();
+    });
+
+    // Make profile/settings generic modals close by tapping empty backdrop.
+    document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{
+      if(e.target===m){m.classList.remove('open');bodyUnlock()}
+    }));
+    try{lucide.createIcons()}catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
+})();
+</script>
+
+
+<style id="mk-v10-focus-effects">
+/* Lightweight Focus Mode metronome glow — subtle, responsive, not distracting. */
+#focusOverlay .focus-main{
+  isolation:isolate;
+  overflow:hidden;
+  box-shadow:inset 0 0 28px rgba(0,245,255,.025);
+}
+#focusOverlay .focus-main:before,
+#focusOverlay .focus-main:after{
+  content:"";position:absolute;left:50%;top:50%;width:74px;height:74px;
+  border:1px solid rgba(0,245,255,.12);border-radius:50%;
+  transform:translate(-50%,-50%) scale(.72);opacity:.25;pointer-events:none;z-index:0;
+}
+#focusOverlay .focus-main:after{
+  width:118px;height:118px;border-color:rgba(255,43,214,.08);
+  transform:translate(-50%,-50%) scale(.58);opacity:.18;
+}
+#focusOverlay .focus-main>*{position:relative;z-index:2}
+#focusOverlay .focus-main.focus-running:before{animation:mkFocusAura 1.2s ease-in-out infinite}
+#focusOverlay .focus-main.focus-running:after{animation:mkFocusAuraWide 1.8s ease-in-out infinite}
+#focusOverlay .focus-main.focus-beat-hit{animation:mkFocusBeat .16s cubic-bezier(.2,.8,.2,1)}
+#focusOverlay .focus-main.focus-beat-hit .focus-bpm{
+  text-shadow:0 0 22px rgba(0,245,255,.38),0 0 48px rgba(0,245,255,.12);
+}
+#focusOverlay .focus-beat.pulse{
+  filter:drop-shadow(0 0 10px rgba(0,245,255,.65));
+}
+@keyframes mkFocusAura{
+  0%,100%{transform:translate(-50%,-50%) scale(.72);opacity:.18}
+  50%{transform:translate(-50%,-50%) scale(1.04);opacity:.48}
+}
+@keyframes mkFocusAuraWide{
+  0%,100%{transform:translate(-50%,-50%) scale(.58);opacity:.12}
+  50%{transform:translate(-50%,-50%) scale(1.08);opacity:.28}
+}
+@keyframes mkFocusBeat{
+  0%{transform:scale(1);box-shadow:inset 0 0 28px rgba(0,245,255,.025)}
+  45%{transform:scale(1.012);box-shadow:0 0 28px rgba(0,245,255,.10),inset 0 0 30px rgba(0,245,255,.05)}
+  100%{transform:scale(1);box-shadow:inset 0 0 28px rgba(0,245,255,.025)}
+}
+@media(max-width:600px){
+  #focusOverlay .focus-main:before{width:62px;height:62px}
+  #focusOverlay .focus-main:after{width:100px;height:100px}
+}
+</style>
+<script id="mk-v10-focus-exclusivity-js">
+(function(){
+  const oldFocus=window.toggleFocusMode;
+  if(typeof oldFocus==='function'&&!oldFocus.__mkV10){
+    const w=function(){
+      try{window.mkCloseReviewV10?.();window.mkCloseRecordingV10?.()}catch(e){}
+      return oldFocus.apply(this,arguments);
+    };
+    w.__mkV10=true;window.toggleFocusMode=w;
+  }
+  const oldUpdate=window.updateFocusUI;
+  if(typeof oldUpdate==='function'&&!oldUpdate.__mkV10Fx){
+    const w=function(){
+      const r=oldUpdate.apply(this,arguments);
+      const main=document.querySelector('#focusOverlay .focus-main');
+      if(main){
+        const running=!!window.metroRunning;
+        main.classList.toggle('focus-running',running);
+        if(running){
+          main.classList.remove('focus-beat-hit');void main.offsetWidth;main.classList.add('focus-beat-hit');
+          clearTimeout(window.__mkFocusBeatHit);window.__mkFocusBeatHit=setTimeout(()=>main.classList.remove('focus-beat-hit'),180);
+        }
+      }
+      return r;
+    };
+    w.__mkV10Fx=true;window.updateFocusUI=w;
+  }
+})();
+</script>
