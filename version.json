@@ -1,5 +1,5 @@
 {
-  "version": "2026.09.08.11",
-  "releasedAt": "2026-09-08T15:00:00Z",
-  "message": "Focus Mode redesigned with a magical metronome orb, practice status notifications removed, and app updates now require user confirmation before installation."
+  "version": "2026.09.08.12",
+  "releasedAt": "2026-09-08T15:30:00Z",
+  "message": "Mobile session reset fixed, Focus Mode compacted for phones, recording indicator added to the metronome, and update confirmation is now visible and explicit."
 }

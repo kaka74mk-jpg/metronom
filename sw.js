@@ -1,4 +1,4 @@
-const CACHE_NAME = "mk-studio-v11";
+const CACHE_NAME = "mk-studio-v13";
 
 const APP_SHELL = [
   "./",
@@ -8,12 +8,8 @@ const APP_SHELL = [
 ];
 
 self.addEventListener("install", (event) => {
-  self.skipWaiting();
-
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(APP_SHELL);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
 });
 
@@ -29,28 +25,30 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
 
-  // نسخه و Service Worker همیشه از شبکه خوانده شوند
+  // Always get the latest version info and service worker
   if (
     url.pathname.endsWith("/version.json") ||
     url.pathname.endsWith("/sw.js")
   ) {
     event.respondWith(
-      fetch(request, {
-        cache: "no-store"
-      })
-        .then((response) => {
-          return response;
-        })
-        .catch(() => caches.match(request))
+      fetch(request, { cache: "no-store" }).catch(() =>
+        caches.match(request)
+      )
     );
     return;
   }
 
-  // صفحات HTML: اول شبکه، در صورت نبود اینترنت از کش
+  // HTML / navigation: network first
   if (
     request.mode === "navigate" ||
     url.pathname.endsWith(".html") ||
@@ -68,18 +66,15 @@ self.addEventListener("fetch", (event) => {
 
           return response;
         })
-        .catch(() => {
-          return caches.match(request);
-        })
+        .catch(() => caches.match(request))
     );
-
     return;
   }
 
-  // سایر فایل‌ها: کش اول، سپس شبکه
+  // Other assets: cache first
   event.respondWith(
-    caches.match(request).then((cached) => {
-      return cached || fetch(request);
-    })
+    caches.match(request).then(
+      (cached) => cached || fetch(request)
+    )
   );
 });

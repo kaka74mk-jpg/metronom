@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.08.11">
+<meta name="mk-app-version" content="2026.09.08.12">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1927,8 +1927,15 @@ function updateSessionTimer(){
   const todayTotal=getTodaySeasonSeconds()+(sessionRunning?current:0);
   if(e)e.textContent=formatDurationLong(current);
   if(day)day.textContent=formatDurationLong(todayTotal);
-  if(card)card.classList.toggle("running",sessionRunning);
-  if(state)state.textContent=sessionRunning?"● Recording practice time":"Ready";
+  if(card){
+    card.classList.toggle("running",!!sessionRunning);
+    if(!sessionRunning){
+      card.classList.remove("running");
+      card.style.removeProperty("border-color");card.style.removeProperty("box-shadow");
+    }
+  }
+  document.querySelectorAll(".timer-box.season-running").forEach(el=>el.classList.toggle("season-running",!!sessionRunning));
+  if(state){state.textContent=sessionRunning?"● Recording practice time":"Ready";state.classList.toggle("session-live",!!sessionRunning)}
   syncPracticeLiveUI();
   if(document.getElementById("focusOverlay")?.classList.contains("open")&&typeof updateFocusUI==="function")updateFocusUI();
   if(sessionRunning){clearTimeout(sessionTimerTick);sessionTimerTick=setTimeout(updateSessionTimer,250)}
@@ -2028,7 +2035,13 @@ function encodeAudioBufferToMp3(audioBuffer){
   return encodeMp3([channel],audioBuffer.sampleRate||44100);
 }
 function updateRecordingUI(active){
-  const main=document.getElementById("mainRecordBtn"),btn=document.getElementById("recordBtn"),badge=document.getElementById("recordLiveBadge");
+  const main=document.getElementById("mainRecordBtn"),btn=document.getElementById("recordBtn"),badge=document.getElementById("recordLiveBadge"),metroCard=document.getElementById("tempoDisplayCard");
+  if(metroCard){
+    metroCard.classList.toggle("is-recording",!!active);
+    let dot=metroCard.querySelector(".mk-recording-dot");
+    if(!dot){dot=document.createElement("span");dot.className="mk-recording-dot";dot.setAttribute("aria-label","Recording");metroCard.appendChild(dot)}
+    dot.hidden=!active;
+  }
   if(main){main.classList.toggle("recording-active",active);main.innerHTML=active?'<i data-lucide="square"></i><span>Recording…</span>':'<i data-lucide="mic"></i><span>Record</span>'}
   if(btn){btn.classList.toggle("recording-active",active);btn.innerHTML=active?'<i data-lucide="square"></i><span>Recording…</span>':'<i data-lucide="mic"></i><span>Start Recording</span>'}
   if(badge){badge.classList.toggle("live",active);badge.innerHTML=active?'<span></span> RECORDING':'<span></span> READY'}
@@ -2720,7 +2733,58 @@ function setSync(a,b){
 const MK_APP_VERSION=(document.querySelector('meta[name="mk-app-version"]')?.content||"2026.09.08.11").trim();
 let mkRemoteAppVersion="",mkUpdateCheckInFlight=null;
 function compareAppVersions(a,b){const pa=String(a||"").replace(/^v/i,"").split(/[.+-]/).map(x=>parseInt(x,10)||0),pb=String(b||"").replace(/^v/i,"").split(/[.+-]/).map(x=>parseInt(x,10)||0);for(let i=0;i<Math.max(pa.length,pb.length);i++){const d=(pa[i]||0)-(pb[i]||0);if(d)return d}return 0}
-function setAppUpdateUI(state,detail,remote=""){const box=document.getElementById("appUpdateBox"),btn=document.getElementById("appUpdateBtn"),label=document.getElementById("appVersionLabel"),msg=document.getElementById("appUpdateDetail");if(label)label.textContent=`v${MK_APP_VERSION}${remote&&remote!==MK_APP_VERSION?` → v${remote}`:""}`;if(msg)msg.textContent=detail||"";if(btn){btn.classList.toggle("ready",state==="available");btn.style.display=state==="available"||state==="error"?"inline-flex":"none";btn.innerHTML=state==="available"?'<i data-lucide="download"></i><span>Update available</span>':'<i data-lucide="refresh-cw"></i><span>Check again</span>';btn.onclick=state==="available"?confirmAppUpdate:()=>checkForAppUpdate(true);btn.disabled=false}if(box)box.classList.toggle("update-found",state==="available");try{lucide.createIcons()}catch{}}
+function setAppUpdateUI(state,detail,remote=""){
+  const box=document.getElementById("appUpdateBox"),btn=document.getElementById("appUpdateBtn"),label=document.getElementById("appVersionLabel"),msg=document.getElementById("appUpdateDetail");
+  if(label)label.textContent=`v${MK_APP_VERSION}${remote&&remote!==MK_APP_VERSION?` → v${remote}`:""}`;
+  if(msg)msg.textContent=detail||"";
+  if(btn){
+    btn.classList.toggle("ready",state==="available");
+    btn.style.display=state==="available"||state==="error"?"inline-flex":"none";
+    btn.innerHTML=state==="available"?'<i data-lucide="download"></i><span>Update available</span>':'<i data-lucide="refresh-cw"></i><span>Check again</span>';
+    btn.onclick=state==="available"?confirmAppUpdate:()=>checkForAppUpdate(true);
+    btn.disabled=false;
+  }
+  if(box)box.classList.toggle("update-found",state==="available");
+  if(state==="available"&&remote)showUpdateBanner(remote);
+  if(state!=="available")hideUpdateBanner();
+  try{lucide.createIcons()}catch{}
+}
+function showUpdateBanner(remote){
+  let b=document.getElementById("mkUpdateBanner");
+  if(!b){
+    b=document.createElement("button");b.id="mkUpdateBanner";b.type="button";
+    b.className="mk-update-banner";b.onclick=confirmAppUpdate;
+    b.innerHTML='<span class="mk-update-banner-dot"></span><span class="mk-update-banner-copy"><b>MK Studio update available</b><small>Tap to review and install</small></span><i data-lucide="chevron-right"></i>';
+    document.body.appendChild(b);
+  }
+  const small=b.querySelector("small");if(small)small.textContent=`Version v${remote} is ready · tap to update`;
+  b.classList.add("show");
+  try{lucide.createIcons()}catch{}
+}
+function hideUpdateBanner(){document.getElementById("mkUpdateBanner")?.classList.remove("show")}
+function confirmAppUpdate(){
+  const remote=mkRemoteAppVersion||"the latest version";
+  let modal=document.getElementById("mkUpdateConfirm");
+  if(!modal){
+    modal=document.createElement("div");modal.id="mkUpdateConfirm";modal.className="mk-update-confirm";
+    modal.innerHTML='<div class="mk-update-confirm-box"><div class="mk-update-confirm-icon"><i data-lucide="download"></i></div><div class="mk-update-confirm-title">Update available</div><div class="mk-update-confirm-text" id="mkUpdateConfirmText"></div><div class="mk-update-confirm-actions"><button type="button" class="mk-update-no">Not now</button><button type="button" class="mk-update-yes">Update now</button></div></div>';
+    document.body.appendChild(modal);
+    modal.querySelector(".mk-update-no").onclick=()=>modal.classList.remove("open");
+    modal.querySelector(".mk-update-yes").onclick=()=>{modal.classList.remove("open");applyAppUpdate()};
+  }
+  const text=modal.querySelector("#mkUpdateConfirmText");if(text)text.textContent=`MK Studio v${remote} is ready to install. Do you want to update now?`;
+  modal.classList.add("open");
+  try{lucide.createIcons()}catch{}
+}
+async function applyAppUpdate(){
+  try{sessionStorage.setItem("mkStudioUpdateRequested","1")}catch{}
+  const reg=mkSWRegistration||(("serviceWorker" in navigator)?await navigator.serviceWorker.getRegistration():null);
+  if(reg){
+    try{await reg.update()}catch{}
+    if(reg.waiting){reg.waiting.postMessage({type:"SKIP_WAITING"});return;}
+  }
+  location.replace(`./?mk_update=${Date.now()}`);
+}
 async function fetchRemoteAppVersion(){const res=await fetch(`./version.json?mk_update_check=${Date.now()}`,{cache:"no-store",headers:{"Cache-Control":"no-cache"}});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();return String(data?.version||"").trim()}
 async function checkForAppUpdate(showMessage=false){if(mkUpdateCheckInFlight)return mkUpdateCheckInFlight;mkUpdateCheckInFlight=(async()=>{const btn=document.getElementById("appUpdateBtn");if(btn){btn.disabled=true;btn.innerHTML='<i data-lucide="loader-circle"></i><span>Checking…</span>';try{lucide.createIcons()}catch{}}try{const remote=await fetchRemoteAppVersion();if(!remote)throw new Error("Missing version");mkRemoteAppVersion=remote;if(compareAppVersions(remote,MK_APP_VERSION)>0){setAppUpdateUI("available",`A newer MK Studio build is live on GitHub (v${remote}). Update this device now.`,remote);return true}setAppUpdateUI("current",`This device is up to date. Live version: v${remote}.`,remote);return false}catch(e){console.warn("App update check failed",e);setAppUpdateUI("error",showMessage?"Could not check GitHub right now. Your data and sync are still available.":"GitHub update check unavailable.");return false}finally{mkUpdateCheckInFlight=null}})();return mkUpdateCheckInFlight}
 let mkSWRegistration=null;
@@ -2996,6 +3060,9 @@ window.addEventListener("DOMContentLoaded",()=>{
         })
         .catch((error) => {console.error("Service Worker registration failed:", error);checkForAppUpdate(false);});
     });
+    window.addEventListener("load",()=>{setTimeout(()=>checkForAppUpdate(false),1800);setInterval(()=>{if(!document.hidden)checkForAppUpdate(false)},15*60*1000)});
+  } else {
+    window.addEventListener("load",()=>{checkForAppUpdate(false);setInterval(()=>{if(!document.hidden)checkForAppUpdate(false)},15*60*1000)});
   }
 </script>
 
@@ -3711,6 +3778,26 @@ function schedulePracticeReminders(){
      rule below for the exact conflict being resolved.
      =================================================================== -->
 
+<style id="mk-mobile-session-record-update-fix">
+/* Mobile session reset: never leave the completed timer in its live state. */
+.practice-timer-card:not(.running){border-color:rgba(0,245,255,.28)!important;box-shadow:none!important}
+.practice-timer-card:not(.running) .practice-timer-state,.practice-timer-card:not(.running) .timer-state{color:#697793!important}
+.timer-box.season-running{border-color:rgba(184,255,61,.48)!important}
+/* Recording indicator inside the main metronome display. */
+.tempo-display-card{position:relative!important}
+.mk-recording-dot{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:#ff304f;box-shadow:0 0 8px rgba(255,48,79,.9),0 0 18px rgba(255,48,79,.45);animation:mkRecordBlink .9s ease-in-out infinite;z-index:20}
+.mk-recording-dot[hidden]{display:none!important}
+@keyframes mkRecordBlink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(.72)}}
+/* Always-visible update notification, including mobile where Settings/sidebar may be hidden. */
+.mk-update-banner{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translate(-50%,20px);z-index:10050;width:min(430px,calc(100vw - 24px));display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid rgba(0,245,255,.38);border-radius:14px;background:linear-gradient(135deg,rgba(7,18,28,.97),rgba(20,9,29,.97));color:#eef3ff;box-shadow:0 14px 45px rgba(0,0,0,.5),0 0 28px rgba(0,245,255,.12);opacity:0;pointer-events:none;transition:.22s ease;cursor:pointer;text-align:left}
+.mk-update-banner.show{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+.mk-update-banner-dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#b8ff3d;box-shadow:0 0 12px #b8ff3d;animation:mkUpdatePulse 1.1s infinite}
+.mk-update-banner-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}.mk-update-banner-copy b{font-size:10px}.mk-update-banner-copy small{font-size:8px;color:#91a0ba;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@keyframes mkUpdatePulse{50%{opacity:.45;transform:scale(.78)}}
+.mk-update-confirm{position:fixed;inset:0;z-index:10060;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.72);backdrop-filter:blur(12px)}
+.mk-update-confirm.open{display:flex}.mk-update-confirm-box{width:min(360px,calc(100vw - 28px));padding:22px;border:1px solid rgba(0,245,255,.25);border-radius:20px;background:#0b111c;box-shadow:0 25px 70px rgba(0,0,0,.6);text-align:center}.mk-update-confirm-icon{width:44px;height:44px;margin:0 auto 10px;border-radius:13px;display:grid;place-items:center;background:rgba(0,245,255,.1);color:#00f5ff}.mk-update-confirm-icon svg{width:20px}.mk-update-confirm-title{font-size:15px;font-weight:900}.mk-update-confirm-text{margin-top:7px;color:#8996ad;font-size:10px;line-height:1.6}.mk-update-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:16px}.mk-update-confirm-actions button{height:40px;border-radius:10px;border:1px solid #243149;background:#111927;color:#dfe8f5;font-size:9px;font-weight:850}.mk-update-confirm-actions .mk-update-yes{border-color:transparent;background:linear-gradient(135deg,#00e5ef,#39f7d4);color:#031013}
+@media(max-width:600px){.mk-update-banner{bottom:max(12px,env(safe-area-inset-bottom));padding:10px 11px}.mk-recording-dot{top:7px;right:8px;width:7px;height:7px}}
+</style>
 <style id="mk-focus-magic-orb-v15">
 /* Focus Mode — large mystical metronome orb */
 #focusOverlay .focus-main{
@@ -3776,13 +3863,14 @@ function schedulePracticeReminders(){
 @keyframes mkOrbBeat{0%{transform:scale(1)}35%{transform:scale(1.025);filter:brightness(1.18)}100%{transform:scale(1)}}
 @keyframes mkOrbAccent{0%{transform:scale(1)}35%{transform:scale(1.045);filter:brightness(1.28)}100%{transform:scale(1)}}
 @media(max-width:600px){
-  #focusOverlay .focus-main{width:238px!important;height:238px!important;min-height:238px!important;flex-basis:238px!important;margin:14px auto 6px!important}
-  #focusOverlay .focus-main .focus-bpm{font-size:78px!important}
+  #focusOverlay .focus-shell{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;max-height:calc(100vh - 12px)!important;padding:12px!important;gap:6px!important}
+  #focusOverlay .focus-main{width:210px!important;height:210px!important;min-height:210px!important;flex-basis:210px!important;margin:8px auto 4px!important}
+  #focusOverlay .focus-main .focus-bpm{font-size:70px!important}
   #focusOverlay .focus-main .focus-beat{font-size:21px!important;margin-top:12px!important}
 }
 @media(max-width:380px){
-  #focusOverlay .focus-main{width:210px!important;height:210px!important;min-height:210px!important;flex-basis:210px!important}
-  #focusOverlay .focus-main .focus-bpm{font-size:68px!important}
+  #focusOverlay .focus-main{width:184px!important;height:184px!important;min-height:184px!important;flex-basis:184px!important}
+  #focusOverlay .focus-main .focus-bpm{font-size:61px!important}
 }
 /* No persistent practice notifications on the main page. */
 .practice-live-indicator,.practice-toast{display:none!important;opacity:0!important;pointer-events:none!important}
