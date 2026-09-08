@@ -5346,3 +5346,55 @@ main .sync-card{display:block!important}
   }
 }
 </style>
+
+<style id="mk-focus-v6-real-final">
+/* FINAL FOCUS OVERRIDE - replaces old visual layers */
+#focusOverlay{z-index:12000!important}
+#focusOverlay .focus-shell{
+ background:linear-gradient(145deg,rgba(15,20,35,.96),rgba(4,8,18,.98))!important;
+ border-radius:28px!important;
+ padding:22px!important;
+ box-shadow:0 25px 80px rgba(0,0,0,.55),inset 0 0 40px rgba(0,220,255,.08)!important;
+}
+#focusOverlay .focus-main{
+ width:min(330px,70vw)!important;
+ height:min(330px,70vw)!important;
+ max-width:none!important;
+ max-height:none!important;
+ aspect-ratio:1!important;
+ border-radius:50%!important;
+ background:radial-gradient(circle,rgba(0,245,255,.16),rgba(12,18,35,.98) 62%)!important;
+ border:1px solid rgba(0,240,255,.35)!important;
+ box-shadow:0 0 50px rgba(0,220,255,.18), inset 0 0 45px rgba(255,255,255,.05)!important;
+}
+#focusOverlay .focus-bpm{
+ font-size:92px!important;
+ font-weight:800!important;
+ letter-spacing:-4px!important;
+ text-shadow:0 0 25px rgba(0,240,255,.5)!important;
+}
+#focusOverlay .focus-beat{
+ font-size:15px!important;
+ opacity:.8!important;
+}
+#focusOverlay .focus-timers{
+ display:grid!important;
+ grid-template-columns:repeat(2,1fr)!important;
+ gap:14px!important;
+ margin-top:20px!important;
+}
+#focusOverlay .focus-timer{
+ background:rgba(255,255,255,.06)!important;
+ border:1px solid rgba(255,255,255,.1)!important;
+ border-radius:18px!important;
+ backdrop-filter:blur(12px)!important;
+}
+#focusOverlay .focus-controls{
+ margin-top:22px!important;
+}
+
+/* modal layers */
+.profile-panel,.profile-card,#profilePanel,[id*=profile]{z-index:5000!important}
+.modal{z-index:9000!important}
+#focusOverlay,.focus-overlay{z-index:12000!important}
+</style>
