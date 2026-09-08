@@ -4955,3 +4955,50 @@ main .sync-card{display:block!important}
 }
 @keyframes mkFocusBreath{0%,100%{transform:scale(.82);opacity:.35}50%{transform:scale(1.08);opacity:.8}}
 </style>
+
+<style id="mk-v18-light-home-meter">
+/* v18: lightweight Home metronome effect — keep the visual, remove expensive glow/filter animation. */
+@media(max-width:760px){
+  .metro-card .tempo-display-card{
+    width:190px!important;height:190px!important;min-height:190px!important;
+    background:radial-gradient(circle at 50% 48%,rgba(0,245,255,.09),rgba(7,13,23,.97) 68%)!important;
+    border:1px solid rgba(0,245,255,.14)!important;
+    box-shadow:0 0 18px rgba(0,245,255,.07),inset 0 0 18px rgba(0,245,255,.035)!important;
+    will-change:auto!important;
+  }
+  .metro-card .tempo-display-card:before{
+    inset:-5%;
+    border-color:rgba(0,245,255,.055);
+    box-shadow:none;
+    animation:none!important;
+  }
+  .metro-card .tempo-display-card:after{
+    inset:20%;
+    background:radial-gradient(circle,rgba(0,245,255,.07),transparent 68%);
+    opacity:.55;
+    animation:none!important;
+  }
+  .metro-card .tempo-display-card.mk-home-running{
+    border-color:rgba(0,245,255,.26)!important;
+    box-shadow:0 0 24px rgba(0,245,255,.10),inset 0 0 22px rgba(0,245,255,.045)!important;
+  }
+  .metro-card .tempo-display-card.mk-home-running .bpm-big{
+    transform:none!important;
+    text-shadow:0 0 18px rgba(0,245,255,.28)!important;
+  }
+  .metro-card .tempo-display-card.mk-home-pulse .bpm-big{
+    animation:mkHomeBpmLite .16s ease-out!important;
+  }
+  .metro-card .tempo-display-card.mk-home-pulse:after{animation:mkHomeOrbLite .16s ease-out!important}
+  .metro-card .tempo-display-card .leds{transform:none!important}
+  .metro-card .tempo-display-card .led{box-shadow:none!important}
+  .metro-card .tempo-display-card .led.on{box-shadow:0 0 6px rgba(0,245,255,.55)!important}
+  .metro-card .tempo-display-card .led.first{box-shadow:none!important}
+}
+@keyframes mkHomeBpmLite{0%{transform:scale(1)}50%{transform:scale(1.025)}100%{transform:scale(1)}}
+@keyframes mkHomeOrbLite{0%{opacity:.35;transform:scale(.94)}50%{opacity:.7;transform:scale(1)}100%{opacity:.55;transform:scale(.98)}}
+@media(prefers-reduced-motion:reduce){
+  .metro-card .tempo-display-card.mk-home-pulse .bpm-big,
+  .metro-card .tempo-display-card.mk-home-pulse:after{animation:none!important}
+}
+</style>
