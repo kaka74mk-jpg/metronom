@@ -5129,3 +5129,138 @@ main .sync-card{display:block!important}
   #focusOverlay .focus-icon-action.season,#focusOverlay .focus-icon-action.metro{height:36px!important;margin-top:7px!important}
 }
 </style>
+<style id="mk-v22-focus-clean-mobile">
+/* v22: clean, deterministic Focus Mode phone layout */
+@media (max-width:760px){
+  #focusOverlay .focus-shell{
+    width:100vw!important;
+    height:100dvh!important;
+    max-width:none!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:calc(10px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom))!important;
+    box-sizing:border-box!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:auto minmax(0,1fr) auto auto auto!important;
+    align-items:center!important;
+    justify-items:center!important;
+    gap:8px!important;
+    overflow:hidden!important;
+  }
+
+  /* Header */
+  #focusOverlay .focus-top{
+    grid-row:1!important;
+    width:100%!important;
+    height:32px!important;
+    margin:0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+  }
+
+  /* Big metronome circle */
+  #focusOverlay .focus-main{
+    grid-row:2!important;
+    grid-column:1!important;
+    justify-self:center!important;
+    align-self:center!important;
+    width:min(72vw,300px)!important;
+    height:min(72vw,300px)!important;
+    min-width:0!important;
+    min-height:0!important;
+    max-width:300px!important;
+    max-height:300px!important;
+    flex:none!important;
+    margin:0!important;
+    border-radius:50%!important;
+    aspect-ratio:1/1!important;
+    position:relative!important;
+    left:auto!important;
+    transform:none!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
+  #focusOverlay .focus-main.focus-beat-hit{transform:scale(1.006)!important}
+
+  /* Controls become individual grid items: minus / BPM / plus */
+  #focusOverlay .focus-controls{display:contents!important}
+  #focusOverlay .focus-icon-action.tempo{
+    grid-row:3!important;
+    width:42px!important;
+    height:40px!important;
+    margin:0!important;
+    align-self:center!important;
+  }
+  #focusOverlay .focus-icon-action.tempo:first-of-type{grid-column:1!important;justify-self:center!important;margin-left:-128px!important}
+  #focusOverlay .focus-tempo-value{
+    grid-row:3!important;
+    grid-column:1!important;
+    width:90px!important;
+    height:40px!important;
+    margin:0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex-direction:row!important;
+    gap:4px!important;
+  }
+  #focusOverlay .focus-icon-action.tempo:last-of-type{grid-column:1!important;justify-self:center!important;margin-left:128px!important}
+
+  /* Two timers directly below speed */
+  #focusOverlay .focus-timers{
+    grid-row:4!important;
+    grid-column:1!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:8px!important;
+    align-self:stretch!important;
+  }
+  #focusOverlay .focus-timer{
+    width:100%!important;
+    min-width:0!important;
+    min-height:54px!important;
+    padding:7px 5px!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+  }
+  #focusOverlay .focus-timer-label,
+  #focusOverlay .focus-timer-value{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  #focusOverlay .focus-timer-value{font-size:18px!important}
+
+  /* Season / Metronome at the bottom, evenly split */
+  #focusOverlay .focus-icon-action.season,
+  #focusOverlay .focus-icon-action.metro{
+    grid-row:5!important;
+    width:100%!important;
+    height:38px!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+  }
+  #focusOverlay .focus-icon-action.season{grid-column:1!important;justify-self:start!important;width:calc(50% - 4px)!important}
+  #focusOverlay .focus-icon-action.metro{grid-column:1!important;justify-self:end!important;width:calc(50% - 4px)!important}
+
+  /* Keep the circle comfortably sized on short phones. */
+  @media (max-height:700px){
+    #focusOverlay .focus-main{width:min(62vw,260px)!important;height:min(62vw,260px)!important}
+  }
+  @media (max-width:390px){
+    #focusOverlay .focus-main{width:min(68vw,265px)!important;height:min(68vw,265px)!important}
+    #focusOverlay .focus-icon-action.tempo:first-of-type{margin-left:-112px!important}
+    #focusOverlay .focus-icon-action.tempo:last-of-type{margin-left:112px!important}
+    #focusOverlay .focus-timer{min-height:50px!important}
+    #focusOverlay .focus-icon-action.season,
+    #focusOverlay .focus-icon-action.metro{height:36px!important}
+  }
+  @media (max-width:350px){
+    #focusOverlay .focus-main{width:min(64vw,230px)!important;height:min(64vw,230px)!important}
+    #focusOverlay .focus-icon-action.tempo:first-of-type{margin-left:-98px!important}
+    #focusOverlay .focus-icon-action.tempo:last-of-type{margin-left:98px!important}
+  }
+}
+</style>
