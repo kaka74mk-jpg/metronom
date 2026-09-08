@@ -5002,3 +5002,60 @@ main .sync-card{display:block!important}
   .metro-card .tempo-display-card.mk-home-pulse:after{animation:none!important}
 }
 </style>
+
+<style id="mk-v19-focus-special-lite">
+/* v19: Focus Mode metronome — distinctive, soft, lightweight. */
+@media(max-width:760px){
+  #focusOverlay .focus-main{
+    width:100%!important;
+    min-height:132px!important;
+    height:132px!important;
+    flex:0 0 132px!important;
+    margin:0!important;
+    border:1px solid rgba(0,245,255,.18)!important;
+    border-radius:30px!important;
+    background:linear-gradient(145deg,rgba(10,22,32,.98),rgba(5,11,18,.98))!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035),inset 0 0 24px rgba(0,245,255,.035),0 8px 24px rgba(0,0,0,.18)!important;
+    overflow:hidden!important;
+  }
+  /* Static inner frame: no continuous animation. */
+  #focusOverlay .focus-main:before{
+    inset:6px!important;
+    border:1px solid rgba(0,245,255,.075)!important;
+    border-radius:25px!important;
+    opacity:1!important;
+    box-shadow:inset 0 0 12px rgba(0,245,255,.018)!important;
+  }
+  #focusOverlay .focus-main:after{
+    inset:auto!important;
+    width:150px!important;
+    height:150px!important;
+    left:50%!important;
+    top:50%!important;
+    transform:translate(-50%,-50%)!important;
+    border-radius:50%!important;
+    background:radial-gradient(circle,rgba(0,245,255,.07) 0,rgba(0,245,255,.025) 34%,transparent 68%)!important;
+    opacity:1!important;
+    animation:none!important;
+  }
+  #focusOverlay .focus-main.focus-running{
+    border-color:rgba(0,245,255,.28)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.04),inset 0 0 28px rgba(0,245,255,.045),0 10px 28px rgba(0,0,0,.2)!important;
+  }
+  /* A tiny beat response instead of a heavy glowing animation. */
+  #focusOverlay .focus-main.focus-beat-hit{
+    transform:scale(1.006)!important;
+    border-color:rgba(184,255,61,.38)!important;
+    box-shadow:inset 0 0 24px rgba(184,255,61,.035),0 8px 26px rgba(0,0,0,.18)!important;
+  }
+  #focusOverlay .focus-main .focus-bpm{
+    text-shadow:0 0 18px rgba(0,245,255,.16)!important;
+  }
+}
+@media(max-width:390px){
+  #focusOverlay .focus-main{min-height:126px!important;height:126px!important;flex-basis:126px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #focusOverlay .focus-main{transition:none!important}
+}
+</style>
