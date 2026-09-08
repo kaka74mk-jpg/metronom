@@ -5059,3 +5059,378 @@ main .sync-card{display:block!important}
   #focusOverlay .focus-main{transition:none!important}
 }
 </style>
+<style id="mk-v20-focus-circle-layout">
+@media(max-width:760px){
+  #focusOverlay{padding:16px 14px calc(18px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important;overflow:hidden!important}
+  #focusOverlay .focus-main{
+    width:min(82vw,360px)!important;height:min(82vw,360px)!important;min-width:0!important;min-height:0!important;
+    flex:0 0 auto!important;margin:0 auto!important;border-radius:50%!important;aspect-ratio:1/1!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+  }
+  #focusOverlay .focus-main:before{inset:7px!important;border-radius:50%!important}
+  #focusOverlay .focus-main:after{width:180px!important;height:180px!important;border-radius:50%!important}
+  #focusOverlay .focus-bottom,
+  #focusOverlay .focus-controls,
+  #focusOverlay .focus-info{box-sizing:border-box!important}
+  #focusOverlay .focus-speed,
+  #focusOverlay .tempo-control,
+  #focusOverlay [class*="speed"]{text-align:center!important;margin-left:auto!important;margin-right:auto!important}
+  #focusOverlay .focus-timers,
+  #focusOverlay .timers,
+  #focusOverlay .focus-bottom-row{
+    width:100%!important;display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:12px!important;
+  }
+}
+@media(max-width:390px){
+  #focusOverlay .focus-main{width:min(78vw,310px)!important;height:min(78vw,310px)!important}
+}
+</style>
+<style id="mk-v21-focus-final-layout">
+@media(max-width:760px){
+  #focusOverlay .focus-shell{
+    width:calc(100vw - 18px)!important;max-width:none!important;height:calc(100vh - 18px)!important;max-height:none!important;
+    padding:14px 12px calc(12px + env(safe-area-inset-bottom))!important;gap:0!important;
+    display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-content:flex-start!important;
+    justify-content:center!important;overflow:hidden!important;
+  }
+  #focusOverlay .focus-top{position:static!important;width:100%!important;height:34px!important;flex:0 0 34px!important;margin:0 0 8px!important}
+  #focusOverlay .focus-main{
+    order:2!important;width:min(70vw,330px)!important;height:min(70vw,330px)!important;min-height:0!important;flex:0 0 min(70vw,330px)!important;
+    margin:0 100%!important;transform:translateX(-50%)!important;left:50%!important;position:relative!important;
+    border-radius:50%!important;aspect-ratio:1/1!important;
+  }
+  #focusOverlay .focus-controls{display:contents!important}
+  #focusOverlay .focus-icon-action.tempo,
+  #focusOverlay .focus-tempo-value{
+    order:3!important;flex:0 0 auto!important;margin-top:12px!important;height:42px!important;box-sizing:border-box!important;
+  }
+  #focusOverlay .focus-icon-action.tempo{width:42px!important}
+  #focusOverlay .focus-tempo-value{width:86px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+  #focusOverlay .focus-timers{
+    order:4!important;width:100%!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;
+    margin:10px 0 0!important;flex:0 0 auto!important;
+  }
+  #focusOverlay .focus-timer{min-width:0!important;min-height:54px!important;padding:7px 5px!important;box-sizing:border-box!important}
+  #focusOverlay .focus-timer-value{font-size:18px!important}
+  #focusOverlay .focus-icon-action.season,
+  #focusOverlay .focus-icon-action.metro{
+    order:5!important;flex:0 0 auto!important;width:calc(50% - 4px)!important;height:38px!important;margin-top:9px!important;box-sizing:border-box!important;
+  }
+  #focusOverlay .focus-icon-action.season{margin-left:0!important}
+  #focusOverlay .focus-icon-action.metro{margin-right:0!important}
+}
+@media(max-width:390px){
+  #focusOverlay .focus-main{width:min(64vw,285px)!important;height:min(64vw,285px)!important;flex-basis:min(64vw,285px)!important}
+  #focusOverlay .focus-timers{margin-top:8px!important}
+  #focusOverlay .focus-timer{min-height:50px!important}
+  #focusOverlay .focus-icon-action.tempo,#focusOverlay .focus-tempo-value{height:38px!important;margin-top:9px!important}
+  #focusOverlay .focus-icon-action.tempo{width:38px!important}
+  #focusOverlay .focus-tempo-value{width:76px!important}
+  #focusOverlay .focus-icon-action.season,#focusOverlay .focus-icon-action.metro{height:36px!important;margin-top:7px!important}
+}
+</style>
+<style id="mk-v22-focus-clean-mobile">
+/* v22: clean, deterministic Focus Mode phone layout */
+@media (max-width:760px){
+  #focusOverlay .focus-shell{
+    width:100vw!important;
+    height:100dvh!important;
+    max-width:none!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:calc(10px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom))!important;
+    box-sizing:border-box!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:auto minmax(0,1fr) auto auto auto!important;
+    align-items:center!important;
+    justify-items:center!important;
+    gap:8px!important;
+    overflow:hidden!important;
+  }
+
+  /* Header */
+  #focusOverlay .focus-top{
+    grid-row:1!important;
+    width:100%!important;
+    height:32px!important;
+    margin:0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+  }
+
+  /* Big metronome circle */
+  #focusOverlay .focus-main{
+    grid-row:2!important;
+    grid-column:1!important;
+    justify-self:center!important;
+    align-self:center!important;
+    width:min(72vw,300px)!important;
+    height:min(72vw,300px)!important;
+    min-width:0!important;
+    min-height:0!important;
+    max-width:300px!important;
+    max-height:300px!important;
+    flex:none!important;
+    margin:0!important;
+    border-radius:50%!important;
+    aspect-ratio:1/1!important;
+    position:relative!important;
+    left:auto!important;
+    transform:none!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
+  #focusOverlay .focus-main.focus-beat-hit{transform:scale(1.006)!important}
+
+  /* Controls become individual grid items: minus / BPM / plus */
+  #focusOverlay .focus-controls{display:contents!important}
+  #focusOverlay .focus-icon-action.tempo{
+    grid-row:3!important;
+    width:42px!important;
+    height:40px!important;
+    margin:0!important;
+    align-self:center!important;
+  }
+  #focusOverlay .focus-icon-action.tempo:first-of-type{grid-column:1!important;justify-self:center!important;margin-left:-128px!important}
+  #focusOverlay .focus-tempo-value{
+    grid-row:3!important;
+    grid-column:1!important;
+    width:90px!important;
+    height:40px!important;
+    margin:0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex-direction:row!important;
+    gap:4px!important;
+  }
+  #focusOverlay .focus-icon-action.tempo:last-of-type{grid-column:1!important;justify-self:center!important;margin-left:128px!important}
+
+  /* Two timers directly below speed */
+  #focusOverlay .focus-timers{
+    grid-row:4!important;
+    grid-column:1!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:8px!important;
+    align-self:stretch!important;
+  }
+  #focusOverlay .focus-timer{
+    width:100%!important;
+    min-width:0!important;
+    min-height:54px!important;
+    padding:7px 5px!important;
+    box-sizing:border-box!important;
+    overflow:hidden!important;
+  }
+  #focusOverlay .focus-timer-label,
+  #focusOverlay .focus-timer-value{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  #focusOverlay .focus-timer-value{font-size:18px!important}
+
+  /* Season / Metronome at the bottom, evenly split */
+  #focusOverlay .focus-icon-action.season,
+  #focusOverlay .focus-icon-action.metro{
+    grid-row:5!important;
+    width:100%!important;
+    height:38px!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+  }
+  #focusOverlay .focus-icon-action.season{grid-column:1!important;justify-self:start!important;width:calc(50% - 4px)!important}
+  #focusOverlay .focus-icon-action.metro{grid-column:1!important;justify-self:end!important;width:calc(50% - 4px)!important}
+
+  /* Keep the circle comfortably sized on short phones. */
+  @media (max-height:700px){
+    #focusOverlay .focus-main{width:min(62vw,260px)!important;height:min(62vw,260px)!important}
+  }
+  @media (max-width:390px){
+    #focusOverlay .focus-main{width:min(68vw,265px)!important;height:min(68vw,265px)!important}
+    #focusOverlay .focus-icon-action.tempo:first-of-type{margin-left:-112px!important}
+    #focusOverlay .focus-icon-action.tempo:last-of-type{margin-left:112px!important}
+    #focusOverlay .focus-timer{min-height:50px!important}
+    #focusOverlay .focus-icon-action.season,
+    #focusOverlay .focus-icon-action.metro{height:36px!important}
+  }
+  @media (max-width:350px){
+    #focusOverlay .focus-main{width:min(64vw,230px)!important;height:min(64vw,230px)!important}
+    #focusOverlay .focus-icon-action.tempo:first-of-type{margin-left:-98px!important}
+    #focusOverlay .focus-icon-action.tempo:last-of-type{margin-left:98px!important}
+  }
+}
+</style>
+
+<style id="mk-v23-focus-true-layout">
+/* v23: final mobile Focus Mode layout — no flex tricks, no negative margins */
+@media (max-width:760px){
+  #focusOverlay .focus-shell{
+    width:100vw!important;
+    height:100dvh!important;
+    max-width:none!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:calc(10px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom))!important;
+    box-sizing:border-box!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:32px minmax(0,1fr) auto auto auto!important;
+    align-items:center!important;
+    justify-items:center!important;
+    gap:8px!important;
+    overflow:hidden!important;
+  }
+
+  #focusOverlay .focus-top{
+    grid-row:1!important;grid-column:1!important;
+    width:100%!important;height:32px!important;margin:0!important;
+    display:flex!important;align-items:center!important;justify-content:space-between!important;
+  }
+
+  #focusOverlay .focus-main{
+    grid-row:2!important;grid-column:1!important;
+    width:min(72vw,310px)!important;
+    height:min(72vw,310px)!important;
+    min-width:0!important;min-height:0!important;
+    max-width:310px!important;max-height:310px!important;
+    margin:0!important;padding:0!important;
+    flex:none!important;position:relative!important;left:auto!important;
+    transform:none!important;border-radius:50%!important;aspect-ratio:1/1!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    justify-self:center!important;align-self:center!important;
+  }
+  #focusOverlay .focus-main.focus-beat-hit{transform:scale(1.006)!important}
+
+  /* Speed: minus / BPM / plus, perfectly centered as one unit */
+  #focusOverlay .focus-controls{
+    grid-row:3!important;grid-column:1!important;
+    width:100%!important;margin:0!important;padding:0!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 42px 90px 42px minmax(0,1fr)!important;
+    gap:6px!important;align-items:center!important;justify-items:stretch!important;
+  }
+  #focusOverlay .focus-controls .focus-icon-action.tempo{
+    width:42px!important;height:40px!important;margin:0!important;padding:0!important;
+  }
+  #focusOverlay .focus-controls .focus-icon-action.tempo:nth-child(3){grid-column:2!important;grid-row:1!important}
+  #focusOverlay .focus-controls .focus-tempo-value{
+    grid-column:3!important;grid-row:1!important;
+    width:90px!important;height:40px!important;margin:0!important;padding:0!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+  }
+  #focusOverlay .focus-controls .focus-icon-action.tempo:nth-child(5){grid-column:4!important;grid-row:1!important}
+
+  /* Timers: two equal cards directly below speed */
+  #focusOverlay .focus-timers{
+    grid-row:4!important;grid-column:1!important;
+    width:100%!important;margin:0!important;padding:0!important;
+    display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:8px!important;align-self:stretch!important;
+  }
+  #focusOverlay .focus-timer{
+    width:100%!important;min-width:0!important;min-height:54px!important;
+    box-sizing:border-box!important;padding:7px 6px!important;overflow:hidden!important;
+  }
+  #focusOverlay .focus-timer-label,#focusOverlay .focus-timer-value{
+    white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+  }
+  #focusOverlay .focus-timer-value{font-size:18px!important}
+
+  /* Season / Metronome: bottom row, equal width */
+  #focusOverlay .focus-controls .focus-icon-action.season{
+    grid-column:1 / 3!important;grid-row:2!important;
+    width:100%!important;height:38px!important;margin:0!important;
+  }
+  #focusOverlay .focus-controls .focus-icon-action.metro{
+    grid-column:4 / 6!important;grid-row:2!important;
+    width:100%!important;height:38px!important;margin:0!important;
+  }
+  #focusOverlay .focus-controls{row-gap:7px!important}
+
+  @media (max-height:700px){
+    #focusOverlay .focus-shell{grid-template-rows:30px minmax(0,1fr) auto auto auto!important;gap:6px!important}
+    #focusOverlay .focus-main{width:min(62vw,260px)!important;height:min(62vw,260px)!important}
+    #focusOverlay .focus-timer{min-height:48px!important}
+    #focusOverlay .focus-controls .focus-icon-action.tempo,
+    #focusOverlay .focus-controls .focus-tempo-value{height:36px!important}
+    #focusOverlay .focus-controls .focus-icon-action.season,
+    #focusOverlay .focus-controls .focus-icon-action.metro{height:34px!important}
+  }
+  @media (max-width:390px){
+    #focusOverlay .focus-main{width:min(68vw,270px)!important;height:min(68vw,270px)!important}
+    #focusOverlay .focus-controls{grid-template-columns:minmax(0,1fr) 38px 76px 38px minmax(0,1fr)!important;gap:5px!important}
+    #focusOverlay .focus-controls .focus-icon-action.tempo{width:38px!important}
+    #focusOverlay .focus-controls .focus-tempo-value{width:76px!important}
+    #focusOverlay .focus-timer{min-height:46px!important}
+  }
+  @media (max-width:350px){
+    #focusOverlay .focus-main{width:min(62vw,225px)!important;height:min(62vw,225px)!important}
+    #focusOverlay .focus-timer-value{font-size:16px!important}
+  }
+}
+</style>
+
+
+<style id="mk-v24-final-focus-and-modal-fix">
+/* Final mobile cleanup */
+@media(max-width:760px){
+  #focusOverlay .focus-shell{
+    display:grid!important;
+    grid-template-rows:auto auto auto auto!important;
+    align-content:start!important;
+    gap:12px!important;
+    padding:16px 14px calc(16px + env(safe-area-inset-bottom))!important;
+  }
+  #focusOverlay .focus-main{
+    width:min(68vw,270px)!important;
+    height:min(68vw,270px)!important;
+    margin:8px auto 0!important;
+    flex:none!important;
+  }
+  #focusOverlay .focus-controls{
+    display:grid!important;
+    grid-template-columns:38px 76px 38px!important;
+    justify-content:center!important;
+    align-items:center!important;
+    gap:6px!important;
+    margin:0 auto!important;
+  }
+  #focusOverlay .focus-controls .focus-icon-action.tempo,
+  #focusOverlay .focus-controls .focus-tempo-value{
+    grid-column:auto!important;
+    grid-row:auto!important;
+    margin:0!important;
+  }
+  #focusOverlay .focus-timers{
+    margin:0 auto!important;
+    width:100%!important;
+    gap:8px!important;
+  }
+  #focusOverlay .focus-season-actions{
+    margin-top:0!important;
+  }
+}
+
+/* Modal must always sit above every card */
+.modal,
+#settingsModal,
+#mkReviewModal,
+#focusOverlay,
+.mk-review-modal{
+  z-index:99999!important;
+}
+.modal-backdrop,
+.mk-mobile-backdrop{
+  z-index:99998!important;
+}
+.panel,
+.tool,
+.profile-card,
+.profile-section{
+  z-index:auto!important;
+}
+</style>
