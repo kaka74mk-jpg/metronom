@@ -1592,6 +1592,10 @@ button, input, select, textarea {
   .mk-mobile-category,.practice-timer-card,.metro-visual,.focus-timer,.focus-main{will-change:transform,filter}
 }
 </style>
+
+
+
+
 </head>
 <body>
 <div class="app">
@@ -4827,4 +4831,39 @@ main .sync-card{display:block!important}
   #focusOverlay .focus-icon-action,#focusOverlay .focus-tempo-value{height:42px!important}
 }
 @media(max-width:390px){#focusOverlay .focus-main{width:54vw!important;height:54vw!important}#focusOverlay .focus-timers{gap:5px!important}#focusOverlay .focus-timer{min-height:52px!important}#focusOverlay .focus-controls{grid-template-columns:1fr 1fr 38px 70px 38px!important}}
+</style>
+
+<style id="mk-mobile-v15-final-ui-fix">
+@media(max-width:760px){
+  /* 1) Home metronome BPM: keep 3-digit values fully inside the orb. */
+  #tempoDisplayCard{overflow:visible!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;padding:8px!important}
+  #tempoDisplayCard .bpm-big{display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;text-align:center!important;white-space:nowrap!important;overflow:visible!important;line-height:1!important;font-variant-numeric:tabular-nums!important;letter-spacing:-.075em!important;font-size:clamp(50px,15vw,64px)!important}
+  @media(max-width:390px){#tempoDisplayCard .bpm-big{font-size:50px!important;letter-spacing:-.07em!important}}
+
+  /* 2) Focus Mode is a true full-screen surface, not a top-half card. */
+  #focusOverlay{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-height:none!important;display:none!important;align-items:stretch!important;justify-content:stretch!important;padding:0!important;margin:0!important;overflow:hidden!important}
+  #focusOverlay.open{display:block!important}
+  #focusOverlay .focus-shell{position:absolute!important;inset:0!important;width:100vw!important;max-width:none!important;height:100dvh!important;min-height:100dvh!important;max-height:none!important;margin:0!important;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important;border:0!important;border-radius:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;justify-content:space-between!important;align-items:stretch!important;gap:10px!important}
+  #focusOverlay .focus-top{width:100%!important;flex:0 0 auto!important}
+  #focusOverlay .focus-main{flex:1 1 auto!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;margin:0!important}
+  #focusOverlay .focus-timers{flex:0 0 auto!important;width:100%!important;grid-template-columns:1fr 1fr!important}
+  #focusOverlay .focus-controls{flex:0 0 auto!important;width:100%!important}
+
+  /* 3) Remove the stray sheet/handle line from every mobile surface. */
+  .metro-card>.panel.open:before,
+  .modal-box:before,
+  .dashboard-menu.open .period-card:before,
+  .mk-mobile-category-sheet:before,
+  .mk-tools-sheet:before,
+  .mk-mobile-panel-sheet:before{content:none!important;display:none!important}
+
+  /* 4) Recording Studio: force the real Record panel to become a visible mobile sheet. */
+  #panel-record.open{display:block!important;position:fixed!important;left:8px!important;right:8px!important;top:auto!important;bottom:calc(64px + env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;max-height:min(78vh,680px)!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;z-index:22010!important;margin:0!important;padding:16px!important;box-sizing:border-box!important;border:1px solid rgba(255,255,255,.11)!important;border-radius:20px 20px 16px 16px!important;background:linear-gradient(180deg,#101725,#080d15)!important;box-shadow:0 24px 80px rgba(0,0,0,.62),0 0 35px rgba(0,245,255,.07)!important;visibility:visible!important;opacity:1!important;transform:none!important}
+  #panel-record.open:before{content:none!important;display:none!important}
+  #panel-record.open .recording-head{display:flex!important}
+  #panel-record.open .recording-console{display:grid!important;grid-template-columns:1fr 1fr!important}
+  #panel-record.open .recording-console .rec-status{grid-column:1/-1!important}
+  #panel-record.open .recordings{display:grid!important}
+  body:has(#panel-record.open){overflow:hidden!important}
+}
 </style>
