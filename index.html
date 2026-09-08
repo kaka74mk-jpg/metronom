@@ -3627,6 +3627,79 @@ function schedulePracticeReminders(){
 
 
 
+
+<style id="mk-v14-final-fixes">
+/* remove mobile gap surface */
+.mk-mobile-backdrop,#mkMobileBackdrop{background:transparent!important}
+/* focus cleanup */
+.focus-controls .season,.focus-controls .metro{display:none!important}
+.focus-main{border-radius:50%!important;aspect-ratio:1/1!important;max-width:260px!important;margin:18px auto!important;display:flex!important;flex-direction:column!important;justify-content:center!important}
+.focus-bpm{font-size:56px!important}
+.focus-controls{margin-top:12px!important}
+</style>
+<script id="mk-v14-final-js">
+(function(){
+// one modal close
+function mkCloseAll(){
+ document.querySelectorAll('.modal.open,.mk-review-modal.open,.metro-card>.panel.open,.mk-tools-sheet.open').forEach(x=>x.classList.remove('open'));
+ const f=document.getElementById('focusOverlay'); if(f){f.classList.remove('open');f.setAttribute('aria-hidden','true')}
+}
+window.mkCloseAllSurfaces=mkCloseAll;
+
+// backup only profile, sync home indicator restored
+window.addEventListener('DOMContentLoaded',()=>{
+ const sync=document.querySelector('.sync-card');
+ const home=document.querySelector('.home')||document.querySelector('main');
+ if(sync && home && !home.contains(sync)) home.appendChild(sync);
+});
+
+// record studio single route
+window.openRecordFixed=function(){
+ mkCloseAll();
+ const p=document.getElementById('panel-record');
+ if(p){p.classList.add('open');p.style.display='block';try{renderRecordings&&renderRecordings()}catch(e){} return;}
+ if(typeof openRecord==='function' && openRecord!==window.openRecordFixed) return openRecord();
+};
+window.openRecord=window.openRecordFixed;
+
+// review chooser with real content
+window.mkOpenReviewV14=function(){
+ mkCloseAll();
+ let r=document.getElementById('mkReviewV14');
+ if(!r){
+  r=document.createElement('div');r.id='mkReviewV14';r.className='modal open';document.body.appendChild(r);
+ }
+ r.innerHTML=`<div class="modal-box"><div class="modal-head"><div class="modal-title">Review</div><button class="modal-close" id="rvClose">×</button></div><div class="modal-actions" id="rvMenu">
+ <button class="small-btn" data-rv="calendar">Calendar</button>
+ <button class="small-btn" data-rv="state">Current Season State</button>
+ <button class="small-btn" data-rv="history">Current Season History</button>
+ <button class="small-btn" data-rv="all">All Seasons Stats</button>
+ </div><div id="rvBody"></div></div>`;
+ r.querySelector('#rvClose').onclick=()=>r.classList.remove('open');
+ r.querySelectorAll('[data-rv]').forEach(b=>b.onclick=()=>{
+  const body=r.querySelector('#rvBody'); body.innerHTML='';
+  let id=b.dataset.rv==='calendar'?'panel-calendar':b.dataset.rv==='history'?'historyCard':b.dataset.rv==='state'?'statsCard':'allSeasonsCard';
+  const el=document.getElementById(id);
+  if(el){body.appendChild(el);el.style.display='block';el.classList.add('open');}
+  try{renderCalendar&&renderCalendar()}catch(e){}
+  try{renderHistory&&renderHistory()}catch(e){}
+  try{renderStats&&renderStats()}catch(e){}
+  try{renderOverview&&renderOverview()}catch(e){}
+ });
+ r.classList.add('open');
+};
+window.mkOpenReviewV7=window.mkOpenReviewV14;
+window.openReview=window.mkOpenReviewV14;
+
+// intercept category record/review
+const old=window.openCategory;
+if(old) window.openCategory=function(cat){
+ if(cat==='review') return mkOpenReviewV14();
+ if(cat==='record') return openRecordFixed();
+ return old.apply(this,arguments);
+};
+})();
+</script>
 </body></html>
 <!-- Mobile polish: category contents, no Tools sheet, focus-style home tempo -->
 <style id="mk-round4-fixes">
