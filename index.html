@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.08.10">
+<meta name="mk-app-version" content="2026.09.08.12">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1596,6 +1596,67 @@ button, input, select, textarea {
 
 
 
+
+<style>
+/* === Mobile final polish === */
+
+/* Focus / metronome visual box: keep everything centered and inside card */
+@media(max-width:760px){
+  .metro-visual{
+    height:150px!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+  .visual-studio,
+  .tempo-display-card{
+    width:calc(100% - 20px)!important;
+    max-width:100%!important;
+    min-width:0!important;
+    margin:0 auto!important;
+  }
+  .tempo-display-card .bpm-big{
+    font-size:42px!important;
+  }
+  .tempo-display-card .leds{
+    transform:none!important;
+  }
+
+  /* profile controls must stay above cards but below real modals */
+  .profile-grid,
+  .profile-item{
+    position:relative;
+    z-index:1;
+    overflow:hidden;
+  }
+
+  .modal,
+  .mk-pro-modal{
+    z-index:99999!important;
+  }
+
+  /* Main transport buttons: readable text */
+  .start.metro{
+    color:#00151a!important;
+    text-shadow:0 1px 1px rgba(255,255,255,.25);
+  }
+  .start.session{
+    background:linear-gradient(135deg,#24334b,#121a29)!important;
+    color:#ffffff!important;
+    border-color:rgba(0,245,255,.25)!important;
+  }
+}
+
+/* prevent modal overlap artifacts */
+.modal-box{
+  position:relative;
+  z-index:100000;
+}
+
+/* Update badge should not falsely stay stale */
+.app-update-box.update-found{
+  animation:none!important;
+}
+</style>
 </head>
 <body>
 <div class="app">
