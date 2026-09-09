@@ -5538,3 +5538,229 @@ main .sync-card{display:block!important}
   }
 }
 </style>
+
+
+<!-- MK CLEAN FINAL UI PATCH: Focus Mode + Profile mobile layering -->
+<style id="mk-clean-final-focus-profile">
+/* =====================================================================
+   FOCUS MODE — clean, deterministic layout
+   This block intentionally overrides the accumulated legacy patches above.
+   ===================================================================== */
+#focusOverlay{
+  position:fixed!important;
+  inset:0!important;
+  z-index:20000!important;
+  display:none!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:20px!important;
+  box-sizing:border-box!important;
+}
+#focusOverlay.open{display:flex!important}
+#focusOverlay .focus-shell{
+  position:relative!important;
+  inset:auto!important;
+  transform:none!important;
+  box-sizing:border-box!important;
+  width:min(560px,94vw)!important;
+  height:auto!important;
+  max-height:min(820px,92dvh)!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:20px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:14px!important;
+  overflow:auto!important;
+  border-radius:26px!important;
+  background:linear-gradient(180deg,rgba(16,25,42,.98),rgba(5,10,18,.99))!important;
+  border:1px solid rgba(0,245,255,.20)!important;
+  box-shadow:0 30px 100px rgba(0,0,0,.72),0 0 55px rgba(0,245,255,.08)!important;
+}
+#focusOverlay .focus-top{
+  order:1!important;
+  flex:0 0 auto!important;
+  position:static!important;
+  width:100%!important;
+  margin:0!important;
+}
+#focusOverlay .focus-main{
+  order:2!important;
+  flex:0 0 auto!important;
+  position:relative!important;
+  width:min(300px,58vw)!important;
+  height:min(300px,58vw)!important;
+  min-width:180px!important;
+  min-height:180px!important;
+  max-width:300px!important;
+  max-height:300px!important;
+  aspect-ratio:1!important;
+  margin:0 auto!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border-radius:50%!important;
+  overflow:hidden!important;
+}
+#focusOverlay .focus-bpm{
+  margin:0!important;
+  font-size:clamp(68px,11vw,108px)!important;
+  line-height:.9!important;
+  letter-spacing:-.05em!important;
+}
+#focusOverlay .focus-beat{margin-top:9px!important}
+#focusOverlay .focus-info{margin-top:7px!important}
+#focusOverlay .focus-timers{
+  order:3!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  margin:0!important;
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:10px!important;
+}
+#focusOverlay .focus-timer{
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+#focusOverlay .focus-controls{
+  order:4!important;
+  flex:0 0 auto!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  display:grid!important;
+  grid-template-columns:1fr 1fr 64px 90px 64px!important;
+  grid-template-areas:"season metro minus value plus"!important;
+  gap:8px!important;
+  align-items:stretch!important;
+}
+#focusOverlay .focus-icon-action.season{grid-area:season!important;width:auto!important;margin:0!important}
+#focusOverlay .focus-icon-action.metro{grid-area:metro!important;width:auto!important;margin:0!important}
+#focusOverlay .focus-icon-action.tempo[onclick="changeBpm(-1)"]{grid-area:minus!important;width:100%!important;margin:0!important}
+#focusOverlay .focus-tempo-value{grid-area:value!important;width:100%!important;margin:0!important}
+#focusOverlay .focus-icon-action.tempo[onclick="changeBpm(1)"]{grid-area:plus!important;width:100%!important;margin:0!important}
+#focusOverlay .focus-icon-action{min-width:0!important;height:46px!important}
+#focusOverlay .focus-record-btn{display:none!important}
+
+/* Profile always becomes the topmost mobile sheet, never underneath Review/Focus. */
+#profileModal{
+  z-index:21000!important;
+}
+#profileModal.open{
+  z-index:21000!important;
+}
+
+@media(max-width:760px){
+  #focusOverlay{
+    align-items:stretch!important;
+    justify-content:stretch!important;
+    padding:0!important;
+  }
+  #focusOverlay .focus-shell{
+    width:100vw!important;
+    height:100dvh!important;
+    max-height:none!important;
+    border-radius:0!important;
+    border:0!important;
+    padding:calc(12px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom))!important;
+    gap:12px!important;
+    overflow-y:auto!important;
+  }
+  #focusOverlay .focus-top{min-height:40px!important}
+  #focusOverlay .focus-main{
+    width:min(62vw,270px)!important;
+    height:min(62vw,270px)!important;
+    min-width:150px!important;
+    min-height:150px!important;
+    max-width:270px!important;
+    max-height:270px!important;
+  }
+  #focusOverlay .focus-bpm{font-size:clamp(58px,16vw,82px)!important}
+  #focusOverlay .focus-timers{gap:8px!important}
+  #focusOverlay .focus-controls{
+    grid-template-columns:1fr 1fr 52px 76px 52px!important;
+    gap:7px!important;
+  }
+  #focusOverlay .focus-icon-action{height:44px!important}
+
+  /* Profile sheet: start near the top instead of hugging the bottom. */
+  #profileModal{
+    align-items:flex-start!important;
+    justify-content:center!important;
+    padding:clamp(10px,5vh,42px) 8px calc(8px + env(safe-area-inset-bottom))!important;
+    box-sizing:border-box!important;
+  }
+  #profileModal .modal-box{
+    width:100%!important;
+    max-width:520px!important;
+    max-height:90dvh!important;
+    margin:0 auto!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+    border-radius:20px!important;
+    padding:17px!important;
+    box-sizing:border-box!important;
+  }
+  #profileModal .modal-actions{
+    position:sticky!important;
+    bottom:0!important;
+    z-index:20!important;
+    flex:0 0 auto!important;
+    margin:14px -17px -17px!important;
+    padding:12px 17px calc(12px + env(safe-area-inset-bottom))!important;
+    background:linear-gradient(180deg,rgba(13,18,29,.88),#0d121d 35%)!important;
+    border-top:1px solid rgba(255,255,255,.10)!important;
+  }
+}
+
+@media(max-width:390px){
+  #focusOverlay .focus-shell{padding-left:10px!important;padding-right:10px!important}
+  #focusOverlay .focus-main{width:150px!important;height:150px!important;min-width:150px!important;min-height:150px!important}
+  #focusOverlay .focus-bpm{font-size:56px!important}
+  #focusOverlay .focus-controls{grid-template-columns:1fr 1fr 46px 68px 46px!important}
+}
+</style>
+
+<script id="mk-clean-final-focus-profile-js">
+(function(){
+  function closeCompetingSurfaces(except){
+    try{ if(typeof closeEverySurface==='function') closeEverySurface(except); }catch(e){}
+    document.querySelectorAll('.mk-review-modal.open,.mk-pro-panel.open,.mk-tools-sheet.open,.mk-mobile-category-sheet.open,.dashboard-menu.open,.metro-card>.panel.open').forEach(function(x){x.classList.remove('open')});
+    document.querySelectorAll('.modal.open').forEach(function(x){if(x.id!=='profileModal'||except!=='profile')x.classList.remove('open')});
+    if(except!=='focus'){
+      var f=document.getElementById('focusOverlay');
+      if(f){f.classList.remove('open');f.setAttribute('aria-hidden','true')}
+    }
+  }
+
+  /* Focus always opens alone. */
+  window.mkCleanFocusToggle=function(){
+    var overlay=document.getElementById('focusOverlay');
+    if(!overlay)return;
+    var opening=!overlay.classList.contains('open');
+    if(opening)closeCompetingSurfaces('focus');
+    overlay.classList.toggle('open',opening);
+    overlay.setAttribute('aria-hidden',opening?'false':'true');
+    if(opening){
+      try{updateFocusUI()}catch(e){}
+      try{lucide.createIcons()}catch(e){}
+    }
+  };
+
+  /* Replace the old toggle with the clean controller once everything is loaded. */
+  var install=function(){
+    window.toggleFocusMode=window.mkCleanFocusToggle;
+    var p=document.getElementById('profileModal');
+    if(p && !p.__mkCleanProfile){
+      p.__mkCleanProfile=true;
+      p.addEventListener('click',function(e){if(e.target===p){try{closeProfile()}catch(x){p.classList.remove('open')}}});
+    }
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+})();
+</script>
