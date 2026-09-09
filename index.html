@@ -6122,3 +6122,63 @@ main .sync-card{display:block!important}
   setTimeout(bindFocusCards,1000);
 })();
 </script>
+
+
+<style id="mk-ultra-light-metro-glow">
+/* Very subtle beat glow — light only, no movement */
+#tempoDisplayCard.mk-light-beat,
+#focusOverlay .focus-main.mk-light-beat{
+  animation:mkLightBeatGlow .16s ease-out!important;
+}
+@keyframes mkLightBeatGlow{
+  0%{
+    box-shadow:inset 0 0 28px rgba(0,245,255,.025),
+               0 0 0 rgba(0,245,255,0);
+  }
+  45%{
+    box-shadow:inset 0 0 34px rgba(0,245,255,.065),
+               0 0 14px rgba(0,245,255,.055);
+  }
+  100%{
+    box-shadow:inset 0 0 28px rgba(0,245,255,.025),
+               0 0 0 rgba(0,245,255,0);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #tempoDisplayCard.mk-light-beat,
+  #focusOverlay .focus-main.mk-light-beat{animation:none!important}
+}
+</style>
+
+<script id="mk-ultra-light-metro-glow-js">
+(function(){
+  function lightBeat(el){
+    if(!el)return;
+    el.classList.remove("mk-light-beat");
+    void el.offsetWidth;
+    el.classList.add("mk-light-beat");
+    clearTimeout(el.__mkLightBeatTimer);
+    el.__mkLightBeatTimer=setTimeout(()=>el.classList.remove("mk-light-beat"),180);
+  }
+
+  window.mkLightBeatHome=function(){
+    lightBeat(document.getElementById("tempoDisplayCard"));
+  };
+
+  window.mkLightBeatFocus=function(){
+    lightBeat(document.querySelector("#focusOverlay .focus-main"));
+  };
+
+  // Keep the existing metronome scheduler, but add only a tiny glow.
+  const oldPulse=window.pulseMetroCard;
+  if(typeof oldPulse==="function" && !oldPulse.__mkLightGlow){
+    window.pulseMetroCard=function(accent){
+      const r=oldPulse.apply(this,arguments);
+      lightBeat(document.getElementById("tempoDisplayCard"));
+      lightBeat(document.querySelector("#focusOverlay .focus-main"));
+      return r;
+    };
+    window.pulseMetroCard.__mkLightGlow=true;
+  }
+})();
+</script>
