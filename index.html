@@ -2703,7 +2703,7 @@ let __mkBeatNodes=null;
 function pulseMetroCard(accent=false){
   if(!metroRunning)return;
   const cls=accent?"beat-accent":"beat-pulse";
-  if(!__mkBeatNodes||!__mkBeatNodes.length){__mkBeatNodes=document.querySelectorAll(".tempo-display-card,.metro-visual,.practice-timer-card,.mk-mobile-category,.section-card,.panel,.focus-main,.focus-timer")}
+  if(!__mkBeatNodes||!__mkBeatNodes.length){__mkBeatNodes=document.querySelectorAll(".tempo-display-card,.metro-visual,.practice-timer-card")}
   const nodes=__mkBeatNodes;
   nodes.forEach(n=>{n.classList.remove("mk-beat-sync");n.classList.add("mk-beat-sync")});
   clearTimeout(window.__metroPulseClear);
@@ -6055,3 +6055,70 @@ main .sync-card{display:block!important}
   }
 }
 </style>
+
+
+<style id="mk-focus-click-fix-and-pulse-fix">
+/* Focus mode cards must receive the tap */
+#focusOverlay .focus-main,
+#focusOverlay .focus-timer{
+  pointer-events:auto!important;
+  position:relative!important;
+  z-index:50!important;
+}
+
+/* Metronome pulse should not shake the whole focus/page UI */
+.mk-beat-sync,
+.beat-pulse,
+.beat-accent{
+  animation:none!important;
+}
+#focusOverlay .focus-main.mk-beat-sync,
+#focusOverlay .focus-timer.mk-beat-sync{
+  transform:none!important;
+  animation:none!important;
+}
+</style>
+
+<script id="mk-focus-card-real-events">
+(function(){
+  function bindFocusCards(){
+    const main=document.querySelector("#focusOverlay .focus-main");
+    const timers=document.querySelectorAll("#focusOverlay .focus-timer");
+    if(main && !main.dataset.bound){
+      main.dataset.bound="1";
+      main.addEventListener("click",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if(typeof togglePracticeFromFocus==="function") togglePracticeFromFocus();
+      });
+      main.addEventListener("keydown",function(e){
+        if(e.key==="Enter" || e.key===" "){
+          e.preventDefault();
+          if(typeof togglePracticeFromFocus==="function") togglePracticeFromFocus();
+        }
+      });
+    }
+    timers.forEach(function(t){
+      if(t.dataset.bound)return;
+      t.dataset.bound="1";
+      t.addEventListener("click",function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if(typeof toggleSeasonFromFocus==="function") toggleSeasonFromFocus();
+      });
+      t.addEventListener("keydown",function(e){
+        if(e.key==="Enter" || e.key===" "){
+          e.preventDefault();
+          if(typeof toggleSeasonFromFocus==="function") toggleSeasonFromFocus();
+        }
+      });
+    });
+  }
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",bindFocusCards);
+  }else{
+    bindFocusCards();
+  }
+  setTimeout(bindFocusCards,1000);
+})();
+</script>
