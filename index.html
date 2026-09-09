@@ -6182,3 +6182,66 @@ main .sync-card{display:block!important}
   }
 })();
 </script>
+
+<style id="mk-focus-only-beat-glow">
+#focusOverlay .focus-main.mk-focus-light-glow{
+  animation:mkFocusLightGlow .18s ease-out!important;
+}
+@keyframes mkFocusLightGlow{
+  0%{box-shadow:inset 0 0 25px rgba(0,245,255,.03),0 0 0 rgba(0,245,255,0)}
+  45%{box-shadow:inset 0 0 38px rgba(0,245,255,.10),0 0 18px rgba(0,245,255,.08)}
+  100%{box-shadow:inset 0 0 25px rgba(0,245,255,.03),0 0 0 rgba(0,245,255,0)}
+}
+</style>
+<script id="mk-focus-only-beat-glow-js">
+(function(){
+  window.mkFocusGlow=function(){
+    const el=document.querySelector("#focusOverlay .focus-main");
+    if(!el)return;
+    el.classList.remove("mk-focus-light-glow");
+    void el.offsetWidth;
+    el.classList.add("mk-focus-light-glow");
+    clearTimeout(el.__mkFocusGlowTimer);
+    el.__mkFocusGlowTimer=setTimeout(()=>el.classList.remove("mk-focus-light-glow"),220);
+  };
+  const oldPulse=window.pulseMetroCard;
+  if(typeof oldPulse==="function"&&!oldPulse.__mkFocusGlow){
+    window.pulseMetroCard=function(){
+      const r=oldPulse.apply(this,arguments);
+      window.mkFocusGlow();
+      return r;
+    };
+    window.pulseMetroCard.__mkFocusGlow=true;
+  }
+})();
+</script>
+
+<style id="mk-mobile-modal-create-fix">
+@media(max-width:760px){
+  #practiceModal{
+    align-items:center!important;
+    padding:14px!important;
+    z-index:20000!important;
+  }
+  #practiceModal .modal-box{
+    max-height:88dvh!important;
+    overflow-y:auto!important;
+    padding-bottom:28px!important;
+  }
+  #practiceModal .modal-box button[type="submit"],
+  #practiceModal .modal-box .create-btn,
+  #practiceModal .modal-box .primary-btn{
+    position:relative!important;
+    z-index:20!important;
+    margin-bottom:8px!important;
+  }
+}
+</style>
+
+<style id="mk-hide-season-history-title">
+.current-season-history,
+.season-history-label,
+#seasonHistoryTitle{
+  display:none!important;
+}
+</style>
