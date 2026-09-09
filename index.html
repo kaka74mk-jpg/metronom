@@ -6123,125 +6123,53 @@ main .sync-card{display:block!important}
 })();
 </script>
 
-
-<style id="mk-ultra-light-metro-glow">
-/* Very subtle beat glow — light only, no movement */
-#tempoDisplayCard.mk-light-beat,
-#focusOverlay .focus-main.mk-light-beat{
-  animation:mkLightBeatGlow .16s ease-out!important;
-}
-@keyframes mkLightBeatGlow{
-  0%{
-    box-shadow:inset 0 0 28px rgba(0,245,255,.025),
-               0 0 0 rgba(0,245,255,0);
-  }
-  45%{
-    box-shadow:inset 0 0 34px rgba(0,245,255,.065),
-               0 0 14px rgba(0,245,255,.055);
-  }
-  100%{
-    box-shadow:inset 0 0 28px rgba(0,245,255,.025),
-               0 0 0 rgba(0,245,255,0);
-  }
-}
-@media(prefers-reduced-motion:reduce){
-  #tempoDisplayCard.mk-light-beat,
-  #focusOverlay .focus-main.mk-light-beat{animation:none!important}
-}
-</style>
-
-<script id="mk-ultra-light-metro-glow-js">
-(function(){
-  function lightBeat(el){
-    if(!el)return;
-    el.classList.remove("mk-light-beat");
-    void el.offsetWidth;
-    el.classList.add("mk-light-beat");
-    clearTimeout(el.__mkLightBeatTimer);
-    el.__mkLightBeatTimer=setTimeout(()=>el.classList.remove("mk-light-beat"),180);
-  }
-
-  window.mkLightBeatHome=function(){
-    lightBeat(document.getElementById("tempoDisplayCard"));
-  };
-
-  window.mkLightBeatFocus=function(){
-    lightBeat(document.querySelector("#focusOverlay .focus-main"));
-  };
-
-  // Keep the existing metronome scheduler, but add only a tiny glow.
-  const oldPulse=window.pulseMetroCard;
-  if(typeof oldPulse==="function" && !oldPulse.__mkLightGlow){
-    window.pulseMetroCard=function(accent){
-      const r=oldPulse.apply(this,arguments);
-      lightBeat(document.getElementById("tempoDisplayCard"));
-      lightBeat(document.querySelector("#focusOverlay .focus-main"));
-      return r;
-    };
-    window.pulseMetroCard.__mkLightGlow=true;
-  }
-})();
-</script>
-
-<style id="mk-focus-only-beat-glow">
-#focusOverlay .focus-main.mk-focus-light-glow{
-  animation:mkFocusLightGlow .18s ease-out!important;
-}
-@keyframes mkFocusLightGlow{
-  0%{box-shadow:inset 0 0 25px rgba(0,245,255,.03),0 0 0 rgba(0,245,255,0)}
-  45%{box-shadow:inset 0 0 38px rgba(0,245,255,.10),0 0 18px rgba(0,245,255,.08)}
-  100%{box-shadow:inset 0 0 25px rgba(0,245,255,.03),0 0 0 rgba(0,245,255,0)}
-}
-</style>
-<script id="mk-focus-only-beat-glow-js">
-(function(){
-  window.mkFocusGlow=function(){
-    const el=document.querySelector("#focusOverlay .focus-main");
-    if(!el)return;
-    el.classList.remove("mk-focus-light-glow");
-    void el.offsetWidth;
-    el.classList.add("mk-focus-light-glow");
-    clearTimeout(el.__mkFocusGlowTimer);
-    el.__mkFocusGlowTimer=setTimeout(()=>el.classList.remove("mk-focus-light-glow"),220);
-  };
-  const oldPulse=window.pulseMetroCard;
-  if(typeof oldPulse==="function"&&!oldPulse.__mkFocusGlow){
-    window.pulseMetroCard=function(){
-      const r=oldPulse.apply(this,arguments);
-      window.mkFocusGlow();
-      return r;
-    };
-    window.pulseMetroCard.__mkFocusGlow=true;
-  }
-})();
-</script>
-
-<style id="mk-mobile-modal-create-fix">
-@media(max-width:760px){
-  #practiceModal{
+<style id="mk-global-modal-action-visibility-fix">
+/* Global mobile modal layout: keep action buttons visible */
+@media (max-width:760px){
+  .modal,
+  .modal.open,
+  .dialog,
+  .sheet,
+  .popup,
+  .overlay-modal{
     align-items:center!important;
-    padding:14px!important;
-    z-index:20000!important;
+    padding:12px!important;
+    padding-bottom:calc(12px + env(safe-area-inset-bottom))!important;
   }
-  #practiceModal .modal-box{
-    max-height:88dvh!important;
-    overflow-y:auto!important;
-    padding-bottom:28px!important;
-  }
-  #practiceModal .modal-box button[type="submit"],
-  #practiceModal .modal-box .create-btn,
-  #practiceModal .modal-box .primary-btn{
-    position:relative!important;
-    z-index:20!important;
-    margin-bottom:8px!important;
-  }
-}
-</style>
 
-<style id="mk-hide-season-history-title">
-.current-season-history,
-.season-history-label,
-#seasonHistoryTitle{
-  display:none!important;
+  .modal-box,
+  .dialog-box,
+  .sheet-box,
+  .popup-box,
+  .overlay-modal>div{
+    max-height:calc(100dvh - 24px)!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+
+  .modal-box .modal-actions,
+  .dialog-box .modal-actions,
+  .sheet-box .actions,
+  .popup-box .actions,
+  .modal-box button:last-child,
+  .dialog-box button:last-child{
+    flex-shrink:0!important;
+    position:sticky!important;
+    bottom:0!important;
+    z-index:20!important;
+  }
+
+  /* create/save/cancel rows should never hide behind the modal edge */
+  .modal-actions,
+  .form-actions,
+  .dialog-actions,
+  .sheet-actions{
+    margin-top:auto!important;
+    padding-top:12px!important;
+    padding-bottom:6px!important;
+    background:inherit!important;
+  }
 }
 </style>
