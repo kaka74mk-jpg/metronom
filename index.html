@@ -2220,7 +2220,7 @@ function stopSession(save=true,stopMetronome=true){
 function getLastSavedSessionSeconds(practice=currentPractice()){
   const sessions=Array.isArray(practice?.sessions)?practice.sessions:[];
   if(!sessions.length)return 0;
-  const last=sessions[sessions.length-1];
+  const last=sessions.slice().sort((a,b)=>(Date.parse(b.updatedAt||b.date||0)||0)-(Date.parse(a.updatedAt||a.date||0)||0))[0];
   return Math.max(0,Number(last?.seconds)||0);
 }
 function restoreSavedSessionTimer(){
@@ -2252,7 +2252,7 @@ function formatDurationLong(sec){sec=Math.max(0,Math.floor(Number(sec)||0));retu
 function saveSession(seconds){
   let p=currentPractice();if(!p)return;
   p.sessions=Array.isArray(p.sessions)?p.sessions:[];
-  const rec={id:crypto.randomUUID(),date:new Date().toISOString(),seconds:Math.max(0,Math.floor(Number(seconds)||0)),bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning};
+  const rec={id:crypto.randomUUID(),date:new Date().toISOString(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),deviceId:DEVICE_ID,practiceId:p.id,seconds:Math.max(0,Math.floor(Number(seconds)||0)),bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning};
   p.sessions.push(rec);
   p.practiceDays=p.practiceDays||{};
   p.practiceDays[localDateKey(new Date())]=true;
@@ -2734,8 +2734,8 @@ function togglePanel(name,btn){let p=document.getElementById("panel-"+name),open
 
 function openNew(){document.getElementById("practiceModal").classList.add("open");setTimeout(()=>document.getElementById("newName").focus(),80)}
 function closeModal(){document.getElementById("practiceModal").classList.remove("open")}
-function createPractice(){let name=document.getElementById("newName").value.trim(),target=Number(document.getElementById("newTarget").value)||120,color=document.getElementById("newColor")?.value||"#00f5ff",icon=document.getElementById("newIcon")?.value||"music-2";if(!name)return;let p={id:crypto.randomUUID(),name,target,color,icon,sessions:[],settings:{},practiceDays:{},recordings:[]};db.practices.push(p);currentId=p.id;localStorage.setItem("studioMetronomeCurrent",currentId);closeModal();document.getElementById("newName").value="";saveDB()}
-async function deleteSeason(id){let p=db.practices.find(x=>x.id===id);if(!p)return;if(!confirm(`Delete season "${p.name}"? This will permanently remove its sessions, recordings, settings and statistics.`))return;const wasCurrent=id===currentId;db.practices=db.practices.filter(x=>x.id!==id);if(!db.practices.length){db=defaultDB()}if(wasCurrent||!db.practices.some(x=>x.id===currentId)){currentId=db.practices[0].id;localStorage.setItem("studioMetronomeCurrent",currentId)}loadPracticeSettings(currentPractice());saveDB(true);try{await syncCloudImmediately()}catch{}renderAll()}
+function createPractice(){let name=document.getElementById("newName").value.trim(),target=Number(document.getElementById("newTarget").value)||120,color=document.getElementById("newColor")?.value||"#00f5ff",icon=document.getElementById("newIcon")?.value||"music-2";if(!name)return;ensureSyncMeta();let p={id:crypto.randomUUID(),name,target,color,icon,sessions:[],settings:{},practiceDays:{},recordings:[],_updatedAt:nowISO(),_updatedBy:DEVICE_ID,_fieldUpdatedAt:{}};db.practices.push(p);db.syncMeta.deletedPractices=db.syncMeta.deletedPractices.filter(id=>id!==p.id);currentId=p.id;localStorage.setItem("studioMetronomeCurrent",currentId);closeModal();document.getElementById("newName").value="";saveDB()}
+async function deleteSeason(id){let p=db.practices.find(x=>x.id===id);if(!p)return;if(!confirm(`Delete season "${p.name}"? This will permanently remove its sessions, recordings, settings and statistics.`))return;ensureSyncMeta();db.syncMeta.deletedPractices=[...new Set([...(db.syncMeta.deletedPractices||[]),id])];const wasCurrent=id===currentId;db.practices=db.practices.filter(x=>x.id!==id);if(!db.practices.length){db=defaultDB();ensureSyncMeta()}if(wasCurrent||!db.practices.some(x=>x.id===currentId)){currentId=db.practices[0].id;localStorage.setItem("studioMetronomeCurrent",currentId)}loadPracticeSettings(currentPractice());saveDB(true);markLocalChange();try{await syncCloudImmediately()}catch{}renderAll()}
 function renameCurrent(){openEditSeason()}
 async function deleteCurrentSeason(){
   const p=currentPractice();
@@ -2743,8 +2743,8 @@ async function deleteCurrentSeason(){
   closeEditSeason();
   await deleteSeason(p.id);
 }
-function clearCurrentHistory(){let p=currentPractice();if(!p?.sessions.length||!confirm("Clear this Season history?"))return;p.sessions=[];p.practiceDays={};saveDB()}
-function resetSeason(id=currentId){let p=db.practices.find(x=>x.id===id);if(!p)return;if(!confirm(`Reset "${p.name}"? Sessions, recordings and settings will be cleared.`))return;p.sessions=[];p.practiceDays={};p.recordings=[];p.settings={};p.target=120;if(id===currentId)loadPracticeSettings(p);saveDB()}
+function clearCurrentHistory(){let p=currentPractice();if(!p?.sessions.length||!confirm("Clear this Season history?"))return;p.sessions=[];p.practiceDays={};touchPractice(p);saveDB()}
+function resetSeason(id=currentId){let p=db.practices.find(x=>x.id===id);if(!p)return;if(!confirm(`Reset "${p.name}"? Sessions, recordings and settings will be cleared.`))return;p.sessions=[];p.practiceDays={};p.recordings=[];p.settings={};p.target=120;touchPractice(p);if(id===currentId)loadPracticeSettings(p);saveDB()}
 async function resetAll(){
   if(!confirm("Reset all MK Studio data? This will permanently clear all seasons, sessions, recordings, settings and cloud data for this account. This cannot be undone.")) return;
   try{
@@ -2864,177 +2864,253 @@ async function signIn(){if(!sb)return authMsg("Supabase is unavailable.");const 
 async function signUp(){if(!sb)return authMsg("Supabase is unavailable.");const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;if(!email||password.length<6)return authMsg("Use a valid email and a password of at least 6 characters.");authMsg("Creating account…");const {data,error}=await sb.auth.signUp({email,password});if(error)return authMsg(error.message);if(data.session){await loadCloudData();closeAuth()}else authMsg("Account created. Check your email if confirmation is enabled.");}
 async function signOut(){if(sb)await sb.auth.signOut();document.getElementById("authActionBtn").textContent="Sign In";loadUserEmail();setSync("Local","Signed out; local data remains available.")}
 async function loadUserEmail(){if(!sb){document.getElementById("profileEmail").textContent="Local mode";return}try{let {data}=await sb.auth.getUser();const email=data?.user?.email;document.getElementById("profileEmail").textContent=email||"Not signed in";const b=document.getElementById("authActionBtn");if(b){b.textContent=email?"Sign Out":"Sign In";b.onclick=email?signOut:openAuth}}catch{document.getElementById("profileEmail").textContent="Not signed in"}}
-let syncTimer=null;function debouncedSync(){clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncNow(false),180)}
+let syncTimer=null;function debouncedSync(){clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncNow(false),350)}
+
+/* =========================================================
+   MK Studio CLOUD SYNC v2
+   - Cloud is merged, never blindly replaces local data.
+   - Seasons are merged by id.
+   - Sessions/recordings are merged by id.
+   - Settings use per-device timestamps when available.
+   - Concurrent writes use optimistic locking and retry.
+   - A local/default device can never erase a richer cloud database.
+   ========================================================= */
+function cloneData(x){return JSON.parse(JSON.stringify(x||{}))}
+function ensureSyncMeta(){
+  if(!db||typeof db!=="object")db=defaultDB();
+  db.version=Math.max(Number(db.version)||7,8);
+  db.syncMeta=db.syncMeta&&typeof db.syncMeta==="object"?db.syncMeta:{};
+  db.syncMeta.deletedPractices=Array.isArray(db.syncMeta.deletedPractices)?db.syncMeta.deletedPractices:[];
+  db.syncMeta.fieldUpdatedAt=db.syncMeta.fieldUpdatedAt&&typeof db.syncMeta.fieldUpdatedAt==="object"?db.syncMeta.fieldUpdatedAt:{};
+  return db.syncMeta;
+}
+const DEVICE_ID_KEY="mkStudioDeviceId_v2";
+function getDeviceId(){let id=localStorage.getItem(DEVICE_ID_KEY);if(!id){id=crypto.randomUUID();localStorage.setItem(DEVICE_ID_KEY,id)}return id}
+const DEVICE_ID=getDeviceId();
+function nowISO(){return new Date().toISOString()}
+function touchPractice(p){
+  if(!p)return;
+  p._updatedAt=nowISO();
+  p._updatedBy=DEVICE_ID;
+}
+function touchField(p,key){
+  if(!p)return;
+  ensureSyncMeta();
+  db.syncMeta.fieldUpdatedAt[`${p.id}:${key}`]={at:nowISO(),device:DEVICE_ID};
+}
+function practiceScore(p){
+  return (Array.isArray(p?.sessions)?p.sessions.length:0)*10+
+         (Array.isArray(p?.recordings)?p.recordings.length:0)*5+
+         Object.keys(p?.settings||{}).length+
+         Object.keys(p?.practiceDays||{}).length;
+}
+function mergeById(localArr,remoteArr){
+  const map=new Map();
+  [...(Array.isArray(localArr)?localArr:[]),...(Array.isArray(remoteArr)?remoteArr:[])].forEach(item=>{
+    if(!item||!item.id)return;
+    const old=map.get(item.id);
+    if(!old){map.set(item.id,cloneData(item));return}
+    const oa=Date.parse(old.updatedAt||old.createdAt||old.date||0)||0;
+    const ia=Date.parse(item.updatedAt||item.createdAt||item.date||0)||0;
+    map.set(item.id,ia>=oa?cloneData(item):old);
+  });
+  return [...map.values()].sort((a,b)=>{
+    const da=Date.parse(a.date||a.createdAt||a.updatedAt||0)||0;
+    const db=Date.parse(b.date||b.createdAt||b.updatedAt||0)||0;
+    return da-db;
+  });
+}
+function mergePractice(localP,remoteP){
+  if(!localP)return cloneData(remoteP);
+  if(!remoteP)return cloneData(localP);
+  const lp=cloneData(localP),rp=cloneData(remoteP);
+  const out={...lp};
+  const la=Date.parse(lp._updatedAt||0)||0,ra=Date.parse(rp._updatedAt||0)||0;
+  // Identity/display fields: newest practice metadata wins.
+  if(ra>la){
+    if(rp.name!=null)out.name=rp.name;
+    if(rp.color!=null)out.color=rp.color;
+    if(rp.icon!=null)out.icon=rp.icon;
+    if(rp.target!=null)out.target=rp.target;
+  }
+  out.id=lp.id||rp.id;
+  out.sessions=mergeById(lp.sessions,rp.sessions);
+  out.recordings=mergeById(lp.recordings,rp.recordings);
+  out.practiceDays={...(rp.practiceDays||{}),...(lp.practiceDays||{})};
+  out.settings={...(rp.settings||{}),...(lp.settings||{})};
+  // If both sides have field timestamps, use the newest value for each setting.
+  ensureSyncMeta();
+  const lm=lp._fieldUpdatedAt||{},rm=rp._fieldUpdatedAt||{};
+  const keys=new Set([...Object.keys(out.settings),...Object.keys(lm),...Object.keys(rm)]);
+  keys.forEach(k=>{
+    const lt=Date.parse(lm[k]?.at||0)||0,rt=Date.parse(rm[k]?.at||0)||0;
+    if(rt>lt && Object.prototype.hasOwnProperty.call(rp.settings||{},k))out.settings[k]=cloneData(rp.settings[k]);
+    else if(lt>rt && Object.prototype.hasOwnProperty.call(lp.settings||{},k))out.settings[k]=cloneData(lp.settings[k]);
+  });
+  out._updatedAt=la>=ra?(lp._updatedAt||rp._updatedAt):(rp._updatedAt||lp._updatedAt);
+  out._updatedBy=la>=ra?(lp._updatedBy||DEVICE_ID):(rp._updatedBy||DEVICE_ID);
+  out._fieldUpdatedAt={...rm,...lm};
+  return out;
+}
+function mergeSnapshots(local,remote){
+  const L=cloneData(local||defaultDB()),R=cloneData(remote||{});
+  ensureSyncMeta();
+  const lm=L.syncMeta&&typeof L.syncMeta==="object"?L.syncMeta:{};
+  const rm=R.syncMeta&&typeof R.syncMeta==="object"?R.syncMeta:{};
+  const deleted=new Set([...(lm.deletedPractices||[]),...(rm.deletedPractices||[])]);
+  const localMap=new Map((L.practices||[]).map(p=>[p.id,p]));
+  const remoteMap=new Map((R.practices||[]).map(p=>[p.id,p]));
+  const ids=new Set([...localMap.keys(),...remoteMap.keys()]);
+  const practices=[];
+  ids.forEach(id=>{
+    if(deleted.has(id))return;
+    practices.push(mergePractice(localMap.get(id),remoteMap.get(id)));
+  });
+  practices.sort((a,b)=>{
+    const ai=(L.practices||[]).findIndex(x=>x.id===a.id),bi=(L.practices||[]).findIndex(x=>x.id===b.id);
+    if(ai>=0&&bi>=0)return ai-bi;
+    return (a.name||"").localeCompare(b.name||"");
+  });
+  // Never allow an empty/default device to destroy a non-empty cloud account.
+  if(!practices.length){
+    const fallback=(R.practices&&R.practices.length)?R.practices:(L.practices||[]);
+    practices.push(...cloneData(fallback));
+  }
+  const out={...L,...R,version:Math.max(Number(L.version)||7,Number(R.version)||7,8),practices};
+  out.syncMeta={
+    ...rm,...lm,
+    deletedPractices:[...deleted],
+    fieldUpdatedAt:{...(rm.fieldUpdatedAt||{}),...(lm.fieldUpdatedAt||{})}
+  };
+  return out;
+}
+function markPracticeUpdated(p){touchPractice(p);touchField(p,"__meta")}
+function saveDB(skipSync=false){
+  ensureSyncMeta();
+  localStorage.setItem(DB_KEY,JSON.stringify(db));
+  if(!skipSync)markLocalChange();
+  renderAll();
+  if(!skipSync)debouncedSync();
+}
+function saveDBFast(){ensureSyncMeta();localStorage.setItem(DB_KEY,JSON.stringify(db));markLocalChange();debouncedSync()}
+function currentPractice(){let p=db.practices.find(x=>x.id===currentId);if(!p){p=db.practices[0];currentId=p?.id}return p}
+function settings(){let p=currentPractice();return p.settings||(p.settings={})}
+function saveSetting(k,v){settings()[k]=v;const p=currentPractice();if(p){p._fieldUpdatedAt=p._fieldUpdatedAt||{};p._fieldUpdatedAt[k]={at:nowISO(),device:DEVICE_ID};touchPractice(p)}saveDB()}
+function allSessions(){return db.practices.flatMap(p=>(p.sessions||[]).map(s=>({...s,practice:p.name,practiceId:p.id})))}
+function allDays(){let out=new Set;allSessions().forEach(s=>out.add(localDateKey(s.date)));return out}
+function localDateKey(d){let x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`}
+function formatMinutes(sec){sec=Number(sec)||0;let h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60);return h?`${h}h ${m}m`:`${m}m`}
+function formatDuration(sec){sec=Math.floor(sec||0);return `${String(Math.floor(sec/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
 async function getCloudSnapshot(user){
   if(!sb||!user)return null;
   const {data,error}=await sb.from(SUPABASE_TABLE).select("data,updated_at").eq("user_id",user.id).maybeSingle();
   if(error)throw error;
   return data||null;
 }
-function applyRemoteSnapshot(remote,source="Realtime"){
-  if(!remote?.data?.practices||realtimeApplying)return false;
-  const remoteUpdatedAt=remote.updated_at||"";
-  if(remoteUpdatedAt&&realtimeLastUpdatedAt&&new Date(remoteUpdatedAt)<=new Date(realtimeLastUpdatedAt))return false;
-  const localDirtyAt=Number(localStorage.getItem("mkStudioLocalDirtyAt")||0);
-  if(localDirtyAt && remoteUpdatedAt && new Date(remoteUpdatedAt).getTime() < localDirtyAt){
-    setSync("Local changes","Your newer local changes are being synced…");
-    debouncedSync();
-    return false;
-  }
-  if(localDirtyAt && !remoteUpdatedAt){
-    setSync("Local changes","Your latest local changes are being synced…");
-    debouncedSync();
-    return false;
-  }
+function applyMergedState(merged,source="Cloud sync"){
+  if(!merged?.practices?.length)return false;
+  realtimeApplying=true;
   try{
-    realtimeApplying=true;
-    db=remote.data;
-    currentId=localStorage.getItem("studioMetronomeCurrent");
-    if(!currentId||!db.practices.some(p=>p.id===currentId))currentId=db.practices[0]?.id;
+    const wanted=currentId||localStorage.getItem("studioMetronomeCurrent");
+    db=merged;
+    currentId=wanted&&db.practices.some(p=>p.id===wanted)?wanted:db.practices[0]?.id;
     if(currentId)localStorage.setItem("studioMetronomeCurrent",currentId);
     localStorage.setItem(DB_KEY,JSON.stringify(db));
     loadPracticeSettings(currentPractice());
     restoreSavedSessionTimer();
-    renderAll();
-    restoreSectionState();
-    realtimeLastUpdatedAt=remoteUpdatedAt||realtimeLastUpdatedAt;
-    setSync(source,"Updated from another device.");
+    renderAll();restoreSectionState();
+    setSync(source,"Cloud data merged safely with this device.");
     return true;
   }finally{realtimeApplying=false}
+}
+function applyRemoteSnapshot(remote,source="Realtime"){
+  if(!remote?.data?.practices||realtimeApplying)return false;
+  const localDirtyAt=Number(localStorage.getItem("mkStudioLocalDirtyAt")||0);
+  if(localDirtyAt){debouncedSync();return false}
+  try{
+    const merged=mergeSnapshots(db,remote.data);
+    return applyMergedState(merged,source);
+  }catch(e){console.warn("Cloud merge failed",e);return false}
 }
 async function loadCloudData(){
   if(!sb)return;
   if(cloudLoadInFlight)return cloudLoadInFlight;
   cloudLoadInFlight=(async()=>{
     try{
-      const {data:{user}}=await sb.auth.getUser();
-      if(!user)return;
-
-      // Capture the local revision BEFORE the network request. If anything is
-      // saved while the request is in flight, the remote snapshot must NOT
-      // overwrite that newer local state.
+      const {data:{user}}=await sb.auth.getUser();if(!user)return;
       const revisionAtStart=Number(localStorage.getItem("mkStudioLocalRevision")||0);
-      const dirtyAtStart=Number(localStorage.getItem("mkStudioLocalDirtyAt")||0);
       const remote=await getCloudSnapshot(user);
-
       const revisionNow=Number(localStorage.getItem("mkStudioLocalRevision")||0);
       const dirtyNow=Number(localStorage.getItem("mkStudioLocalDirtyAt")||0);
-      if(dirtyNow || revisionNow!==revisionAtStart || dirtyAtStart){
-        // Local data is newer or was changed while loading. Sync it instead of
-        // replacing it with a possibly stale cloud snapshot.
-        await syncNow(true);
-        return;
+      const merged=remote?.data?.practices?mergeSnapshots(db,remote.data):cloneData(db);
+      // If local changed during the request, merge and upload; never replace it with remote.
+      if(dirtyNow||revisionNow!==revisionAtStart){
+        db=merged;localStorage.setItem(DB_KEY,JSON.stringify(db));renderAll();
+        await syncNow(true);return;
       }
-
       if(remote?.data?.practices){
-        db=remote.data;
-        currentId=localStorage.getItem("studioMetronomeCurrent");
-        if(!currentId||!db.practices.some(p=>p.id===currentId))currentId=db.practices[0]?.id;
-        if(currentId)localStorage.setItem("studioMetronomeCurrent",currentId);
-        localStorage.setItem(DB_KEY,JSON.stringify(db));
-        realtimeLastUpdatedAt=remote.updated_at||"";
-        loadPracticeSettings(currentPractice());
-        restoreSavedSessionTimer();
-        renderAll();
-        restoreSectionState();
-        setSync("Synced","Cloud data loaded.");
+        const changed=JSON.stringify(db)!==JSON.stringify(merged);
+        if(changed){applyMergedState(merged,"Synced");await syncNow(true)}
+        else setSync("Synced","Cloud data is already up to date.");
       }else{
+        // First device/account creation: upload the existing local database.
         await syncNow(true);
       }
-    }catch(e){
-      console.error("Cloud load failed",e);
-      setSync("Local","Cloud load failed; local data preserved.");
-    }finally{
-      cloudLoadInFlight=null;
-    }
+    }catch(e){console.error("Cloud load failed",e);setSync("Local","Cloud load failed; local data preserved.")}
+    finally{cloudLoadInFlight=null}
   })();
   return cloudLoadInFlight;
 }
-async function syncCloudImmediately(){
-  if(!sb)return false;
-  return await syncNow(true);
-}
-
+async function syncCloudImmediately(){return await syncNow(true)}
 async function syncNow(silent=false){
   if(!sb){setSync("Local","Supabase client is unavailable.");return false}
-
-  // Serialize all writes. This prevents an older request from finishing after
-  // a newer request and clearing the dirty flag / publishing stale data.
-  if(syncInFlight){
-    syncQueued=true;
-    try{await syncInFlight}catch{}
-    if(syncQueued){
-      syncQueued=false;
-      return await syncNow(silent);
-    }
-    return true;
-  }
-
+  if(syncInFlight){syncQueued=true;try{await syncInFlight}catch{};return true}
   syncInFlight=(async()=>{
     try{
       const {data:{user}}=await sb.auth.getUser();
       if(!user){setSync("Local","Not signed in; data is local.");return false}
-      if(!silent)setSync("Syncing…","Saving MK Studio data to Supabase");
-
-      const revisionAtStart=Number(localStorage.getItem("mkStudioLocalRevision")||0);
-      const dirtyAtStart=Number(localStorage.getItem("mkStudioLocalDirtyAt")||0);
-      // Freeze the exact state being uploaded. Never let a later mutation alter
-      // the payload while the request is in flight.
-      const snapshot=JSON.parse(JSON.stringify(db));
-      const updatedAt=new Date().toISOString();
-      const payload={user_id:user.id,data:snapshot,updated_at:updatedAt};
-      const {error}=await sb.from(SUPABASE_TABLE).upsert(payload,{onConflict:"user_id"});
-      if(error)throw error;
-
-      const revisionNow=Number(localStorage.getItem("mkStudioLocalRevision")||0);
-      const dirtyNow=Number(localStorage.getItem("mkStudioLocalDirtyAt")||0);
-      const stillCurrent=revisionNow===revisionAtStart && dirtyNow===dirtyAtStart;
-
-      // The upload succeeded, but only mark it as the current durable state if
-      // no newer local save happened during the upload.
-      if(stillCurrent){
-        realtimeLastUpdatedAt=updatedAt;
-        if(realtimeChannel){
-          try{await realtimeChannel.send({type:"broadcast",event:"mk_state",payload:{user_id:user.id,data:snapshot,updated_at:updatedAt}})}catch(e){console.warn("Realtime broadcast failed",e)}
+      if(!silent)setSync("Syncing…","Merging this device with Supabase…");
+      for(let attempt=0;attempt<4;attempt++){
+        const revisionAtStart=Number(localStorage.getItem("mkStudioLocalRevision")||0);
+        const remote=await getCloudSnapshot(user);
+        const localSnapshot=cloneData(db);
+        const merged=remote?.data?.practices?mergeSnapshots(localSnapshot,remote.data):localSnapshot;
+        const updatedAt=nowISO();
+        const payload={user_id:user.id,data:merged,updated_at:updatedAt};
+        let result;
+        if(remote?.updated_at){
+          // Optimistic lock: only update if nobody changed the row since our read.
+          result=await sb.from(SUPABASE_TABLE).update({data:merged,updated_at:updatedAt}).eq("user_id",user.id).eq("updated_at",remote.updated_at).select("updated_at").maybeSingle();
+          if(result.error)throw result.error;
+          if(!result.data){continue;}
+        }else{
+          result=await sb.from(SUPABASE_TABLE).insert(payload).select("updated_at").maybeSingle();
+          if(result.error){
+            // Another device may have created the row between SELECT and INSERT.
+            const retry=await getCloudSnapshot(user);if(retry?.data?.practices)continue;
+            throw result.error;
+          }
         }
+        const revisionNow=Number(localStorage.getItem("mkStudioLocalRevision")||0);
+        if(revisionNow!==revisionAtStart){syncQueued=true;continue}
+        const before=JSON.stringify(db),after=JSON.stringify(merged);
+        if(before!==after){db=merged;localStorage.setItem(DB_KEY,JSON.stringify(db));
+          if(!db.practices.some(p=>p.id===currentId))currentId=db.practices[0]?.id;
+          loadPracticeSettings(currentPractice());restoreSavedSessionTimer();renderAll();restoreSectionState();
+        }
+        realtimeLastUpdatedAt=updatedAt;
         localStorage.removeItem("mkStudioLocalDirtyAt");
-        setSync("Synced","Supabase sync is active.");
+        if(realtimeChannel){try{await realtimeChannel.send({type:"broadcast",event:"mk_state",payload:{user_id:user.id,data:merged,updated_at:updatedAt}})}catch(e){console.warn("Realtime broadcast failed",e)}}
+        setSync("Synced","Cloud merge is active across all devices.");
         return true;
       }
-
-      // A newer local save exists. Keep the dirty marker and immediately queue
-      // another upload of the newest state. Importantly, do NOT broadcast the
-      // older snapshot as the latest state.
-      syncQueued=true;
-      setSync("Syncing…","A newer local change is being uploaded…");
-      return true;
-    }catch(e){
-      console.error("Sync failed",e);
-      setSync("Local","Sync failed; local data was preserved.");
-      return false;
-    }finally{
-      syncInFlight=null;
-    }
+      throw new Error("Cloud changed repeatedly; retrying shortly.");
+    }catch(e){console.error("Sync failed",e);setSync("Local","Sync failed; local data was preserved.");return false}
+    finally{syncInFlight=null}
   })();
-
-  try{return await syncInFlight}
-  finally{
-    if(syncQueued){
-      syncQueued=false;
-      // Run the newest state after the current request has fully released the lock.
-      setTimeout(()=>syncNow(true),0);
-    }
-  }
-}
-
-function setSync(a,b){
-  const st=document.getElementById("syncStatus"),detail=document.getElementById("syncDetail"),last=document.getElementById("syncLast"),mode=document.getElementById("syncMode"),cloud=document.getElementById("syncChipCloud"),rt=document.getElementById("syncChipRealtime"),card=document.querySelector(".sync-card");
-  if(st)st.textContent=a;if(detail)detail.textContent=b;
-  if(last&&/synced|realtime/i.test(String(a)))last.textContent="Updated "+new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
-  if(mode)mode.textContent=/realtime/i.test(String(a))?"REALTIME CLOUD":/synced|syncing/i.test(String(a))?"CLOUD SYNC":"LOCAL STORAGE";
-  if(cloud)cloud.innerHTML=`Cloud <b>${/synced|realtime|syncing/i.test(String(a))?"ON":"OFF"}</b>`;
-  if(rt)rt.innerHTML=`Realtime <b>${/realtime/i.test(String(a))?"ON":"OFF"}</b>`;
-  if(card){card.classList.remove("sync-live","sync-working","sync-offline");if(/realtime|synced/i.test(String(a)))card.classList.add("sync-live");else if(/syncing/i.test(String(a)))card.classList.add("sync-working");else card.classList.add("sync-offline")}
+  try{return await syncInFlight}finally{if(syncQueued){syncQueued=false;setTimeout(()=>syncNow(true),0)}}
 }
 
 /* ===== GitHub app update manager ===== */
@@ -3316,7 +3392,7 @@ function saveSeasonEdits(){
   const p=currentPractice();if(!p)return;
   const name=document.getElementById("editSeasonName").value.trim();
   if(!name)return;
-  p.name=name;p.color=document.getElementById("editSeasonColor").value||"#00f5ff";p.icon=document.getElementById("editSeasonIcon").value||"music-2";
+  p.name=name;p.color=document.getElementById("editSeasonColor").value||"#00f5ff";p.icon=document.getElementById("editSeasonIcon").value||"music-2";touchPractice(p);
   closeEditSeason();saveDB();
 }
 function loadReminderUI(){
