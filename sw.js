@@ -1,10 +1,17 @@
-const CACHE_NAME = "mk-studio-v15";
+/* ============================================================
+   MK STUDIO — Service Worker
+   ============================================================ */
+
+const CACHE_NAME = "mk-studio-v16";
 
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./version.json"
+  "./version.json",
+  "./css/styles.css",
+  "./js/app.js",
+  "./js/sw-register.js"
 ];
 
 self.addEventListener("install", (event) => {
