@@ -1,5 +1,0 @@
-{
-  "version": "2026.09.08.12",
-  "releasedAt": "2026-09-09T00:00:00Z",
-  "message": "Fixed: Focus Mode mobile layout (clean grid, no overlapping controls) and Profile panel buttons no longer hidden behind modal content."
-}
