@@ -1,4 +1,82 @@
-const CACHE='mk-studio-v2-final-ui-qa4';
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./','./index.html','./manifest.webmanifest','./version.json']))));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.pathname.endsWith('/version.json')||u.pathname.endsWith('/index.html')){e.respondWith(fetch(e.request,{cache:'no-store'}).catch(()=>caches.match(e.request)));return}e.respondWith(caches.match(e.request).then(c=>c||fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(x=>x.put(e.request,copy));return r}).catch(()=>caches.match('./index.html')))});
+const CACHE_NAME = "mk-studio-v15";
+
+const APP_SHELL = [
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./version.json"
+];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.addAll(APP_SHELL)
+    )
+  );
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      )
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+  const url = new URL(request.url);
+
+  // Always get latest version and service worker
+  if (
+    url.pathname.endsWith("/version.json") ||
+    url.pathname.endsWith("/sw.js")
+  ) {
+    event.respondWith(
+      fetch(request, { cache: "no-store" }).catch(() =>
+        caches.match(request)
+      )
+    );
+    return;
+  }
+
+  // HTML / navigation: network first
+  if (
+    request.mode === "navigate" ||
+    url.pathname.endsWith(".html") ||
+    url.pathname === "/" ||
+    url.pathname.endsWith("/")
+  ) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, copy);
+          });
+
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Other assets: cache first
+  event.respondWith(
+    caches.match(request).then(
+      (cached) => cached || fetch(request)
+    )
+  );
+});
