@@ -1,7 +1,1 @@
-{
-  "version": "2.0.0-final-ui-qa3",
-  "name": "MK Studio V2",
-  "build": "2026.09.12-ui-tools",
-  "released": "2026-09-12",
-  "notes": "UI parity QA: rebuilt Rhythm, Sound and Technique panels with usable controls and mobile-safe layout."
-}
+{"version":"2.0.0-final-ui-qa4","name":"MK Studio","channel":"stable-candidate","updated":"2026-09-12"}

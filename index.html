@@ -8,6 +8,18 @@
  .recording-list{display:grid;gap:8px}.recording-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025)}.recording-name{font-weight:800;font-size:12px}.recording-meta{color:var(--muted);font-size:10px;margin-top:4px}.recording-actions{display:flex;gap:6px}.recording-live{display:flex;align-items:center;gap:8px;padding:12px;border:1px solid rgba(255,43,214,.25);background:rgba(255,43,214,.05);border-radius:12px}.recording-dot{width:9px;height:9px;border-radius:50%;background:var(--danger);box-shadow:0 0 12px var(--danger);animation:recPulse 1s infinite}.recording-time{font-variant-numeric:tabular-nums;font-weight:900}.recording-permission{padding:12px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:11px}.record-modal-controls{display:flex;gap:8px;flex-wrap:wrap}.record-primary{min-width:140px}.audio-player{width:100%;margin-top:8px}.recording-empty{text-align:center;padding:18px;color:var(--muted);font-size:11px}@keyframes recPulse{50%{opacity:.35;transform:scale(.8)}}
 /* V2 Tool Panels — rebuilt from the reference app */
 .tool-panels{margin-top:10px;display:grid;gap:8px}.inline-tool-panel{display:none;background:#0a0f18;border:1px solid var(--line);border-radius:13px;padding:12px}.inline-tool-panel.open{display:block}.inline-tool-panel .panel-title{font-size:10px;font-weight:850;color:#dce5fa;margin-bottom:9px}.meter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field label{display:block;color:var(--muted);font-size:8px;margin-bottom:4px}.select,.num{width:100%;background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px;outline:none}.note-list{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:6px}.note-btn{background:var(--card2);color:var(--muted);border:1px solid var(--line);border-radius:9px;padding:8px 4px;font-size:9px}.note-btn.active{border-color:var(--pink);color:var(--pink);box-shadow:0 0 16px rgba(255,43,214,.08)}.note-symbol{display:block;font-size:21px;color:var(--text)}.rhythm-builder-grid{display:grid;grid-template-columns:repeat(16,minmax(0,1fr));gap:4px}.rhythm-step{aspect-ratio:1;border:1px solid var(--line);background:var(--card2);color:var(--muted);border-radius:8px;display:grid;place-items:center;font-size:14px;font-family:"Noto Music","Segoe UI Symbol",sans-serif}.rhythm-step.on{background:rgba(0,245,255,.13);border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 15px rgba(0,245,255,.1)}.tool-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.tool-row .preset.active{border-color:var(--cyan);color:var(--cyan)}.tool-slider{width:100%;accent-color:var(--cyan)}.sound-options,.technique-options{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.sound-option,.technique-option{border:1px solid var(--line);background:#101624;color:var(--muted);border-radius:9px;padding:9px 7px;font-size:9px;text-align:center}.sound-option.active,.technique-option.active{border-color:var(--pink);color:var(--pink);box-shadow:0 0 14px rgba(255,43,214,.08)}.technique-tempo{margin-top:10px;padding:10px;border:1px solid rgba(0,245,255,.22);border-radius:11px;background:linear-gradient(135deg,rgba(0,245,255,.055),rgba(255,43,214,.045))}.technique-tempo-grid{display:grid;grid-template-columns:1fr 1fr 90px;gap:7px;align-items:end}.technique-tempo-grid label{font-size:8px;color:var(--muted);display:flex;flex-direction:column;gap:4px}.technique-tempo-grid input{box-sizing:border-box;width:100%;background:#080d16;color:var(--text);border:1px solid var(--line);border-radius:7px;padding:7px}.technique-status{margin-top:7px;font-size:8px;color:var(--muted);line-height:1.5}.toggle-line{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:10px}.toggle-line:last-child{border-bottom:0}.toggle{min-width:48px}.mini-value{font-size:11px;color:var(--cyan);font-weight:800}@media(max-width:760px){.rhythm-builder-grid{grid-template-columns:repeat(8,minmax(0,1fr))}.sound-options,.technique-options{grid-template-columns:repeat(2,1fr)}.technique-tempo-grid{grid-template-columns:1fr 1fr}.technique-tempo-grid button{grid-column:1/-1}}
+</style>
+<style id="final-polish">
+.tempo-card{background:radial-gradient(circle at 50% 42%,rgba(0,245,255,.055),transparent 34%),linear-gradient(145deg,rgba(16,23,37,.97),rgba(6,9,15,.98));border-color:rgba(0,245,255,.16)}
+.tempo-card:after{content:"";position:absolute;inset:1px;border-radius:19px;pointer-events:none;background:linear-gradient(135deg,rgba(255,255,255,.045),transparent 30%,transparent 70%,rgba(255,43,214,.035))}
+.tempo-number{filter:drop-shadow(0 0 18px rgba(0,245,255,.12))}.tempo-card.running{border-color:rgba(0,245,255,.34);box-shadow:0 0 0 1px rgba(0,245,255,.05),0 28px 90px rgba(0,0,0,.6),0 0 45px rgba(0,245,255,.07)}
+.start.metro{box-shadow:0 10px 28px rgba(0,245,255,.08)}.start.session{background:linear-gradient(135deg,rgba(184,255,61,.13),rgba(255,255,255,.025));color:#eaf4ff}
+.tool-panels{margin-top:9px}.inline-tool-panel{box-shadow:inset 0 0 24px rgba(0,245,255,.025),0 10px 30px rgba(0,0,0,.18)}
+.focus-overlay{background:radial-gradient(circle at 50% 38%,rgba(0,245,255,.08),transparent 30%),rgba(0,0,0,.78)}
+.focus{background:radial-gradient(circle at 50% 38%,rgba(0,245,255,.07),transparent 35%),linear-gradient(145deg,#101827,#070a11);border-color:rgba(0,245,255,.25);box-shadow:0 30px 120px rgba(0,0,0,.75),0 0 50px rgba(0,245,255,.05)}
+.focus-main{min-height:300px}.focus-bpm{font-size:clamp(88px,16vw,128px);background:linear-gradient(180deg,#fff,var(--cyan));-webkit-background-clip:text;color:transparent;text-shadow:0 0 30px rgba(0,245,255,.15)}
+.review-item.open{border-color:rgba(0,245,255,.22);box-shadow:0 0 24px rgba(0,245,255,.04)}
+@media(max-width:760px){.focus{width:100%;max-width:520px;min-height:calc(100vh - 28px);display:flex;flex-direction:column;justify-content:space-between}.focus-main{min-height:0;flex:1}.focus-controls{grid-template-columns:1fr}.tool-panels{margin-top:8px}.inline-tool-panel{padding:11px}}
 </style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>.cloud-card{margin-top:12px}.cloud-row{display:flex;justify-content:space-between;gap:10px;align-items:center}.cloud-badges{display:flex;gap:6px;flex-wrap:wrap}.badge{padding:4px 8px;border-radius:999px;border:1px solid var(--line);font-size:9px}.badge.on{border-color:rgba(70,255,170,.4);color:#75ffc0}.badge.off{color:var(--muted)}.auth-email{font-size:10px;color:var(--muted);word-break:break-all}.auth-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}</style>
 <style id="reference-ui-parity">
@@ -97,47 +109,147 @@ function initTechniquePanel(){
   const options=[['normal','Normal'],['accent','Accent Shift'],['accelerando','Accelerando'],['ritardando','Ritardando'],['double','Double Time'],['half','Half Time']];const wrap=$('techniqueOptions');if(!wrap)return;const selected=localStorage.getItem('mk-v2-technique')||'normal';wrap.innerHTML='';options.forEach(([id,label])=>{const b=document.createElement('button');b.className='technique-option'+(id===selected?' active':'');b.textContent=label;b.onclick=()=>{localStorage.setItem('mk-v2-technique',id);wrap.querySelectorAll('.technique-option').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('techniqueStatus').textContent=(id==='accelerando'||id==='ritardando')?'Automatic tempo is ready. Set interval and BPM change, then Start.':label+' selected for practice.'};wrap.appendChild(b)});
   const running=window.mkTechniqueTimer; $('techniqueStart').textContent=running?'■ Stop':'▶ Start';$('techniqueStart').onclick=()=>{if(window.mkTechniqueTimer){clearInterval(window.mkTechniqueTimer);window.mkTechniqueTimer=null;initTechniquePanel();toast('Automatic tempo stopped');return}const mode=localStorage.getItem('mk-v2-technique')||'normal';if(!['accelerando','ritardando'].includes(mode)){toast('Choose Accelerando or Ritardando first');return}const interval=Math.max(1,Number($('techniqueInterval').value)||5)*1000;const step=Math.max(1,Number($('techniqueStep').value)||1);window.mkTechniqueTimer=setInterval(()=>{const current=Number($('bpm')?.textContent)||80;const next=mode==='accelerando'?Math.min(300,current+step):Math.max(20,current-step);if(typeof bpm==='function')bpm(next)},interval);initTechniquePanel();toast(mode==='accelerando'?'Accelerando started':'Ritardando started')};
 }
+function nav(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===view));
+  document.querySelectorAll('.bottom [data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===view));
+  if(view==='review'){
+    document.querySelectorAll('.review-item').forEach(x=>x.classList.remove('open'));
+  }
+  if(view==='profile') renderSeasons();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function focus(open){
+  const overlay=$('focusOverlay'); if(!overlay)return;
+  if(open){
+    render(); dots(); overlay.classList.add('open');
+    document.body.style.overflow='hidden';
+  }else{
+    overlay.classList.remove('open');
+    document.body.style.overflow='';
+  }
+}
+function closeTopLayers(){
+  document.querySelectorAll('.modal-backdrop.open').forEach(x=>x.classList.remove('open'));
+  focus(false);
+}
 function init(){state.recordings=state.recordings||[];const p=[72,80,90,100,120,140,160,180,200];$('presets').innerHTML=p.map(x=>`<button class="preset" data-bpm="${x}">${x}</button>`).join('');$('presets').onclick=e=>{if(e.target.dataset.bpm)bpm(e.target.dataset.bpm)};$('minus').onclick=()=>bpm(state.bpm-1);$('plus').onclick=()=>bpm(state.bpm+1);$('range').oninput=e=>bpm(e.target.value);$('metro').onclick=metro;$('focusMetro').onclick=metro;$('session').onclick=session;$('focusSession').onclick=session;$('todayBox').onclick=session;$('sessionBox').onclick=session;$('record').onclick=openRecording;$('recordClose').onclick=()=>{$('recordModal').classList.remove('open')};$('recordCancel').onclick=()=>{$('recordModal').classList.remove('open')};$('recordStart').onclick=()=>state.recorder?stopRecording():startRecording();$('focusOpen').onclick=()=>focus(true);$('focusBottom').onclick=()=>focus(true);$('focusClose').onclick=()=>focus(false);$('settings').onclick=()=>$('settingsModal').classList.add('open');$('settingsClose').onclick=()=>$('settingsModal').classList.remove('open');$('settingsDone').onclick=()=>$('settingsModal').classList.remove('open');$('clearLocal').onclick=()=>{if(confirm('Clear all local MK Studio data?')){localStorage.removeItem(Store.key);location.reload()}};$('addSeason').onclick=addSeason;document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>nav(b.dataset.nav));document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>openTool(b.dataset.view));document.querySelectorAll('.review-toggle').forEach(b=>b.onclick=()=>{const item=b.parentElement;document.querySelectorAll('.review-item').forEach(x=>{if(x!==item)x.classList.remove('open')});item.classList.toggle('open');if(item.classList.contains('open'))renderReview(b.dataset.review)});document.addEventListener('click',e=>{const id=e.target.closest('[data-season]')?.dataset.season;if(id)switchSeason(id)});render();dots();state.timer=setInterval(render,500)}return{init}})();App.init();
 </script><script>if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));</script>
 <script>
 const CloudSync=(()=>{
   const KEY='mk-v2-cloud-config';
   const DEFAULT={url:'https://ufynbbtrvkdvdcozpzpg.supabase.co',anonKey:'sb_publishable_uzXbeTG-OBU2MGZPKLhPLQ_GkH-AG5B'};
-  let client=null,channel=null,user=null,syncing=false,lastSync=0;
+  let client=null,channel=null,user=null,syncing=false,lastSync=0,lastLocalWrite=0,queued=false,initialized=false;
   const $=id=>document.getElementById(id);
   const cfg=()=>{try{return {...DEFAULT,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return DEFAULT}};
   const setStatus=(cloud,realtime,sync,email='')=>{
     const label=sync==='SYNCED'?'CLOUD SYNCED':sync==='SYNCING'?'SYNCING…':sync==='ERROR'?'SYNC ERROR':cloud?'CLOUD CONNECTED':'LOCAL';
-    const home=[['syncStatus',label],['cloudText',cloud?'Cloud ON':'Cloud OFF'],['account',email||'Local'],['realtime',realtime?'ON':'OFF']];
-    home.forEach(([id,text])=>{const e=$(id);if(e)e.textContent=text});
+    [['syncStatus',label],['cloudText',cloud?'Cloud ON':'Cloud OFF'],['account',email||'Local'],['realtime',realtime?'ON':'OFF']].forEach(([id,text])=>{const e=$(id);if(e)e.textContent=text});
     const led=$('cloudLed');if(led)led.classList.toggle('on',!!cloud);
     if($('cloudStatus'))$('cloudStatus').textContent=label;
     if($('cloudEmail'))$('cloudEmail').textContent=email||'Not signed in';
-    [['cloudBadge',cloud?'Cloud ON':'Cloud OFF',cloud],['realtimeBadge',realtime?'Realtime ON':'Realtime OFF',realtime],['syncBadge',sync==='SYNCED'?'Synced':sync==='SYNCING'?'Syncing…':sync==='ERROR'?'Sync error':'Not synced yet',sync==='SYNCED']].forEach(([id,t,on])=>{const e=$(id);if(e){e.textContent=t;e.classList.toggle('on',!!on);e.classList.toggle('off',!on)}})
+    [['cloudBadge',cloud?'Cloud ON':'Cloud OFF',cloud],['realtimeBadge',realtime?'Realtime ON':'Realtime OFF',realtime],['syncBadge',sync==='SYNCED'?'Synced':sync==='SYNCING'?'Syncing…':sync==='ERROR'?'Sync error':'Not synced yet',sync==='SYNCED']].forEach(([id,t,on])=>{const e=$(id);if(e){e.textContent=t;e.classList.toggle('on',!!on);e.classList.toggle('off',!on)}});
   };
-  function init(){const c=cfg(); if(!c.url||!c.anonKey){setStatus(false,false,'LOCAL');return false} client=supabase.createClient(c.url,c.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}); client.auth.onAuthStateChange((event,session)=>{user=session?.user||null; setStatus(!!user,!!channel,lastSync?'SYNCED':'LOCAL',user?.email||''); if(user) setTimeout(()=>{sync();subscribe();renderCloudRecordings()},0); else unsubscribe();}); client.auth.getSession().then(({data})=>{user=data.session?.user||null;setStatus(!!user,!!channel,lastSync?'SYNCED':'LOCAL',user?.email||'');if(user){sync();subscribe();renderCloudRecordings()}}); return true}
+  function init(){
+    const c=cfg();
+    if(!c.url||!c.anonKey||!window.supabase){setStatus(false,false,'LOCAL');return false}
+    client=supabase.createClient(c.url,c.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    client.auth.onAuthStateChange((event,session)=>{
+      user=session?.user||null;
+      setStatus(!!user,!!channel,lastSync?'SYNCED':'LOCAL',user?.email||'');
+      if(user){
+        setTimeout(()=>{sync();subscribe();renderCloudRecordings()},50);
+      }else unsubscribe();
+    });
+    client.auth.getSession().then(({data})=>{
+      user=data.session?.user||null;
+      setStatus(!!user,!!channel,lastSync?'SYNCED':'LOCAL',user?.email||'');
+      if(user){sync();subscribe();renderCloudRecordings()}
+    });
+    initialized=true;
+    return true;
+  }
   async function signIn(email,password){if(!client)throw Error('Supabase is not configured');const r=await client.auth.signInWithPassword({email,password});if(r.error)throw r.error;return r.data}
   async function signUp(email,password){if(!client)throw Error('Supabase is not configured');const r=await client.auth.signUp({email,password});if(r.error)throw r.error;return r.data}
   async function signOut(){if(!client)return;await client.auth.signOut();}
-  function payload(){const raw=JSON.parse(localStorage.getItem('mk-v2-practice')||'{}');return {id:user.id,user_id:user.id,data:raw,updated_at:new Date().toISOString()}}
-  async function sync(){if(!client||!user||syncing)return; syncing=true;setStatus(true,!!channel,'SYNCING',user.email);try{const local=JSON.parse(localStorage.getItem('mk-v2-practice')||'{}');const {data:remote,error}=await client.from('mk_studio_data').select('data,updated_at').eq('user_id',user.id).maybeSingle();if(error)throw error;let merged=remote?.data||null;if(merged){merged=merge(local,merged)}else merged=local;localStorage.setItem('mk-v2-practice',JSON.stringify(merged));const row={user_id:user.id,data:merged,updated_at:new Date().toISOString()};const up=await client.from('mk_studio_data').upsert(row,{onConflict:'user_id'});if(up.error)throw up.error;lastSync=Date.now();setStatus(true,!!channel,'SYNCED',user.email);renderCloudRecordings()}catch(e){console.error(e);setStatus(true,!!channel,'ERROR',user.email);toast('Cloud sync failed')}finally{syncing=false}}
-  function merge(a,b){const out={...b,...a};const amap=new Map((a?.seasons||[]).map(x=>[x.id,x]));const bmap=new Map((b?.seasons||[]).map(x=>[x.id,x]));const ids=new Set([...amap.keys(),...bmap.keys()]);out.seasons=[...ids].map(id=>{const x=amap.get(id),y=bmap.get(id);if(!x)return y;if(!y)return x;return {...y,...x,sessions:mergeArray(x.sessions||[],y.sessions||[])}});out.recordings=[...new Map([...(b?.recordings||[]),...(a?.recordings||[])].map(x=>[x.id,x])).values()];return out}
+  function readLocal(){try{return JSON.parse(localStorage.getItem('mk-v2-practice')||'{}')}catch{return {}}}
+  function writeLocal(data){localStorage.setItem('mk-v2-practice',JSON.stringify(data));lastLocalWrite=Date.now();}
+  async function sync(){
+    if(!client||!user)return;
+    if(syncing){queued=true;return}
+    syncing=true;queued=false;setStatus(true,!!channel,'SYNCING',user.email);
+    try{
+      const local=readLocal();
+      const {data:remote,error}=await client.from('mk_studio_data').select('data,updated_at').eq('user_id',user.id).maybeSingle();
+      if(error)throw error;
+      const merged=remote?.data?merge(local,remote.data):local;
+      writeLocal(merged);
+      const row={user_id:user.id,data:merged,updated_at:new Date().toISOString()};
+      const up=await client.from('mk_studio_data').upsert(row,{onConflict:'user_id'});
+      if(up.error)throw up.error;
+      lastSync=Date.now();
+      setStatus(true,!!channel,'SYNCED',user.email);
+      if(typeof render==='function')render();
+      renderCloudRecordings();
+    }catch(e){
+      console.error(e);setStatus(true,!!channel,'ERROR',user.email);
+      toast('Cloud sync failed');
+    }finally{
+      syncing=false;
+      if(queued)setTimeout(sync,500);
+    }
+  }
+  function merge(a,b){
+    const out={...b,...a};
+    const amap=new Map((a?.seasons||[]).map(x=>[x.id,x]));
+    const bmap=new Map((b?.seasons||[]).map(x=>[x.id,x]));
+    const ids=new Set([...amap.keys(),...bmap.keys()]);
+    out.seasons=[...ids].map(id=>{
+      const x=amap.get(id),y=bmap.get(id);if(!x)return y;if(!y)return x;
+      return {...y,...x,sessions:mergeArray(x.sessions||[],y.sessions||[])};
+    });
+    out.recordings=[...new Map([...(b?.recordings||[]),...(a?.recordings||[])].map(x=>[x.id,x])).values()];
+    return out;
+  }
   function mergeArray(a,b){return [...new Map([...b,...a].map(x=>[x.id,x])).values()].sort((x,y)=>(y.startedAt||0)-(x.startedAt||0))}
   async function renderCloudRecordings(){
-    const recs=JSON.parse(localStorage.getItem('mk-v2-practice')||'{}').recordings||[];
+    const current=readLocal(),recs=current.recordings||[];
     if(!client||!user)return;
     for(const r of recs){
       if(!r.storagePath)continue;
-      try{const {data,error}=await client.storage.from('mk-studio-recordings').createSignedUrl(r.storagePath,3600);if(!error&&data?.signedUrl)r.url=data.signedUrl;}catch{}
+      try{const {data,error}=await client.storage.from('mk-studio-recordings').createSignedUrl(r.storagePath,3600);if(!error&&data?.signedUrl)r.url=data.signedUrl}catch{}
     }
-    const current=JSON.parse(localStorage.getItem('mk-v2-practice')||'{}');current.recordings=recs;localStorage.setItem('mk-v2-practice',JSON.stringify(current));
+    current.recordings=recs;writeLocal(current);
+    if(typeof renderReview==='function')renderReview('recordings');
   }
-  function subscribe(){if(!client||!user||channel)return;channel=client.channel('mk-studio-data-'+user.id).on('postgres_changes',{event:'*',schema:'public',table:'mk_studio_data',filter:'user_id=eq.'+user.id},()=>sync()).subscribe(status=>{if(status==='SUBSCRIBED'){setStatus(true,true,lastSync?'SYNCED':'LOCAL',user.email)}})}
+  function subscribe(){
+    if(!client||!user||channel)return;
+    channel=client.channel('mk-studio-data-'+user.id)
+      .on('postgres_changes',{event:'*',schema:'public',table:'mk_studio_data',filter:'user_id=eq.'+user.id},payload=>{
+        // Ignore the realtime echo of our own write. External changes are synced after a short debounce.
+        if(syncing || Date.now()-lastLocalWrite<2500)return;
+        clearTimeout(window.mkRealtimeSyncTimer);
+        window.mkRealtimeSyncTimer=setTimeout(()=>sync(),900);
+      })
+      .subscribe(status=>{
+        if(status==='SUBSCRIBED')setStatus(true,true,lastSync?'SYNCED':'LOCAL',user.email);
+        else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')setStatus(true,false,lastSync?'SYNCED':'ERROR',user.email);
+      });
+  }
   function unsubscribe(){if(channel&&client)client.removeChannel(channel);channel=null;setStatus(!!user,false,lastSync?'SYNCED':'LOCAL',user?.email||'')}
   function open(){if($('authModal')){$('authModal').classList.add('open');$('authStatus').textContent=user?('Signed in as '+user.email):'Not signed in'}}
-  function wire(){ $('cloudOpen')?.addEventListener('click',open);$('authClose')?.addEventListener('click',()=>$('authModal').classList.remove('open'));$('authSignIn')?.addEventListener('click',async()=>{try{await signIn($('authEmail').value,$('authPassword').value);toast('Signed in')}catch(e){toast(e.message||'Sign in failed')}});$('authSignUp')?.addEventListener('click',async()=>{try{await signUp($('authEmail').value,$('authPassword').value);toast('Account created')}catch(e){toast(e.message||'Sign up failed')}});$('authSignOut')?.addEventListener('click',signOut);$('authSync')?.addEventListener('click',sync);$('backupExport')?.addEventListener('click',exportBackup);$('backupImportBtn')?.addEventListener('click',()=>$('backupImport')?.click());$('backupImport')?.addEventListener('change',importBackup)}
+  function wire(){
+    $('cloudOpen')?.addEventListener('click',open);
+    $('authClose')?.addEventListener('click',()=>$('authModal').classList.remove('open'));
+    $('authSignIn')?.addEventListener('click',async()=>{try{await signIn($('authEmail').value,$('authPassword').value);toast('Signed in')}catch(e){toast(e.message||'Sign in failed')}});
+    $('authSignUp')?.addEventListener('click',async()=>{try{await signUp($('authEmail').value,$('authPassword').value);toast('Account created')}catch(e){toast(e.message||'Sign up failed')}});
+    $('authSignOut')?.addEventListener('click',signOut);
+    $('authSync')?.addEventListener('click',sync);
+    $('backupExport')?.addEventListener('click',exportBackup);
+    $('backupImportBtn')?.addEventListener('click',()=>$('backupImport')?.click());
+    $('backupImport')?.addEventListener('change',importBackup);
+  }
   function exportBackup(){const raw=localStorage.getItem('mk-v2-practice')||'{}';const blob=new Blob([raw],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mk-studio-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Backup exported')}
-  async function importBackup(e){const f=e.target.files?.[0];if(!f)return;try{const text=await f.text();const incoming=JSON.parse(text);const local=JSON.parse(localStorage.getItem('mk-v2-practice')||'{}');const merged=merge(local,incoming);localStorage.setItem('mk-v2-practice',JSON.stringify(merged));toast('Backup merged safely');setTimeout(()=>location.reload(),500)}catch(err){toast('Invalid backup file')}e.target.value=''}
+  async function importBackup(e){const f=e.target.files?.[0];if(!f)return;try{const incoming=JSON.parse(await f.text());const local=readLocal();writeLocal(merge(local,incoming));toast('Backup merged safely');render();if(user)sync()}catch{toast('Invalid backup file')}e.target.value=''}
   async function uploadRecording(id,blob){if(!client||!user)return null;const path=user.id+'/'+id+'.webm';const up=await client.storage.from('mk-studio-recordings').upload(path,blob,{contentType:blob.type||'audio/webm',upsert:true});if(up.error){console.warn('Recording cloud upload failed',up.error);return null}return {path}}
   window.MKCloudUpload=uploadRecording;
   return {init,wire,sync};
