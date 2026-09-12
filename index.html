@@ -2908,7 +2908,7 @@ function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader
 function openAuth(){document.getElementById("authModal").classList.add("open");document.getElementById("authEmail").focus()}
 function closeAuth(){document.getElementById("authModal").classList.remove("open")}
 function authMsg(t){const e=document.getElementById("authStatus");if(e)e.textContent=t}
-async function signIn(){if(!sb)return authMsg("Supabase is unavailable.");const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;if(!email||!password)return authMsg("Enter your email and password.");authMsg("Signing in…");const {error}=await sb.auth.signInWithPassword({email,password});if(error)return authMsg(error.message);authMsg("Signed in");closeAuth();await loadUserEmail();setSync("Syncing…","Connected. Syncing your cloud data…");loadCloudData().catch(e=>console.warn("Cloud load after sign-in failed",e));}
+async function signIn(){if(!sb)return authMsg("Supabase is unavailable.");const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;if(!email||!password)return authMsg("Enter your email and password.");authMsg("Signing in…");try{const result=await sb.auth.signInWithPassword({email,password});if(result?.error){authMsg(result.error.message);return;}authMsg("Signed in");closeAuth();}catch(e){authMsg(e?.message||"Sign-in failed.");}}
 async function signUp(){if(!sb)return authMsg("Supabase is unavailable.");const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;if(!email||password.length<6)return authMsg("Use a valid email and a password of at least 6 characters.");authMsg("Creating account…");const {data,error}=await sb.auth.signUp({email,password});if(error)return authMsg(error.message);if(data.session){await loadCloudData();closeAuth()}else authMsg("Account created. Check your email if confirmation is enabled.");}
 async function signOut(){if(sb)await sb.auth.signOut();document.getElementById("authActionBtn").textContent="Sign In";loadUserEmail();setSync("Local","Signed out; local data remains available.")}
 async function loadUserEmail(){if(!sb){document.getElementById("profileEmail").textContent="Local mode";return}try{let {data}=await sb.auth.getUser();const email=data?.user?.email;document.getElementById("profileEmail").textContent=email||"Not signed in";const b=document.getElementById("authActionBtn");if(b){b.textContent=email?"Sign Out":"Sign In";b.onclick=email?signOut:openAuth}}catch{document.getElementById("profileEmail").textContent="Not signed in"}}
@@ -3254,14 +3254,29 @@ function stopRealtimeSync(){
 }
 loadPracticeSettings(currentPractice());renderAll();restoreSectionState();restoreActiveSession();restoreSavedSessionTimer();updateSessionTimer();try{loadReminderUI();schedulePracticeReminders()}catch{}
 if(sb){
-  sb.auth.onAuthStateChange(async (event,session)=>{
-    await loadUserEmail();
+  sb.auth.onAuthStateChange((event,session)=>{
+    // Update the UI immediately. Never make the auth modal wait for cloud work.
     if(session && (event==="SIGNED_IN"||event==="INITIAL_SESSION")){
-      await loadCloudData();
-      if(!restoreCloudActiveSession())restoreActiveSession();
-      startRealtimeSync(session.user);
+      authMsg("Signed in");
+      closeAuth();
+      loadUserEmail().catch(()=>{});
+      setSync("Syncing…","Signed in. Syncing your cloud data…");
+      // Cloud/realtime work is deliberately detached from the auth UI.
+      Promise.resolve().then(async()=>{
+        try{
+          await loadCloudData();
+          if(!restoreCloudActiveSession())restoreActiveSession();
+          startRealtimeSync(session.user);
+        }catch(e){
+          console.warn("Post-auth cloud sync failed",e);
+        }
+      });
+      return;
     }
-    if(!session)stopRealtimeSync();
+    if(!session){
+      stopRealtimeSync();
+      loadUserEmail().catch(()=>{});
+    }
   });
   // Bootstrap the live channel even if the initial auth event was missed by the page lifecycle.
   sb.auth.getSession().then(async ({data})=>{
