@@ -3254,14 +3254,25 @@ function stopRealtimeSync(){
 }
 loadPracticeSettings(currentPractice());renderAll();restoreSectionState();restoreActiveSession();restoreSavedSessionTimer();updateSessionTimer();try{loadReminderUI();schedulePracticeReminders()}catch{}
 if(sb){
-  sb.auth.onAuthStateChange(async (event,session)=>{
-    await loadUserEmail();
-    if(session && (event==="SIGNED_IN"||event==="INITIAL_SESSION")){
-      await loadCloudData();
-      if(!restoreCloudActiveSession())restoreActiveSession();
-      startRealtimeSync(session.user);
-    }
-    if(!session)stopRealtimeSync();
+  // IMPORTANT: Supabase auth callbacks must not await other Supabase calls.
+  // Doing so can deadlock signInWithPassword(), leaving the UI stuck on
+  // "Signing in…". Defer all follow-up work until the auth callback returns.
+  sb.auth.onAuthStateChange((event,session)=>{
+    setTimeout(async()=>{
+      try{
+        await loadUserEmail();
+        if(session && (event==="SIGNED_IN"||event==="INITIAL_SESSION")){
+          await loadCloudData();
+          if(!restoreCloudActiveSession())restoreActiveSession();
+          startRealtimeSync(session.user);
+        }else if(!session){
+          stopRealtimeSync();
+        }
+      }catch(e){
+        console.error("Auth state follow-up failed",e);
+        if(session?.user)startRealtimeSync(session.user);
+      }
+    },0);
   });
   // Bootstrap the live channel even if the initial auth event was missed by the page lifecycle.
   sb.auth.getSession().then(async ({data})=>{
