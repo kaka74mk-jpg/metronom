@@ -4046,15 +4046,15 @@ if(old) window.openCategory=function(cat){
     if(detail)detail.textContent=state==='syncing'?'Connected to your cloud account. Syncing data…':'Cloud sync is active. Your data is synced with Supabase.';
     if(last)last.textContent=state==='syncing'?'Syncing now':'Connected';
     if(cloud)cloud.innerHTML='Cloud <b>ON</b>';
-    if(rt)rt.innerHTML='Realtime <b>'+(window.realtimeChannel?'ON':'ON')+'</b>';
+    if(rt)rt.innerHTML='Realtime <b>'+(typeof realtimeChannel!=='undefined'&&realtimeChannel?'ON':'ON')+'</b>';
     if(fill){fill.style.width='100%';fill.style.background='var(--lime)';}
     try{ status.classList.add('sync-live'); }catch(e){}
   }
 
   async function refreshAuthSyncUI(state){
-    if(!window.sb)return;
+    if(typeof sb==='undefined'||!sb)return;
     try{
-      const {data}=await window.sb.auth.getSession();
+      const {data}=await sb.auth.getSession();
       if(data?.session?.user){ paintAuthenticatedSync(state||'synced'); }
     }catch(e){ /* UI only; never interfere with auth/sync */ }
   }
@@ -4071,8 +4071,8 @@ if(old) window.openCategory=function(cat){
   }
 
   // When Supabase confirms the session, paint the Sync card from the session state.
-  if(window.sb){
-    window.sb.auth.onAuthStateChange(function(event,session){
+  if(typeof sb!=='undefined'&&sb){
+    sb.auth.onAuthStateChange(function(event,session){
       if(session?.user && event!=='SIGNED_OUT'){
         setTimeout(()=>refreshAuthSyncUI(event==='SIGNED_IN'?'syncing':'synced'),50);
       }else if(event==='SIGNED_OUT'){
