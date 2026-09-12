@@ -262,7 +262,7 @@ button,input,select{font:inherit}button{cursor:pointer}
 .focus-actions{display:flex;gap:8px}
 .focus-actions button{border:1px solid var(--line);background:#0a101a;color:var(--text);border-radius:9px;padding:9px 14px;font:inherit;cursor:pointer}
 .mk-pro-panel{position:fixed;z-index:10000;right:18px;bottom:18px;width:min(310px,calc(100vw - 36px));display:none;background:#080d16;border:1px solid rgba(0,245,255,.25);border-radius:14px;padding:12px;box-sizing:border-box;box-shadow:0 15px 45px rgba(0,0,0,.5)}
-.mk-pro-panel.open{display:block}
+.mk-pro-panel.open{display:none!important}
 .mk-pro-head{display:flex;justify-content:space-between;align-items:center;color:var(--text);font-size:11px}
 .mk-pro-head button{background:none;border:0;color:var(--muted);font-size:18px;cursor:pointer}
 .tap-value{text-align:center;font-size:22px;font-weight:900;margin:15px 0;color:#e9f7ff}
@@ -1934,7 +1934,7 @@ const drumPatterns={
 function getDrumPattern(){return drumPatterns[drums]||null}
 const specialDefs={normal:"Normal",trill:"Trill",tremolo2:"Tremolo ×2",tremolo3:"Tremolo ×3",accelerando:"Accel.",ritardando:"Ritard.",marcato:"Marcato",staccato:"Staccato"};
 
-function defaultDB(){return{version:8,practices:[{id:crypto.randomUUID(),name:"My Practice",target:120,sessions:[],parts:[],activePartId:null,fullPiece:{targetBpm:120,successfulRunsGoal:3},settings:{},practiceDays:{},recordings:[]}],activeSessions:{}}}
+function defaultDB(){return{version:8,practices:[{id:(crypto.randomUUID?crypto.randomUUID():Date.now()+"_"+Math.random().toString(36).slice(2)),name:"My Practice",target:120,sessions:[],parts:[],activePartId:null,fullPiece:{targetBpm:120,successfulRunsGoal:3},settings:{},practiceDays:{},recordings:[]}],activeSessions:{}}}
 function loadDB(){try{let x=JSON.parse(localStorage.getItem(DB_KEY)||"null");return x?.practices?x:defaultDB()}catch{return defaultDB()}}
 let syncInFlight=null;
 let syncQueued=false;
@@ -2019,7 +2019,7 @@ function renderNotes(){let e=document.getElementById("noteList");e.innerHTML="";
 function setMeterNote(v){meterNote=v;settings().meterNote=v;saveDB()}
 function setMeterFromSelect(v){meterTime=v;settings().meterTime=v;saveDB()}
 function applyCustomMeter(){let a=Number(document.getElementById("meterNum").value),b=Number(document.getElementById("meterDen").value);if(!a||!b)return;meterTime=`${a}/${b}`;settings().meterTime=meterTime;saveDB()}
-function addCustomNote(){let label=document.getElementById("customNoteName").value.trim();let div=Number(document.getElementById("customNoteDiv").value);if(!label||!div)return;let n={id:"custom_"+crypto.randomUUID(),label,symbol:"•",div};customNotes.push(n);settings().customNotes=customNotes;localStorage.setItem("metroCustomNotes",JSON.stringify(customNotes));meterNote=n.id;settings().meterNote=meterNote;document.getElementById("customNoteName").value="";saveDB()}
+function addCustomNote(){let label=document.getElementById("customNoteName").value.trim();let div=Number(document.getElementById("customNoteDiv").value);if(!label||!div)return;let n={id:"custom_"+(crypto.randomUUID?crypto.randomUUID():Date.now()+"_"+Math.random().toString(36).slice(2)),label,symbol:"•",div};customNotes.push(n);settings().customNotes=customNotes;localStorage.setItem("metroCustomNotes",JSON.stringify(customNotes));meterNote=n.id;settings().meterNote=meterNote;document.getElementById("customNoteName").value="";saveDB()}
 
 function getRhythmPattern(){let active=[];rhythmPattern.forEach((x,i)=>{if(x)active.push(i/16)});return active.length?active:[0]}
 function rhythmSymbol(v){return v===2?"♬":v===1?"♪":"·"}
@@ -2357,7 +2357,7 @@ function saveSession(seconds){
   let p=currentPractice();if(!p)return;
   p.sessions=Array.isArray(p.sessions)?p.sessions:[];
   const fullTarget=Number(p.fullPiece?.targetBpm)||Number(p.target)||120;
-  const rec={id:crypto.randomUUID(),date:new Date().toISOString(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),deviceId:DEVICE_ID,practiceId:p.id,partId:practiceSessionPartId||null,mode:practiceSessionMode,seconds:Math.max(0,Math.floor(Number(seconds)||0)),bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning,fullSuccess:practiceSessionMode==='full'&&Number(bpm)>=fullTarget};
+  const rec={id:(crypto.randomUUID?crypto.randomUUID():Date.now()+"_"+Math.random().toString(36).slice(2)),date:new Date().toISOString(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),deviceId:DEVICE_ID,practiceId:p.id,partId:practiceSessionPartId||null,mode:practiceSessionMode,seconds:Math.max(0,Math.floor(Number(seconds)||0)),bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning,fullSuccess:practiceSessionMode==='full'&&Number(bpm)>=fullTarget};
   p.sessions.push(rec);
   p.practiceDays=p.practiceDays||{};
   p.practiceDays[localDateKey(new Date())]=true;
@@ -2493,7 +2493,7 @@ async function finishRecording(){
   const mime=blob.type||"audio/wav";
   const p=currentPractice();if(!p)return;
   p.recordings=p.recordings||[];
-  const id=crypto.randomUUID(), takeNumber=p.recordings.length+1;
+  const id=(crypto.randomUUID?crypto.randomUUID():Date.now()+"_"+Math.random().toString(36).slice(2)), takeNumber=p.recordings.length+1;
   const localUrl=URL.createObjectURL(blob);
   const rec={id,takeNumber,date:new Date().toISOString(),duration:Math.floor((Date.now()-recordingStartedAt)/1000),partId:practiceSessionMode==='part'?(practiceSessionPartId||currentPractice()?.activePartId||null):null,mode:practiceSessionMode,metro:metroRunning,mimeType:mime,size:blob.size,blobUrl:localUrl,uploading:true};
   p.recordings.push(rec); recordings=p.recordings;
@@ -2864,14 +2864,14 @@ function selectPart(id){const p=currentPractice();if(!p)return;if(sessionRunning
 function startFullPieceRun(){if(sessionRunning){alert('Stop the current practice session before starting a full-piece run.');return}const p=currentPractice();if(!p)return;p.fullPiece=p.fullPiece||{targetBpm:Number(p.target)||120,successfulRunsGoal:3};practiceSessionMode='full';practiceSessionPartId=null;setBpm(Number(p.fullPiece.targetBpm)||Number(p.target)||120,false);targetBpm=Number(p.fullPiece.targetBpm)||Number(p.target)||120;updateTarget();startSession()}
 function openPartModal(id=null){const p=currentPractice();if(!p)return;const part=id?(p.parts||[]).find(x=>x.id===id):null;document.getElementById('partModalTitle').textContent=part?'Edit Part':'Add Part';document.getElementById('partName').value=part?.name||`Part ${(p.parts?.length||0)+1}`;document.getElementById('partStartBpm').value=part?.startBpm||bpm||80;document.getElementById('partTargetBpm').value=part?.targetBpm||p.target||120;document.getElementById('partTimeGoal').value=part?.timeGoalMin??30;document.getElementById('partBpmStep').value=part?.bpmStep??5;document.getElementById('partNotes').value=part?.notes||'';document.getElementById('partModal').dataset.editId=part?.id||'';document.getElementById('partModal').classList.add('open');setTimeout(()=>document.getElementById('partName').focus(),60)}
 function closePartModal(){document.getElementById('partModal')?.classList.remove('open')}
-function savePartModal(){const p=currentPractice();if(!p)return;const name=document.getElementById('partName').value.trim();if(!name)return;const start=Math.max(20,Math.min(300,Number(document.getElementById('partStartBpm').value)||80));const target=Math.max(start,Math.min(300,Number(document.getElementById('partTargetBpm').value)||120));const goal=Math.max(0,Number(document.getElementById('partTimeGoal').value)||0);const step=Math.max(1,Math.min(50,Number(document.getElementById('partBpmStep').value)||5));const notes=document.getElementById('partNotes').value.trim();p.parts=Array.isArray(p.parts)?p.parts:[];const editId=document.getElementById('partModal').dataset.editId;let part=editId?p.parts.find(x=>x.id===editId):null;if(part){part.name=name;part.startBpm=start;part.targetBpm=target;part.timeGoalMin=goal;part.bpmStep=step;part.notes=notes}else{part={id:crypto.randomUUID(),name,startBpm:start,targetBpm:target,timeGoalMin:goal,bpmStep:step,notes};p.parts.push(part);if(!p.activePartId)p.activePartId=part.id}touchPractice(p);closePartModal();saveDB();persistCriticalCloud("Part save")}
+function savePartModal(){const p=currentPractice();if(!p)return;const name=document.getElementById('partName').value.trim();if(!name)return;const start=Math.max(20,Math.min(300,Number(document.getElementById('partStartBpm').value)||80));const target=Math.max(start,Math.min(300,Number(document.getElementById('partTargetBpm').value)||120));const goal=Math.max(0,Number(document.getElementById('partTimeGoal').value)||0);const step=Math.max(1,Math.min(50,Number(document.getElementById('partBpmStep').value)||5));const notes=document.getElementById('partNotes').value.trim();p.parts=Array.isArray(p.parts)?p.parts:[];const editId=document.getElementById('partModal').dataset.editId;let part=editId?p.parts.find(x=>x.id===editId):null;if(part){part.name=name;part.startBpm=start;part.targetBpm=target;part.timeGoalMin=goal;part.bpmStep=step;part.notes=notes}else{part={id:(crypto.randomUUID?crypto.randomUUID():Date.now()+"_"+Math.random().toString(36).slice(2)),name,startBpm:start,targetBpm:target,timeGoalMin:goal,bpmStep:step,notes};p.parts.push(part);if(!p.activePartId)p.activePartId=part.id}touchPractice(p);closePartModal();saveDB();persistCriticalCloud("Part save")}
 function deletePart(id){const p=currentPractice();if(!p)return;const part=(p.parts||[]).find(x=>x.id===id);if(!part)return;if(!confirm(`Delete part "${part.name}"? Existing sessions for this part will remain in history but become unassigned.`))return;p.parts=p.parts.filter(x=>x.id!==id);if(p.activePartId===id)p.activePartId=p.parts[0]?.id||null;(p.sessions||[]).forEach(s=>{if(s.partId===id)s.partId=null});touchPractice(p);saveDB();persistCriticalCloud("Part delete")}
 function renderAll(){let p=currentPractice();if(p)loadPracticeSettings(p);renderPracticeList();renderHeader();setBpm(bpm,false);updateVolumeUI(false);updateTarget();renderVisual();metroLeds.length=0;document.querySelectorAll(".led").forEach(x=>metroLeds.push(x));renderMeter();renderRhythm();renderOptions();renderStats();renderHistory();renderOverview();renderCalendar();renderRecordings();renderParts();updateSessionTimer();const mb=document.getElementById("muteBtn");if(mb){mb.classList.toggle("active",metroMuted);mb.innerHTML=metroMuted?'<i data-lucide="volume-x"></i><span>Muted</span>':'<i data-lucide="volume-2"></i><span>Mute</span>'}lucide.createIcons()}
 function togglePanel(name,btn){let p=document.getElementById("panel-"+name),open=p.classList.contains("open");document.querySelectorAll(".panel").forEach(x=>x.classList.remove("open"));document.querySelectorAll(".tool").forEach(x=>x.classList.remove("active"));if(!open){p.classList.add("open");btn.classList.add("active")}}
 
 function openNew(){document.getElementById("practiceModal").classList.add("open");setTimeout(()=>document.getElementById("newName").focus(),80)}
 function closeModal(){document.getElementById("practiceModal").classList.remove("open")}
-function createPractice(){let name=document.getElementById("newName").value.trim(),target=Number(document.getElementById("newTarget").value)||120,color=document.getElementById("newColor")?.value||"#00f5ff",icon=document.getElementById("newIcon")?.value||"music-2";if(!name)return;ensureSyncMeta();let p={id:crypto.randomUUID(),name,target,color,icon,sessions:[],parts:[],activePartId:null,fullPiece:{targetBpm:120,successfulRunsGoal:3},settings:{},practiceDays:{},recordings:[],_updatedAt:nowISO(),_updatedBy:DEVICE_ID,_fieldUpdatedAt:{}};db.practices.push(p);db.syncMeta.deletedPractices=db.syncMeta.deletedPractices.filter(id=>id!==p.id);currentId=p.id;localStorage.setItem("studioMetronomeCurrent",currentId);closeModal();document.getElementById("newName").value="";saveDB()}
+function createPractice(){let name=document.getElementById("newName").value.trim(),target=Number(document.getElementById("newTarget").value)||120,color=document.getElementById("newColor")?.value||"#00f5ff",icon=document.getElementById("newIcon")?.value||"music-2";if(!name)return;ensureSyncMeta();let p={id:(crypto.randomUUID?crypto.randomUUID():Date.now()+"_"+Math.random().toString(36).slice(2)),name,target,color,icon,sessions:[],parts:[],activePartId:null,fullPiece:{targetBpm:120,successfulRunsGoal:3},settings:{},practiceDays:{},recordings:[],_updatedAt:nowISO(),_updatedBy:DEVICE_ID,_fieldUpdatedAt:{}};db.practices.push(p);db.syncMeta.deletedPractices=db.syncMeta.deletedPractices.filter(id=>id!==p.id);currentId=p.id;localStorage.setItem("studioMetronomeCurrent",currentId);closeModal();document.getElementById("newName").value="";saveDB()}
 async function deleteSeason(id){let p=db.practices.find(x=>x.id===id);if(!p)return;if(!confirm(`Delete season "${p.name}"? This will permanently remove its sessions, recordings, settings and statistics.`))return;ensureSyncMeta();db.syncMeta.deletedPractices=[...new Set([...(db.syncMeta.deletedPractices||[]),id])];const wasCurrent=id===currentId;db.practices=db.practices.filter(x=>x.id!==id);if(!db.practices.length){db=defaultDB();ensureSyncMeta()}if(wasCurrent||!db.practices.some(x=>x.id===currentId)){currentId=db.practices[0].id;localStorage.setItem("studioMetronomeCurrent",currentId)}loadPracticeSettings(currentPractice());saveDB(true);markLocalChange();try{await syncCloudImmediately()}catch{}renderAll()}
 function renameCurrent(){openEditSeason()}
 async function deleteCurrentSeason(){
@@ -3022,7 +3022,7 @@ function ensureSyncMeta(){
   return db.syncMeta;
 }
 const DEVICE_ID_KEY="mkStudioDeviceId_v2";
-function getDeviceId(){let id=localStorage.getItem(DEVICE_ID_KEY);if(!id){id=crypto.randomUUID();localStorage.setItem(DEVICE_ID_KEY,id)}return id}
+function getDeviceId(){let id=localStorage.getItem(DEVICE_ID_KEY);if(!id){id=(crypto.randomUUID?crypto.randomUUID():Date.now()+"_"+Math.random().toString(36).slice(2));localStorage.setItem(DEVICE_ID_KEY,id)}return id}
 const DEVICE_ID=getDeviceId();
 function nowISO(){return new Date().toISOString()}
 function touchPractice(p){
@@ -3510,12 +3510,7 @@ window.addEventListener("DOMContentLoaded",()=>{
   </div>
 </div>
 
-<div class="mk-pro-panel" id="tapTempoPanel" aria-hidden="true">
-  <div class="mk-pro-head"><strong>Tap Tempo</strong><button onclick="closeProPanel('tapTempoPanel')">×</button></div>
-  <div class="tap-value" id="tapTempoValue">— BPM</div>
-  <button class="tap-pad" id="tapPad" onclick="tapTempo()">TAP</button>
-  <div class="tap-hint">Tap 3+ times at a steady pulse.</div>
-</div>
+
 
 
 <script>
@@ -6750,25 +6745,26 @@ main .sync-card{display:block!important}
   }
   function cancelPlannerForm(){renderPlanner()}
   function savePlannerForm(editId){
-    try{
     const title=document.getElementById("mkPFTitle")?.value.trim()||"Practice";
-    const type=document.getElementById("mkPFType").value, seasonId=document.getElementById("mkPFSeason").value, partId=document.getElementById("mkPFPart").value||null;
+    const typeEl=document.getElementById("mkPFType"), seasonEl=document.getElementById("mkPFSeason"), partEl=document.getElementById("mkPFPart");
+    if(!typeEl||!seasonEl||!partEl){alert("Planner form is not ready. Please reopen Add Practice.");return;}
+    const type=typeEl.value, seasonId=seasonEl.value, partId=partEl.value||null;
     const rec=document.getElementById("mkPFRec").value,date=document.getElementById("mkPFDate").value||key(today()),duration=Math.max(1,Number(document.getElementById("mkPFDuration").value)||10),bpmVal=document.getElementById("mkPFBpm").value.trim();
     const usePartTarget=document.getElementById("mkPFUsePart").value==="1";
     const weekdays=[...document.querySelectorAll(".mk-plan-day.on")].map(x=>Number(x.dataset.day));
     if(rec==="weekdays"&&!weekdays.length){alert("Select at least one weekday.");return}
     const pl=ensurePlanner();
     if(rec==="once"){
-      const task={id:"once_"+(editId||crypto.randomUUID())+"_"+date,recurringPlanId:null,userId:null,date,title,type,seasonId:seasonId||null,partId:partId||null,duration,bpm:bpmVal===""?null:Number(bpmVal),usePartTarget,status:"pending",actualDuration:0,completedAt:null,skippedAt:null,rescheduledTo:null,override:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+      const task={id:"once_"+(editId||(crypto.randomUUID?crypto.randomUUID():Date.now()+"_"+Math.random().toString(36).slice(2)))+"_"+date,recurringPlanId:null,userId:null,date,title,type,seasonId:seasonId||null,partId:partId||null,duration,bpm:bpmVal===""?null:Number(bpmVal),usePartTarget,status:"pending",actualDuration:0,completedAt:null,skippedAt:null,rescheduledTo:null,override:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
       pl.dailyTasks=pl.dailyTasks.filter(x=>x.id!==task.id);pl.dailyTasks.push(task);
     }else{
       let plan=editId?planById(editId):null;
-      if(!plan){plan={id:"rp_"+crypto.randomUUID(),createdAt:new Date().toISOString(),active:true};pl.recurringPlans.push(plan)}
+      if(!plan){plan={id:"rp_"+(crypto.randomUUID?crypto.randomUUID():Date.now()+"_"+Math.random().toString(36).slice(2)),createdAt:new Date().toISOString(),active:true};pl.recurringPlans.push(plan)}
       Object.assign(plan,{userId:null,title,type,seasonId:seasonId||null,partId:partId||null,fullPieceId:null,duration,bpm:bpmVal===""?null:Number(bpmVal),usePartTarget,recurrenceType:rec,intervalDays:rec==="interval"?Math.max(1,Number(document.getElementById("mkPFInterval").value)||1):null,weekdays:rec==="weekdays"?weekdays:[],startDate:date,active:true,updatedAt:new Date().toISOString()});
       pl.dailyTasks=pl.dailyTasks.filter(t=>t.recurringPlanId!==plan.id || t.status==="completed" || t.status==="skipped");
     }
     savePlanner();renderPlanner();
-    }catch(e){console.error("Planner save error",e);alert("Could not create practice plan. Please check the fields and try again.");}
+    try{closePracticePlanner();}catch(e){}
   }
   function startOverdueAction(id,action){
     if(action==="today")doToday(id);else if(action==="skip"){const t=ensurePlanner().dailyTasks.find(x=>x.id===id);if(t)markTask(t,"skipped")}else rescheduleTask(id);
