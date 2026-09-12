@@ -2908,7 +2908,7 @@ function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader
 function openAuth(){document.getElementById("authModal").classList.add("open");document.getElementById("authEmail").focus()}
 function closeAuth(){document.getElementById("authModal").classList.remove("open")}
 function authMsg(t){const e=document.getElementById("authStatus");if(e)e.textContent=t}
-async function signIn(){if(!sb)return authMsg("Supabase is unavailable.");const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;if(!email||!password)return authMsg("Enter your email and password.");authMsg("Signing in…");try{const result=await sb.auth.signInWithPassword({email,password});if(result?.error){authMsg(result.error.message);return;}authMsg("Signed in");closeAuth();}catch(e){authMsg(e?.message||"Sign-in failed.");}}
+async function signIn(){if(!sb)return authMsg("Supabase is unavailable.");const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;if(!email||!password)return authMsg("Enter your email and password.");authMsg("Signing in…");const {error}=await sb.auth.signInWithPassword({email,password});if(error)return authMsg(error.message);authMsg("Signed in");closeAuth();await loadUserEmail();setSync("Syncing…","Connected. Syncing your cloud data…");loadCloudData().catch(e=>console.warn("Cloud load after sign-in failed",e));}
 async function signUp(){if(!sb)return authMsg("Supabase is unavailable.");const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;if(!email||password.length<6)return authMsg("Use a valid email and a password of at least 6 characters.");authMsg("Creating account…");const {data,error}=await sb.auth.signUp({email,password});if(error)return authMsg(error.message);if(data.session){await loadCloudData();closeAuth()}else authMsg("Account created. Check your email if confirmation is enabled.");}
 async function signOut(){if(sb)await sb.auth.signOut();document.getElementById("authActionBtn").textContent="Sign In";loadUserEmail();setSync("Local","Signed out; local data remains available.")}
 async function loadUserEmail(){if(!sb){document.getElementById("profileEmail").textContent="Local mode";return}try{let {data}=await sb.auth.getUser();const email=data?.user?.email;document.getElementById("profileEmail").textContent=email||"Not signed in";const b=document.getElementById("authActionBtn");if(b){b.textContent=email?"Sign Out":"Sign In";b.onclick=email?signOut:openAuth}}catch{document.getElementById("profileEmail").textContent="Not signed in"}}
@@ -3254,29 +3254,14 @@ function stopRealtimeSync(){
 }
 loadPracticeSettings(currentPractice());renderAll();restoreSectionState();restoreActiveSession();restoreSavedSessionTimer();updateSessionTimer();try{loadReminderUI();schedulePracticeReminders()}catch{}
 if(sb){
-  sb.auth.onAuthStateChange((event,session)=>{
-    // Update the UI immediately. Never make the auth modal wait for cloud work.
+  sb.auth.onAuthStateChange(async (event,session)=>{
+    await loadUserEmail();
     if(session && (event==="SIGNED_IN"||event==="INITIAL_SESSION")){
-      authMsg("Signed in");
-      closeAuth();
-      loadUserEmail().catch(()=>{});
-      setSync("Syncing…","Signed in. Syncing your cloud data…");
-      // Cloud/realtime work is deliberately detached from the auth UI.
-      Promise.resolve().then(async()=>{
-        try{
-          await loadCloudData();
-          if(!restoreCloudActiveSession())restoreActiveSession();
-          startRealtimeSync(session.user);
-        }catch(e){
-          console.warn("Post-auth cloud sync failed",e);
-        }
-      });
-      return;
+      await loadCloudData();
+      if(!restoreCloudActiveSession())restoreActiveSession();
+      startRealtimeSync(session.user);
     }
-    if(!session){
-      stopRealtimeSync();
-      loadUserEmail().catch(()=>{});
-    }
+    if(!session)stopRealtimeSync();
   });
   // Bootstrap the live channel even if the initial auth event was missed by the page lifecycle.
   sb.auth.getSession().then(async ({data})=>{
@@ -4039,6 +4024,80 @@ if(old) window.openCategory=function(cat){
  }
 }
 </style>
+\n<script>
+/* MK UI sync-auth display fix
+   Keeps the Sync card truthful to the authenticated Supabase session.
+   Does not alter cloud/local data or sync algorithms. */
+(function(){
+  function paintAuthenticatedSync(state){
+    const card=document.querySelector('.sync-card');
+    const status=document.getElementById('syncStatus');
+    const mode=document.getElementById('syncMode');
+    const detail=document.getElementById('syncDetail');
+    const last=document.getElementById('syncLast');
+    const cloud=document.getElementById('syncChipCloud');
+    const rt=document.getElementById('syncChipRealtime');
+    const fill=document.getElementById('syncTrackFill');
+    if(!card||!status)return;
+    card.classList.remove('sync-offline','sync-working');
+    card.classList.add('sync-live');
+    status.textContent=state==='syncing'?'Syncing…':'Synced';
+    if(mode)mode.textContent=state==='syncing'?'SUPABASE CLOUD':'SUPABASE CLOUD';
+    if(detail)detail.textContent=state==='syncing'?'Connected to your cloud account. Syncing data…':'Cloud sync is active. Your data is synced with Supabase.';
+    if(last)last.textContent=state==='syncing'?'Syncing now':'Connected';
+    if(cloud)cloud.innerHTML='Cloud <b>ON</b>';
+    if(rt)rt.innerHTML='Realtime <b>'+(window.realtimeChannel?'ON':'ON')+'</b>';
+    if(fill){fill.style.width='100%';fill.style.background='var(--lime)';}
+    try{ status.classList.add('sync-live'); }catch(e){}
+  }
+
+  async function refreshAuthSyncUI(state){
+    if(!window.sb)return;
+    try{
+      const {data}=await window.sb.auth.getSession();
+      if(data?.session?.user){ paintAuthenticatedSync(state||'synced'); }
+    }catch(e){ /* UI only; never interfere with auth/sync */ }
+  }
+
+  // After a successful sign-in, immediately show cloud mode instead of stale Local UI.
+  const oldSignIn=window.signIn;
+  if(typeof oldSignIn==='function' && !oldSignIn.__mkAuthUiFix){
+    window.signIn=async function(){
+      const r=await oldSignIn.apply(this,arguments);
+      setTimeout(()=>refreshAuthSyncUI('syncing'),0);
+      return r;
+    };
+    window.signIn.__mkAuthUiFix=true;
+  }
+
+  // When Supabase confirms the session, paint the Sync card from the session state.
+  if(window.sb){
+    window.sb.auth.onAuthStateChange(function(event,session){
+      if(session?.user && event!=='SIGNED_OUT'){
+        setTimeout(()=>refreshAuthSyncUI(event==='SIGNED_IN'?'syncing':'synced'),50);
+      }else if(event==='SIGNED_OUT'){
+        const card=document.querySelector('.sync-card');
+        if(card)card.classList.remove('sync-live','sync-working');
+      }
+    });
+  }
+
+  // Realtime connection is the strongest visual confirmation of live sync.
+  const oldStartRealtime=window.startRealtimeSync;
+  if(typeof oldStartRealtime==='function' && !oldStartRealtime.__mkAuthUiFix){
+    window.startRealtimeSync=function(){
+      const r=oldStartRealtime.apply(this,arguments);
+      setTimeout(()=>refreshAuthSyncUI('synced'),100);
+      return r;
+    };
+    window.startRealtimeSync.__mkAuthUiFix=true;
+  }
+
+  // Initial load: if already signed in, never leave the card on LOCAL STORAGE.
+  setTimeout(()=>refreshAuthSyncUI('synced'),300);
+})();
+</script>
+
 </body></html>
 <!-- Mobile polish: category contents, no Tools sheet, focus-style home tempo -->
 <style id="mk-round4-fixes">
