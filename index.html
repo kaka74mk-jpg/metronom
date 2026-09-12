@@ -332,6 +332,27 @@ button,input,select{font:inherit}button{cursor:pointer}
 
 /* v4 refinements */
 .tempo-status-row{display:flex;justify-content:center;align-items:center;margin:0 0 7px}.tempo-status-row .tempo-direction-indicator{margin:0!important;justify-content:center;text-align:center}.market-below-tempo{position:static!important;transform:none!important;margin:7px auto 2px!important;width:max-content;max-width:90%;padding:5px 9px!important;border:1px solid rgba(0,245,255,.12);background:rgba(8,14,23,.55);border-radius:8px;box-shadow:none!important}.market-below-tempo svg{width:11px;height:11px}.practice-timer-card{margin-top:7px!important}.focus-season-actions{gap:8px}.focus-action{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;min-width:42px;height:40px;padding:0 12px;border:1px solid rgba(255,255,255,.10);border-radius:11px;background:linear-gradient(180deg,#141d2b,#0b111b);color:#dfe9f5;font:inherit;font-size:9px;font-weight:800;cursor:pointer;box-shadow:0 5px 16px rgba(0,0,0,.22);transition:transform .12s ease,border-color .12s ease,box-shadow .12s ease}.focus-action svg{width:15px;height:15px}.focus-action:hover{transform:translateY(-1px);border-color:rgba(0,245,255,.35);box-shadow:0 7px 20px rgba(0,0,0,.28),0 0 15px rgba(0,245,255,.08)}.focus-action.exit{min-width:40px;padding:0 10px;color:#9aa7bb}.focus-season-start{min-width:125px!important}.focus-season-start span{font-size:9px}.focus-tempo-value{min-width:74px;height:40px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,245,255,.16);border-radius:11px;background:#08101b;color:var(--cyan);font-size:11px}.focus-tempo-value span{font-size:15px;margin-right:3px}@media(max-width:600px){.focus-action{height:38px;min-width:38px;padding:0 10px}.focus-season-start,.focus-action span{font-size:8px}.focus-season-start{min-width:112px!important}.market-below-tempo{font-size:8px!important}}
+
+/* MK Studio Parts / Piece Sections */
+.parts-card{margin:0 auto 12px;max-width:1380px}
+.parts-card .parts-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.parts-head-title{display:flex;align-items:center;gap:8px;font-weight:900}
+.parts-progress{height:5px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden;margin:0 12px 10px}
+.parts-progress>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),#b8ff3d);border-radius:inherit;transition:width .25s ease}
+.parts-list{display:grid;gap:7px}
+.part-row{border:1px solid var(--line);background:rgba(8,14,23,.52);border-radius:12px;overflow:hidden}
+.part-row.active{border-color:rgba(0,245,255,.45);box-shadow:0 0 0 1px rgba(0,245,255,.08) inset}
+.part-summary{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:10px 11px;cursor:pointer}
+.part-num{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:rgba(0,245,255,.08);color:var(--cyan);font-weight:900;font-size:11px}
+.part-main{min-width:0}.part-name{font-weight:900;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.part-meta{font-size:9px;color:var(--muted);margin-top:3px}
+.part-status{font-size:9px;color:var(--lime);font-weight:900;text-align:right}.part-detail{display:none;padding:0 11px 11px;border-top:1px solid rgba(255,255,255,.05)}
+.part-row.expanded .part-detail{display:block}.part-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}.part-stat{padding:8px;border-radius:9px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05)}.part-stat b{display:block;font-size:12px}.part-stat span{font-size:8px;color:var(--muted)}
+.part-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.part-action{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:8px;padding:6px 9px;font-size:9px;font-weight:800;cursor:pointer}.part-action.primary{background:linear-gradient(90deg,var(--cyan),#3cf7d2);color:#041013;border-color:transparent}
+.parts-empty{padding:13px;text-align:center;color:var(--muted);font-size:10px;border:1px dashed var(--line);border-radius:10px}
+.active-part-chip{display:inline-flex;align-items:center;gap:5px;margin:6px auto 0;padding:4px 8px;border-radius:999px;border:1px solid rgba(0,245,255,.16);background:rgba(0,245,255,.05);color:var(--cyan);font-size:8px;font-weight:900}
+.parts-head-actions{display:flex;gap:6px;align-items:center}.full-piece-status{display:none;margin:0 12px 10px;padding:7px 9px;border:1px solid rgba(184,255,61,.18);background:rgba(184,255,61,.05);border-radius:9px;color:var(--lime);font-size:9px;font-weight:800}.full-piece-status.show{display:block}.part-mastery{margin-top:7px;font-size:9px;color:var(--muted)}.part-mastery b{color:var(--text)}
+@media(max-width:760px){.parts-head-actions{gap:4px}.parts-head-actions .small-btn{padding:6px 7px;font-size:8px}}
+@media(max-width:760px){.parts-card{margin-bottom:9px}.part-summary{padding:9px}.part-detail-grid{grid-template-columns:1fr 1fr 1fr}.part-actions{justify-content:stretch}.part-action{flex:1;min-width:0}}
 </style>
 
 <style>
@@ -1656,6 +1677,19 @@ button, input, select, textarea {
 
   </div>
 
+
+  <section class="period-card section-card parts-card" id="partsCard">
+    <div class="period-head section-head parts-head">
+      <div class="parts-head-title"><i data-lucide="list-music"></i><b>Parts</b><span id="partsCount" class="muted">0</span></div>
+      <div class="parts-head-actions"><button class="small-btn" type="button" onclick="startFullPieceRun()"><i data-lucide="play-circle"></i> Full Piece</button><button class="small-btn" type="button" onclick="openPartModal()"><i data-lucide="plus"></i> Add Part</button></div>
+    </div>
+    <div class="parts-progress" aria-label="Season progress"><span id="partsProgressFill"></span></div>
+    <div id="fullPieceStatus" class="full-piece-status"></div>
+    <div class="section-body" style="padding-top:0">
+      <div id="partsList" class="parts-list"></div>
+    </div>
+  </section>
+
   <section class="layout">
     <div>
       <div class="metro-card">
@@ -1841,6 +1875,12 @@ button, input, select, textarea {
 <div class="season-custom" style="margin-top:8px"><div class="field"><label>Season Color</label><input id="editSeasonColor" type="color" value="#00f5ff"></div><div class="field"><label>Season Icon</label><select id="editSeasonIcon" class="select"><option value="music-2">Music</option><option value="guitar">Guitar</option><option value="piano">Piano</option><option value="drum">Drums</option><option value="mic-2">Mic</option><option value="headphones">Headphones</option><option value="star">Star</option><option value="zap">Practice</option></select></div></div>
 <div class="modal-actions"><button class="small-btn" style="color:var(--danger);margin-right:auto" onclick="deleteCurrentSeason()"><i data-lucide="trash-2"></i> Delete Season</button><button class="small-btn" onclick="closeEditSeason()">Cancel</button><button class="small-btn" style="background:var(--cyan);color:#001014" onclick="saveSeasonEdits()">Save Changes</button></div></div></div>
 
+<div class="modal" id="partModal"><div class="modal-box"><div class="modal-head"><div class="modal-title" id="partModalTitle">Add Part</div><button class="modal-close" onclick="closePartModal()">×</button></div>
+<div class="field"><label>Part Name</label><input id="partName" class="num" placeholder="e.g. Intro / Part 1"></div>
+<div class="season-custom" style="margin-top:8px"><div class="field"><label>Start BPM</label><input id="partStartBpm" class="num" type="number" min="20" max="300" value="80"></div><div class="field"><label>Target BPM</label><input id="partTargetBpm" class="num" type="number" min="20" max="300" value="120"></div></div>
+<div class="field" style="margin-top:8px"><label>Time Goal (minutes)</label><input id="partTimeGoal" class="num" type="number" min="0" max="100000" value="30"></div>
+<div class="modal-actions"><button class="small-btn" onclick="closePartModal()">Cancel</button><button class="small-btn" style="background:var(--cyan);color:#001014" onclick="savePartModal()">Save Part</button></div></div></div>
+
 <div class="modal" id="profileModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">Profile</div><button class="modal-close" onclick="closeProfile()">×</button></div><div class="profile-grid"><div class="profile-item"><div class="label">Login Email</div><div class="value" id="profileEmail">—</div></div><div class="profile-item"><div class="label">Total Sessions</div><div class="value" id="profileSessions">0</div></div><div class="profile-item"><div class="label">Total Time</div><div class="value" id="profileTime">0m</div></div><div class="profile-item"><div class="label">تعداد Season</div><div class="value" id="profileSeasons">0</div></div><div class="profile-item"><div class="label">Practice Days</div><div class="value" id="profileDays">0</div></div><div class="profile-item"><div class="label">Best BPM</div><div class="value" id="profileBest">—</div></div></div><div class="modal-actions"><button class="small-btn" id="authActionBtn" onclick="openAuth()">Sign In</button><button class="small-btn" onclick="openBackup()">Backup</button><button class="small-btn" onclick="syncNow()">Sync</button><button class="small-btn" style="color:var(--danger)" onclick="resetAll()">Reset All</button></div></div></div>
 
 <div class="modal" id="authModal"><div class="modal-box"><div class="modal-head"><div class="modal-title">MK Studio Account</div><button class="modal-close" onclick="closeAuth()">×</button></div><div class="field"><label>Email</label><input id="authEmail" class="num" type="email" autocomplete="email" placeholder="you@example.com"></div><div class="field" style="margin-top:8px"><label>Password</label><input id="authPassword" class="num" type="password" autocomplete="current-password" placeholder="••••••••"></div><div class="notice" id="authStatus">Sign in to sync your Seasons and practice history across devices.</div><div class="modal-actions"><button class="small-btn" onclick="signIn()">Sign In</button><button class="small-btn" onclick="signUp()">Create Account</button></div></div></div>
@@ -1861,6 +1901,7 @@ let db=loadDB(), currentId=localStorage.getItem("studioMetronomeCurrent")||db.pr
 let bpm=80,targetBpm=120,meterTime="4/4",meterNote="quarter",rhythmPattern=[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],sound="classic",drums="off",special="normal";
 let customNotes=JSON.parse(localStorage.getItem("metroCustomNotes")||"[]");
 let audioCtx=null,metroRunning=false,sessionRunning=false,sessionStartedAt=0,sessionElapsed=0,nextBeatTime=0,beatIndex=0,schedulerTimer=null,sessionTimerTick=null,chart=null,period="week";
+let practiceSessionPartId=null,practiceSessionMode="part";
 const ACTIVE_SESSION_KEY="mkStudioActiveSession_v1";
 let practiceLiveIndicator=null,practiceToastTimer=null;
 let tempoModifierTimer=null, tempoAutomationRunning=false;
@@ -1885,7 +1926,7 @@ const drumPatterns={
 function getDrumPattern(){return drumPatterns[drums]||null}
 const specialDefs={normal:"Normal",trill:"Trill",tremolo2:"Tremolo ×2",tremolo3:"Tremolo ×3",accelerando:"Accel.",ritardando:"Ritard.",marcato:"Marcato",staccato:"Staccato"};
 
-function defaultDB(){return{version:8,practices:[{id:crypto.randomUUID(),name:"My Practice",target:120,sessions:[],settings:{},practiceDays:{},recordings:[]}],activeSessions:{}}}
+function defaultDB(){return{version:8,practices:[{id:crypto.randomUUID(),name:"My Practice",target:120,sessions:[],parts:[],activePartId:null,settings:{},practiceDays:{},recordings:[]}],activeSessions:{}}}
 function loadDB(){try{let x=JSON.parse(localStorage.getItem(DB_KEY)||"null");return x?.practices?x:defaultDB()}catch{return defaultDB()}}
 let syncInFlight=null;
 let syncQueued=false;
@@ -1913,7 +1954,7 @@ function formatMinutes(sec){sec=Number(sec)||0;let h=Math.floor(sec/3600),m=Math
 function formatDuration(sec){sec=Math.floor(sec||0);return `${String(Math.floor(sec/60)).padStart(2,"0")}:${String(sec%60).padStart(2,"0")}`}
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 
-function loadPracticeSettings(p){let s=p.settings||{};bpm=s.bpm||80;targetBpm=s.target||p.target||120;meterTime=s.meterTime||"4/4";meterNote=s.meterNote||"quarter";rhythmPattern=s.rhythmPattern||[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];sound=s.sound||"classic";drums=s.drums||"off";special=s.special||"normal";metroMuted=!!s.muted;customNotes=Array.isArray(s.customNotes)?s.customNotes:(JSON.parse(localStorage.getItem("metroCustomNotes")||"[]"));localStorage.setItem("metroCustomNotes",JSON.stringify(customNotes));let v=document.getElementById("bpmRange");if(v)v.value=bpm;let t=document.getElementById("targetRange");if(t)t.value=targetBpm;let ms=document.getElementById("meterSelect");if(ms){if([...ms.options].some(o=>o.value===meterTime))ms.value=meterTime;else{meterTime="4/4";ms.value="4/4"}}}
+function loadPracticeSettings(p){let s=p.settings||{};bpm=s.bpm||80;targetBpm=s.target||p.target||120;meterTime=s.meterTime||"4/4";meterNote=s.meterNote||"quarter";rhythmPattern=s.rhythmPattern||[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];sound=s.sound||"classic";drums=s.drums||"off";special=s.special||"normal";metroMuted=!!s.muted;customNotes=Array.isArray(s.customNotes)?s.customNotes:(JSON.parse(localStorage.getItem("metroCustomNotes")||"[]"));localStorage.setItem("metroCustomNotes",JSON.stringify(customNotes));let v=document.getElementById("bpmRange");if(v)v.value=bpm;let t=document.getElementById("targetRange");if(t)t.value=targetBpm;let ms=document.getElementById("meterSelect");if(ms){if([...ms.options].some(o=>o.value===meterTime))ms.value=meterTime;else{meterTime="4/4";ms.value="4/4"}}const part=getActivePart(p);if(part){bpm=Number(part.startBpm)||bpm;targetBpm=Number(part.targetBpm)||targetBpm;}}
 function toggleSidebar(){return false}
 function renderPracticeList(){/* Seasons are now selected from the title-bar dropdown. */ renderSeasonDropdown()}
 function renderSeasonDropdown(){
@@ -1948,7 +1989,7 @@ function renderHeader(){
   let p=currentPractice();if(!p)return;
   const name=document.querySelector("#currentName .title-season-text");
   if(name)name.textContent=p.name;
-  document.getElementById("currentMeta").textContent=`${p.sessions.length} sessions • Target ${p.target} BPM`;
+  const ap=getActivePart(p);document.getElementById("currentMeta").textContent=ap?`${p.sessions.length} sessions • ${ap.name} • Target ${ap.targetBpm} BPM`:`${p.sessions.length} sessions • Target ${p.target} BPM`;
   let ts=document.getElementById("tickerSeason"),tr=document.getElementById("tickerRhythm");
   if(ts)ts.textContent=p.name.toUpperCase();
   if(tr)tr.textContent=`${meterTime} • ${noteDefs[meterNote]?.symbol||customNotes.find(n=>n.id===meterNote)?.symbol||"♩"}`;
@@ -1962,8 +2003,8 @@ function setBpm(v,persist=true){
 }
 function changeBpm(n){setBpm(bpm+n)}
 function updateVolumeUI(persist=false){const e=document.getElementById("volume");if(!e)return;const v=Number(e.value)||0,pct=Math.max(0,Math.min(100,v*100));const out=document.getElementById("volumeValue");if(out)out.textContent=Math.round(pct)+"%";e.style.setProperty("--volume-fill",pct+"%");settings().volume=v;if(persist&&!realtimeApplying)saveDBFast()}
-function setTarget(v,persist=true){targetBpm=Math.max(20,Math.min(300,Math.round(Number(v)||120)));let p=currentPractice();if(p)p.target=targetBpm;const value=document.getElementById("targetValue");if(value)value.textContent=targetBpm;const range=document.getElementById("targetRange");if(range){range.value=targetBpm;setRangeFill(range,targetBpm,"#b8ff3d")}if(persist&&!realtimeApplying)saveDB()}
-function updateTarget(){let p=currentPractice();if(!p)return;targetBpm=p.target||120;const v=document.getElementById("targetValue");if(v)v.textContent=targetBpm;const r=document.getElementById("targetRange");if(r){r.value=targetBpm;setRangeFill(r,targetBpm,"#b8ff3d")}}
+function setTarget(v,persist=true){targetBpm=Math.max(20,Math.min(300,Math.round(Number(v)||120)));let p=currentPractice();let part=getActivePart(p);if(part){part.targetBpm=targetBpm;touchPractice(p)}else if(p)p.target=targetBpm;const value=document.getElementById("targetValue");if(value)value.textContent=targetBpm;const range=document.getElementById("targetRange");if(range){range.value=targetBpm;setRangeFill(range,targetBpm,"#b8ff3d")}if(persist&&!realtimeApplying)saveDB()}
+function updateTarget(){let p=currentPractice();if(!p)return;const part=getActivePart(p);targetBpm=part?.targetBpm||p.target||120;const v=document.getElementById("targetValue");if(v)v.textContent=targetBpm;const r=document.getElementById("targetRange");if(r){r.value=targetBpm;setRangeFill(r,targetBpm,"#b8ff3d")}}
 function renderVisual(){let n=Math.max(4,getRhythmPattern().length);document.getElementById("leds").innerHTML=Array.from({length:Math.min(n,16)},(_,i)=>`<span class="led ${i===0?"first":""}" id="led-${i}"></span>`).join("")}
 function renderMeter(){document.getElementById("currentMeterDisplay").textContent=`${meterTime} • ${noteDefs[meterNote]?.symbol||customNotes.find(n=>n.id===meterNote)?.symbol||"♩"}`;renderNotes();let ms=document.getElementById("meterSelect");if(ms&&[...ms.options].some(o=>o.value===meterTime))ms.value=meterTime}
 function renderNotes(){let e=document.getElementById("noteList");e.innerHTML="";Object.entries(noteDefs).forEach(([id,n])=>{let b=document.createElement("button");b.className="note-btn "+(meterNote===id?"active":"");b.innerHTML=`<span class="note-symbol">${n.symbol}</span>${n.label}`;b.onclick=()=>setMeterNote(id);e.appendChild(b)});customNotes.forEach(n=>{let b=document.createElement("button");b.className="note-btn "+(meterNote===n.id?"active":"");b.innerHTML=`<span class="note-symbol">${escapeHTML(n.symbol||"•")}</span>${escapeHTML(n.label)}`;b.onclick=()=>setMeterNote(n.id);e.appendChild(b)})}
@@ -2140,7 +2181,7 @@ function highlightBeat(i){
   for(let j=0;j<leds.length;j++)leds[j].classList.toggle("on",j===idx);
 }
 
-function toggleSession(){sessionRunning?stopSession(true):startSession()}
+function toggleSession(){if(sessionRunning){stopSession(true);return}practiceSessionMode="part";practiceSessionPartId=currentPractice()?.activePartId||null;startSession()}
 function getTodaySeasonSeconds(){const key=localDateKey(new Date()),p=currentPractice();return (p?.sessions||[]).filter(s=>localDateKey(s.date)===key).reduce((a,s)=>a+(Number(s.seconds)||0),0)}
 function ensurePracticeLiveUI(){
   if(!practiceLiveIndicator){
@@ -2169,7 +2210,7 @@ function getLocalActiveSession(){
 }
 function persistActiveSession(){
   if(!sessionRunning||!currentId)return;
-  const a={practiceId:currentId,startAt:Number(sessionStartedAt)||Date.now(),baseElapsed:Math.max(0,Number(sessionElapsed)||0),savedAt:Date.now(),updatedAt:nowISO(),deviceId:DEVICE_ID};
+  const a={practiceId:currentId,startAt:Number(sessionStartedAt)||Date.now(),baseElapsed:Math.max(0,Number(sessionElapsed)||0),partId:practiceSessionPartId||null,mode:practiceSessionMode,savedAt:Date.now(),updatedAt:nowISO(),deviceId:DEVICE_ID};
   localStorage.setItem(ACTIVE_SESSION_KEY,JSON.stringify(a));
   ensureSyncMeta();
   db.activeSessions=db.activeSessions&&typeof db.activeSessions==="object"?db.activeSessions:{};
@@ -2207,6 +2248,8 @@ function restoreCloudActiveSession(){
   sessionStartedAt=start;
   sessionElapsed=Math.max(0,Number(a.baseElapsed)||0);
   sessionRunning=true;
+  practiceSessionPartId=Object.prototype.hasOwnProperty.call(a,"partId")?a.partId:(db?.practices?.find(x=>x.id===a.practiceId)?.activePartId||null);
+  practiceSessionMode=practiceSessionPartId?"part":"full";
   localStorage.setItem(ACTIVE_SESSION_KEY,JSON.stringify({...a,savedAt:Date.now()}));
   syncPracticeLiveUI();
   return true;
@@ -2214,6 +2257,8 @@ function restoreCloudActiveSession(){
 
 function startSession(){
   if(sessionRunning)return;
+  const p=currentPractice();
+  practiceSessionPartId=(practiceSessionMode==="full")?null:(p?.activePartId||null);
   const shared=db?.activeSessions?.[currentId];
   if(shared&&!shared.deleted&&Number(shared.startAt)){
     sessionStartedAt=Number(shared.startAt);
@@ -2300,7 +2345,7 @@ function formatDurationLong(sec){sec=Math.max(0,Math.floor(Number(sec)||0));retu
 function saveSession(seconds){
   let p=currentPractice();if(!p)return;
   p.sessions=Array.isArray(p.sessions)?p.sessions:[];
-  const rec={id:crypto.randomUUID(),date:new Date().toISOString(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),deviceId:DEVICE_ID,practiceId:p.id,seconds:Math.max(0,Math.floor(Number(seconds)||0)),bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning};
+  const rec={id:crypto.randomUUID(),date:new Date().toISOString(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),deviceId:DEVICE_ID,practiceId:p.id,partId:practiceSessionPartId||null,mode:practiceSessionMode,seconds:Math.max(0,Math.floor(Number(seconds)||0)),bpm,meter:meterTime,rhythm:meterNote,sound,drums,special,metro:metroRunning};
   p.sessions.push(rec);
   p.practiceDays=p.practiceDays||{};
   p.practiceDays[localDateKey(new Date())]=true;
@@ -2777,12 +2822,33 @@ function toggleMute(){
   if(b){b.classList.toggle("active",metroMuted);b.innerHTML=metroMuted?'<i data-lucide="volume-x"></i><span>Muted</span>':'<i data-lucide="volume-2"></i><span>Mute</span>';lucide.createIcons()}
   settings().muted=metroMuted;saveDB();
 }
-function renderAll(){let p=currentPractice();if(p)loadPracticeSettings(p);renderPracticeList();renderHeader();setBpm(bpm,false);updateVolumeUI(false);updateTarget();renderVisual();metroLeds.length=0;document.querySelectorAll(".led").forEach(x=>metroLeds.push(x));renderMeter();renderRhythm();renderOptions();renderStats();renderHistory();renderOverview();renderCalendar();renderRecordings();updateSessionTimer();const mb=document.getElementById("muteBtn");if(mb){mb.classList.toggle("active",metroMuted);mb.innerHTML=metroMuted?'<i data-lucide="volume-x"></i><span>Muted</span>':'<i data-lucide="volume-2"></i><span>Mute</span>'}lucide.createIcons()}
+function getActivePart(p=currentPractice()){if(!p)return null;p.parts=Array.isArray(p.parts)?p.parts:[];if(p.activePartId&&!p.parts.some(x=>x.id===p.activePartId))p.activePartId=p.parts[0]?.id||null;return p.parts.find(x=>x.id===p.activePartId)||null}
+function partSeconds(p,part){return (p?.sessions||[]).filter(s=>s.partId===part.id).reduce((a,s)=>a+(Number(s.seconds)||0),0)}
+function partBestBpm(p,part){const a=(p?.sessions||[]).filter(s=>s.partId===part.id).map(s=>Number(s.bpm)||0).filter(Boolean);return a.length?Math.max(...a):0}
+function partTempoProgress(p,part){const start=Math.max(1,Number(part.startBpm)||80),target=Math.max(start,Number(part.targetBpm)||120),best=partBestBpm(p,part);return Math.max(0,Math.min(100,((Math.max(start,best)-start)/(target-start||1))*100))}
+function partTimeProgress(p,part){const goal=Math.max(0,Number(part.timeGoalMin)||0)*60;return goal?Math.max(0,Math.min(100,partSeconds(p,part)/goal*100)):100}
+function partMastery(p,part){return Math.round(Math.min(partTempoProgress(p,part),partTimeProgress(p,part)))}
+function partComplete(p,part){return partMastery(p,part)>=100}
+function renderParts(){
+  const p=currentPractice(),list=document.getElementById('partsList');if(!list||!p)return;p.parts=Array.isArray(p.parts)?p.parts:[];
+  const count=document.getElementById('partsCount');if(count)count.textContent=p.parts.length?`• ${p.parts.length}`:'';
+  const done=p.parts.filter(x=>partComplete(p,x)).length;const fill=document.getElementById('partsProgressFill');if(fill)fill.style.width=(p.parts.length?(done/p.parts.length)*100:0)+'%';
+  const fs=document.getElementById('fullPieceStatus');if(fs){const has=p.parts.length>0, all=has&&done===p.parts.length;fs.classList.toggle('show',all);fs.innerHTML=all?'✓ All parts mastered — use <b>Full Piece</b> whenever you want to run the complete piece from beginning to end.':''}
+  if(!p.parts.length){list.innerHTML='<div class="parts-empty">No parts yet. Split this Season into sections and give each one its own tempo and time goal.</div>';lucide.createIcons();return}
+  list.innerHTML=p.parts.map((x,i)=>{const sec=partSeconds(p,x),goal=Math.max(0,Number(x.timeGoalMin)||0)*60,complete=partComplete(p,x),active=p.activePartId===x.id,pct=partTimeProgress(p,x),tempoPct=partTempoProgress(p,x),mastery=partMastery(p,x),best=partBestBpm(p,x);return `<div class="part-row ${active?'active':''}" data-part-id="${x.id}"><div class="part-summary" onclick="togglePartRow('${x.id}')"><div class="part-num">${i+1}</div><div class="part-main"><div class="part-name">${escapeHTML(x.name||`Part ${i+1}`)}</div><div class="part-meta">${Number(x.startBpm)||80} → ${Number(x.targetBpm)||120} BPM • ${Number(x.timeGoalMin)||0} min goal</div></div><div class="part-status">${complete?'✓ DONE':mastery+'%'}</div></div><div class="part-detail"><div class="parts-progress" style="margin:0"><span style="width:${mastery}%"></span></div><div class="part-detail-grid"><div class="part-stat"><b>${formatMinutes(sec)} / ${Number(x.timeGoalMin)||0}m</b><span>Time Goal</span></div><div class="part-stat"><b>${best||Number(x.startBpm)||80} / ${Number(x.targetBpm)||120}</b><span>Tempo</span></div><div class="part-stat"><b>${mastery}%</b><span>Mastery</span></div></div><div class="part-mastery">Time <b>${Math.round(pct)}%</b> · Tempo <b>${Math.round(tempoPct)}%</b> · Best <b>${best||'—'} BPM</b></div><div class="part-actions"><button class="part-action primary" onclick="event.stopPropagation();selectPart('${x.id}')">${active?'Selected':'Practice this part'}</button><button class="part-action" onclick="event.stopPropagation();openPartModal('${x.id}')">Edit</button><button class="part-action" onclick="event.stopPropagation();deletePart('${x.id}')">Delete</button></div></div></div>`}).join('');lucide.createIcons()}
+function togglePartRow(id){const row=document.querySelector(`.part-row[data-part-id="${id}"]`);if(row)row.classList.toggle('expanded')}
+function selectPart(id){const p=currentPractice();if(!p)return;if(sessionRunning){alert('Stop the current practice session before switching parts.');return}const part=(p.parts||[]).find(x=>x.id===id);if(!part)return;p.activePartId=id;practiceSessionMode='part';setBpm(Number(part.startBpm)||80,false);targetBpm=Number(part.targetBpm)||120;updateTarget();saveDB()}
+function startFullPieceRun(){if(sessionRunning){alert('Stop the current practice session before starting a full-piece run.');return}practiceSessionMode='full';practiceSessionPartId=null;const p=currentPractice();if(p){setBpm(Number(p.settings?.bpm)||Number(p.target)||120,false);targetBpm=Number(p.target)||120;updateTarget()}startSession();}
+function openPartModal(id=null){const p=currentPractice();if(!p)return;const part=id?(p.parts||[]).find(x=>x.id===id):null;document.getElementById('partModalTitle').textContent=part?'Edit Part':'Add Part';document.getElementById('partName').value=part?.name||`Part ${(p.parts?.length||0)+1}`;document.getElementById('partStartBpm').value=part?.startBpm||bpm||80;document.getElementById('partTargetBpm').value=part?.targetBpm||p.target||120;document.getElementById('partTimeGoal').value=part?.timeGoalMin??30;document.getElementById('partModal').dataset.editId=part?.id||'';document.getElementById('partModal').classList.add('open');setTimeout(()=>document.getElementById('partName').focus(),60)}
+function closePartModal(){document.getElementById('partModal')?.classList.remove('open')}
+function savePartModal(){const p=currentPractice();if(!p)return;const name=document.getElementById('partName').value.trim();if(!name)return;const start=Math.max(20,Math.min(300,Number(document.getElementById('partStartBpm').value)||80));const target=Math.max(start,Math.min(300,Number(document.getElementById('partTargetBpm').value)||120));const goal=Math.max(0,Number(document.getElementById('partTimeGoal').value)||0);p.parts=Array.isArray(p.parts)?p.parts:[];const editId=document.getElementById('partModal').dataset.editId;let part=editId?p.parts.find(x=>x.id===editId):null;if(part){part.name=name;part.startBpm=start;part.targetBpm=target;part.timeGoalMin=goal}else{part={id:crypto.randomUUID(),name,startBpm:start,targetBpm:target,timeGoalMin:goal};p.parts.push(part);if(!p.activePartId)p.activePartId=part.id}touchPractice(p);closePartModal();saveDB()}
+function deletePart(id){const p=currentPractice();if(!p)return;const part=(p.parts||[]).find(x=>x.id===id);if(!part)return;if(!confirm(`Delete part "${part.name}"? Existing sessions for this part will remain in history but become unassigned.`))return;p.parts=p.parts.filter(x=>x.id!==id);if(p.activePartId===id)p.activePartId=p.parts[0]?.id||null;(p.sessions||[]).forEach(s=>{if(s.partId===id)s.partId=null});touchPractice(p);saveDB()}
+function renderAll(){let p=currentPractice();if(p)loadPracticeSettings(p);renderPracticeList();renderHeader();setBpm(bpm,false);updateVolumeUI(false);updateTarget();renderVisual();metroLeds.length=0;document.querySelectorAll(".led").forEach(x=>metroLeds.push(x));renderMeter();renderRhythm();renderOptions();renderStats();renderHistory();renderOverview();renderCalendar();renderRecordings();renderParts();updateSessionTimer();const mb=document.getElementById("muteBtn");if(mb){mb.classList.toggle("active",metroMuted);mb.innerHTML=metroMuted?'<i data-lucide="volume-x"></i><span>Muted</span>':'<i data-lucide="volume-2"></i><span>Mute</span>'}lucide.createIcons()}
 function togglePanel(name,btn){let p=document.getElementById("panel-"+name),open=p.classList.contains("open");document.querySelectorAll(".panel").forEach(x=>x.classList.remove("open"));document.querySelectorAll(".tool").forEach(x=>x.classList.remove("active"));if(!open){p.classList.add("open");btn.classList.add("active")}}
 
 function openNew(){document.getElementById("practiceModal").classList.add("open");setTimeout(()=>document.getElementById("newName").focus(),80)}
 function closeModal(){document.getElementById("practiceModal").classList.remove("open")}
-function createPractice(){let name=document.getElementById("newName").value.trim(),target=Number(document.getElementById("newTarget").value)||120,color=document.getElementById("newColor")?.value||"#00f5ff",icon=document.getElementById("newIcon")?.value||"music-2";if(!name)return;ensureSyncMeta();let p={id:crypto.randomUUID(),name,target,color,icon,sessions:[],settings:{},practiceDays:{},recordings:[],_updatedAt:nowISO(),_updatedBy:DEVICE_ID,_fieldUpdatedAt:{}};db.practices.push(p);db.syncMeta.deletedPractices=db.syncMeta.deletedPractices.filter(id=>id!==p.id);currentId=p.id;localStorage.setItem("studioMetronomeCurrent",currentId);closeModal();document.getElementById("newName").value="";saveDB()}
+function createPractice(){let name=document.getElementById("newName").value.trim(),target=Number(document.getElementById("newTarget").value)||120,color=document.getElementById("newColor")?.value||"#00f5ff",icon=document.getElementById("newIcon")?.value||"music-2";if(!name)return;ensureSyncMeta();let p={id:crypto.randomUUID(),name,target,color,icon,sessions:[],parts:[],activePartId:null,settings:{},practiceDays:{},recordings:[],_updatedAt:nowISO(),_updatedBy:DEVICE_ID,_fieldUpdatedAt:{}};db.practices.push(p);db.syncMeta.deletedPractices=db.syncMeta.deletedPractices.filter(id=>id!==p.id);currentId=p.id;localStorage.setItem("studioMetronomeCurrent",currentId);closeModal();document.getElementById("newName").value="";saveDB()}
 async function deleteSeason(id){let p=db.practices.find(x=>x.id===id);if(!p)return;if(!confirm(`Delete season "${p.name}"? This will permanently remove its sessions, recordings, settings and statistics.`))return;ensureSyncMeta();db.syncMeta.deletedPractices=[...new Set([...(db.syncMeta.deletedPractices||[]),id])];const wasCurrent=id===currentId;db.practices=db.practices.filter(x=>x.id!==id);if(!db.practices.length){db=defaultDB();ensureSyncMeta()}if(wasCurrent||!db.practices.some(x=>x.id===currentId)){currentId=db.practices[0].id;localStorage.setItem("studioMetronomeCurrent",currentId)}loadPracticeSettings(currentPractice());saveDB(true);markLocalChange();try{await syncCloudImmediately()}catch{}renderAll()}
 function renameCurrent(){openEditSeason()}
 async function deleteCurrentSeason(){
