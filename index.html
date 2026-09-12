@@ -6750,6 +6750,7 @@ main .sync-card{display:block!important}
   }
   function cancelPlannerForm(){renderPlanner()}
   function savePlannerForm(editId){
+    try{
     const title=document.getElementById("mkPFTitle")?.value.trim()||"Practice";
     const type=document.getElementById("mkPFType").value, seasonId=document.getElementById("mkPFSeason").value, partId=document.getElementById("mkPFPart").value||null;
     const rec=document.getElementById("mkPFRec").value,date=document.getElementById("mkPFDate").value||key(today()),duration=Math.max(1,Number(document.getElementById("mkPFDuration").value)||10),bpmVal=document.getElementById("mkPFBpm").value.trim();
@@ -6767,6 +6768,7 @@ main .sync-card{display:block!important}
       pl.dailyTasks=pl.dailyTasks.filter(t=>t.recurringPlanId!==plan.id || t.status==="completed" || t.status==="skipped");
     }
     savePlanner();renderPlanner();
+    }catch(e){console.error("Planner save error",e);alert("Could not create practice plan. Please check the fields and try again.");}
   }
   function startOverdueAction(id,action){
     if(action==="today")doToday(id);else if(action==="skip"){const t=ensurePlanner().dailyTasks.find(x=>x.id===id);if(t)markTask(t,"skipped")}else rescheduleTask(id);
