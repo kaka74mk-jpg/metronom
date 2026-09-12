@@ -2908,7 +2908,7 @@ function importData(e){let f=e.target.files[0];if(!f)return;let r=new FileReader
 function openAuth(){document.getElementById("authModal").classList.add("open");document.getElementById("authEmail").focus()}
 function closeAuth(){document.getElementById("authModal").classList.remove("open")}
 function authMsg(t){const e=document.getElementById("authStatus");if(e)e.textContent=t}
-async function signIn(){if(!sb)return authMsg("Supabase is unavailable.");const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;if(!email||!password)return authMsg("Enter your email and password.");authMsg("Signing in…");const {error}=await sb.auth.signInWithPassword({email,password});if(error)return authMsg(error.message);authMsg("Signed in. Loading your cloud data…");await loadCloudData();closeAuth();await loadUserEmail();}
+async function signIn(){if(!sb)return authMsg("Supabase is unavailable.");const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;if(!email||!password)return authMsg("Enter your email and password.");authMsg("Signing in…");const {error}=await sb.auth.signInWithPassword({email,password});if(error)return authMsg(error.message);authMsg("Signed in");closeAuth();await loadUserEmail();setSync("Syncing…","Connected. Syncing your cloud data…");loadCloudData().catch(e=>console.warn("Cloud load after sign-in failed",e));}
 async function signUp(){if(!sb)return authMsg("Supabase is unavailable.");const email=document.getElementById("authEmail").value.trim(),password=document.getElementById("authPassword").value;if(!email||password.length<6)return authMsg("Use a valid email and a password of at least 6 characters.");authMsg("Creating account…");const {data,error}=await sb.auth.signUp({email,password});if(error)return authMsg(error.message);if(data.session){await loadCloudData();closeAuth()}else authMsg("Account created. Check your email if confirmation is enabled.");}
 async function signOut(){if(sb)await sb.auth.signOut();document.getElementById("authActionBtn").textContent="Sign In";loadUserEmail();setSync("Local","Signed out; local data remains available.")}
 async function loadUserEmail(){if(!sb){document.getElementById("profileEmail").textContent="Local mode";return}try{let {data}=await sb.auth.getUser();const email=data?.user?.email;document.getElementById("profileEmail").textContent=email||"Not signed in";const b=document.getElementById("authActionBtn");if(b){b.textContent=email?"Sign Out":"Sign In";b.onclick=email?signOut:openAuth}}catch{document.getElementById("profileEmail").textContent="Not signed in"}}
@@ -3254,25 +3254,14 @@ function stopRealtimeSync(){
 }
 loadPracticeSettings(currentPractice());renderAll();restoreSectionState();restoreActiveSession();restoreSavedSessionTimer();updateSessionTimer();try{loadReminderUI();schedulePracticeReminders()}catch{}
 if(sb){
-  // IMPORTANT: Supabase auth callbacks must not await other Supabase calls.
-  // Doing so can deadlock signInWithPassword(), leaving the UI stuck on
-  // "Signing in…". Defer all follow-up work until the auth callback returns.
-  sb.auth.onAuthStateChange((event,session)=>{
-    setTimeout(async()=>{
-      try{
-        await loadUserEmail();
-        if(session && (event==="SIGNED_IN"||event==="INITIAL_SESSION")){
-          await loadCloudData();
-          if(!restoreCloudActiveSession())restoreActiveSession();
-          startRealtimeSync(session.user);
-        }else if(!session){
-          stopRealtimeSync();
-        }
-      }catch(e){
-        console.error("Auth state follow-up failed",e);
-        if(session?.user)startRealtimeSync(session.user);
-      }
-    },0);
+  sb.auth.onAuthStateChange(async (event,session)=>{
+    await loadUserEmail();
+    if(session && (event==="SIGNED_IN"||event==="INITIAL_SESSION")){
+      await loadCloudData();
+      if(!restoreCloudActiveSession())restoreActiveSession();
+      startRealtimeSync(session.user);
+    }
+    if(!session)stopRealtimeSync();
   });
   // Bootstrap the live channel even if the initial auth event was missed by the page lifecycle.
   sb.auth.getSession().then(async ({data})=>{
