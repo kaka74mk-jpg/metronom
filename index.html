@@ -7,7 +7,7 @@
 
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" content="#05060b">
-<meta name="mk-app-version" content="2026.09.08.12">
+<meta name="mk-app-version" content="2026.09.12.1">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1885,7 +1885,7 @@ const drumPatterns={
 function getDrumPattern(){return drumPatterns[drums]||null}
 const specialDefs={normal:"Normal",trill:"Trill",tremolo2:"Tremolo ×2",tremolo3:"Tremolo ×3",accelerando:"Accel.",ritardando:"Ritard.",marcato:"Marcato",staccato:"Staccato"};
 
-function defaultDB(){return{version:7,practices:[{id:crypto.randomUUID(),name:"My Practice",target:120,sessions:[],settings:{},practiceDays:{},recordings:[]}]}}
+function defaultDB(){return{version:8,practices:[{id:crypto.randomUUID(),name:"My Practice",target:120,sessions:[],settings:{},practiceDays:{},recordings:[]}],activeSessions:{}}}
 function loadDB(){try{let x=JSON.parse(localStorage.getItem(DB_KEY)||"null");return x?.practices?x:defaultDB()}catch{return defaultDB()}}
 let syncInFlight=null;
 let syncQueued=false;
@@ -2164,14 +2164,28 @@ function syncPracticeLiveUI(){
   document.body.classList.toggle("practice-active",!!sessionRunning);
   document.title=sessionRunning?"● PRACTICING • MK Studio":"MK Studio";
 }
+function getLocalActiveSession(){
+  try{return JSON.parse(localStorage.getItem(ACTIVE_SESSION_KEY)||"null")}catch{return null}
+}
 function persistActiveSession(){
   if(!sessionRunning||!currentId)return;
-  localStorage.setItem(ACTIVE_SESSION_KEY,JSON.stringify({practiceId:currentId,startAt:sessionStartedAt,baseElapsed:sessionElapsed,savedAt:Date.now()}));
+  const a={practiceId:currentId,startAt:Number(sessionStartedAt)||Date.now(),baseElapsed:Math.max(0,Number(sessionElapsed)||0),savedAt:Date.now(),updatedAt:nowISO(),deviceId:DEVICE_ID};
+  localStorage.setItem(ACTIVE_SESSION_KEY,JSON.stringify(a));
+  ensureSyncMeta();
+  db.activeSessions=db.activeSessions&&typeof db.activeSessions==="object"?db.activeSessions:{};
+  db.activeSessions[currentId]={...a,deleted:false};
+  localStorage.setItem(DB_KEY,JSON.stringify(db));
 }
-function clearActiveSession(){localStorage.removeItem(ACTIVE_SESSION_KEY)}
+function clearActiveSessionCloud(){
+  if(!currentId)return;
+  localStorage.removeItem(ACTIVE_SESSION_KEY);
+  ensureSyncMeta();
+  db.activeSessions=db.activeSessions&&typeof db.activeSessions==="object"?db.activeSessions:{};
+  db.activeSessions[currentId]={practiceId:currentId,deleted:true,updatedAt:nowISO(),deviceId:DEVICE_ID};
+}
 function restoreActiveSession(){
   try{
-    const a=JSON.parse(localStorage.getItem(ACTIVE_SESSION_KEY)||"null");
+    const a=getLocalActiveSession();
     if(!a||a.practiceId!==currentId||!a.startAt)return false;
     sessionStartedAt=Number(a.startAt)||Date.now();
     sessionElapsed=Math.max(0,Number(a.baseElapsed)||0);
@@ -2180,11 +2194,38 @@ function restoreActiveSession(){
     return true;
   }catch(e){localStorage.removeItem(ACTIVE_SESSION_KEY);return false}
 }
+function restoreCloudActiveSession(){
+  const a=db?.activeSessions?.[currentId];
+  if(!a)return false;
+  if(a.deleted){
+    if(sessionRunning)stopSession(false,false);
+    clearActiveSession();
+    return false;
+  }
+  const start=Number(a.startAt)||0;
+  if(!start)return false;
+  sessionStartedAt=start;
+  sessionElapsed=Math.max(0,Number(a.baseElapsed)||0);
+  sessionRunning=true;
+  localStorage.setItem(ACTIVE_SESSION_KEY,JSON.stringify({...a,savedAt:Date.now()}));
+  syncPracticeLiveUI();
+  return true;
+}
+
 function startSession(){
   if(sessionRunning)return;
-  sessionRunning=true;sessionStartedAt=Date.now();sessionElapsed=0;
+  const shared=db?.activeSessions?.[currentId];
+  if(shared&&!shared.deleted&&Number(shared.startAt)){
+    sessionStartedAt=Number(shared.startAt);
+    sessionElapsed=Math.max(0,Number(shared.baseElapsed)||0);
+  }else{
+    sessionStartedAt=Date.now();
+    sessionElapsed=0;
+  }
+  sessionRunning=true;
   triggerTransportMagic("practiceTimerCard");
   persistActiveSession();
+  syncNow(true);
   document.getElementById("sessionBtn").innerHTML='<i data-lucide="square"></i><span>End Practice</span>';
   lucide.createIcons();syncPracticeLiveUI();
   if(!window.matchMedia?.("(max-width:760px)").matches)showPracticeToast("PRACTICE STARTED","Your practice time is being tracked.");
@@ -2194,12 +2235,19 @@ function startSession(){
 function stopSession(save=true,stopMetronome=true){
   if(!sessionRunning)return;
   sessionElapsed=Math.floor((Date.now()-sessionStartedAt)/1000);
-  sessionRunning=false;clearActiveSession();
+  sessionRunning=false;
+  clearActiveSessionCloud();
   if(sessionTimerTick){clearTimeout(sessionTimerTick);sessionTimerTick=null}
   if(stopMetronome)stopMetro();
   document.getElementById("sessionBtn").innerHTML='<i data-lucide="timer"></i><span>Start Practice</span>';
   lucide.createIcons();
   if(save&&sessionElapsed>=1)saveSession(sessionElapsed);
+  else {
+    localStorage.setItem(DB_KEY,JSON.stringify(db));
+    markLocalChange();
+    debouncedSync();
+  }
+  if(save&&sessionElapsed>=1)debouncedSync();
   syncPracticeLiveUI();
   // Mobile must leave no stale live state after Stop.
   if(window.matchMedia?.("(max-width:760px)").matches){
@@ -2952,6 +3000,23 @@ function mergePractice(localP,remoteP){
   out._fieldUpdatedAt={...rm,...lm};
   return out;
 }
+function mergeActiveSessions(localActive,remoteActive,deletedPractices){
+  const L=(localActive&&typeof localActive==="object")?localActive:{};
+  const R=(remoteActive&&typeof remoteActive==="object")?remoteActive:{};
+  const ids=new Set([...Object.keys(L),...Object.keys(R)]);
+  const out={};
+  ids.forEach(id=>{
+    if(deletedPractices.has(id))return;
+    const a=L[id],b=R[id];
+    if(!a)out[id]=cloneData(b);
+    else if(!b)out[id]=cloneData(a);
+    else{
+      const at=Date.parse(a.updatedAt||0)||0,bt=Date.parse(b.updatedAt||0)||0;
+      out[id]=cloneData(bt>=at?b:a);
+    }
+  });
+  return out;
+}
 function mergeSnapshots(local,remote){
   const L=cloneData(local||defaultDB()),R=cloneData(remote||{});
   ensureSyncMeta();
@@ -2977,6 +3042,7 @@ function mergeSnapshots(local,remote){
     practices.push(...cloneData(fallback));
   }
   const out={...L,...R,version:Math.max(Number(L.version)||7,Number(R.version)||7,8),practices};
+  out.activeSessions=mergeActiveSessions(L.activeSessions,R.activeSessions,deleted);
   out.syncMeta={
     ...rm,...lm,
     deletedPractices:[...deleted],
@@ -3019,7 +3085,7 @@ function applyMergedState(merged,source="Cloud sync"){
     if(currentId)localStorage.setItem("studioMetronomeCurrent",currentId);
     localStorage.setItem(DB_KEY,JSON.stringify(db));
     loadPracticeSettings(currentPractice());
-    restoreSavedSessionTimer();
+    if(!restoreCloudActiveSession())restoreSavedSessionTimer();
     renderAll();restoreSectionState();
     setSync(source,"Cloud data merged safely with this device.");
     return true;
@@ -3069,6 +3135,8 @@ async function syncNow(silent=false){
   if(syncInFlight){syncQueued=true;try{await syncInFlight}catch{};return true}
   syncInFlight=(async()=>{
     try{
+      ensureSyncMeta();
+      db.activeSessions=db.activeSessions&&typeof db.activeSessions==="object"?db.activeSessions:{};
       const {data:{user}}=await sb.auth.getUser();
       if(!user){setSync("Local","Not signed in; data is local.");return false}
       if(!silent)setSync("Syncing…","Merging this device with Supabase…");
@@ -3190,6 +3258,7 @@ if(sb){
     await loadUserEmail();
     if(session && (event==="SIGNED_IN"||event==="INITIAL_SESSION")){
       await loadCloudData();
+      if(!restoreCloudActiveSession())restoreActiveSession();
       startRealtimeSync(session.user);
     }
     if(!session)stopRealtimeSync();
@@ -3199,6 +3268,7 @@ if(sb){
     const session=data?.session;
     if(session){
       await loadCloudData();
+      if(!restoreCloudActiveSession())restoreActiveSession();
       startRealtimeSync(session.user);
     }
   }).catch(()=>{});
