@@ -6487,3 +6487,390 @@ main .sync-card{display:block!important}
   }
 }
 </style>
+
+<style id="mk-planner-v1">
+/* MK Studio Practice Planner — independent mobile bottom sheet */
+@media(max-width:760px){
+  .mk-mobile-nav{grid-template-columns:repeat(5,1fr)!important}
+}
+.mk-planner-backdrop{position:fixed;inset:0;z-index:10020;background:rgba(1,3,7,.72);opacity:0;pointer-events:none;backdrop-filter:blur(10px);transition:opacity .22s ease}
+.mk-planner-backdrop.open{opacity:1;pointer-events:auto}
+.mk-planner-sheet{position:fixed;left:0;right:0;bottom:0;z-index:10021;height:min(88dvh,760px);background:linear-gradient(180deg,#111a29 0%,#080d15 100%);border:1px solid rgba(255,255,255,.10);border-bottom:0;border-radius:24px 24px 0 0;box-shadow:0 -30px 100px rgba(0,0,0,.65),0 -2px 30px rgba(0,245,255,.05);transform:translateY(105%);transition:transform .25s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;overflow:hidden}
+.mk-planner-sheet.open{transform:translateY(0)}
+.mk-planner-handle{width:44px;height:4px;border-radius:99px;background:#3a465d;margin:8px auto 4px;flex:0 0 auto}
+.mk-planner-head{display:flex;align-items:center;justify-content:space-between;padding:8px 13px 10px;flex:0 0 auto}
+.mk-planner-title{font-size:15px;font-weight:950;display:flex;align-items:center;gap:8px}.mk-planner-title svg{color:var(--cyan);width:18px}
+.mk-planner-close{width:30px;height:30px;border:0;border-radius:9px;background:rgba(255,255,255,.07);color:var(--muted);display:grid;place-items:center;font-size:18px}
+.mk-planner-scroll{overflow:auto;overscroll-behavior:contain;padding:0 10px 86px;min-height:0}
+.mk-plan-summary{padding:11px;border:1px solid rgba(0,245,255,.16);background:linear-gradient(135deg,rgba(0,245,255,.055),rgba(255,43,214,.035));border-radius:14px;margin-bottom:8px}
+.mk-plan-summary-head{display:flex;justify-content:space-between;align-items:center}.mk-plan-summary-title{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;color:#e8f2ff}.mk-plan-summary-meta{font-size:9px;color:var(--muted)}
+.mk-plan-bar{height:6px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;margin-top:8px}.mk-plan-bar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--lime));border-radius:inherit;transition:width .25s}
+.mk-plan-accordion{border:1px solid var(--line);background:rgba(9,14,23,.72);border-radius:13px;margin:7px 0;overflow:hidden}
+.mk-plan-accordion.open{border-color:rgba(0,245,255,.18)}
+.mk-plan-acc-head{width:100%;border:0;background:none;color:var(--text);padding:10px 11px;display:flex;align-items:center;justify-content:space-between;text-align:left;font:inherit;cursor:pointer}
+.mk-plan-acc-head strong{font-size:10px}.mk-plan-acc-head small{display:block;color:var(--muted);font-size:7px;margin-top:2px}.mk-plan-chevron{transition:transform .2s;color:var(--muted)}.mk-plan-accordion.open .mk-plan-chevron{transform:rotate(180deg)}
+.mk-plan-acc-body{display:none;padding:0 9px 9px}.mk-plan-accordion.open .mk-plan-acc-body{display:block}
+.mk-plan-task{position:relative;padding:10px 10px 9px;margin:5px 0;border:1px solid rgba(255,255,255,.07);background:#0d1521;border-radius:11px}
+.mk-plan-task-row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:start}
+.mk-plan-check{width:19px;height:19px;margin-top:1px;accent-color:var(--cyan);cursor:pointer}
+.mk-plan-task-title{font-size:10px;font-weight:900;line-height:1.35}.mk-plan-task-meta{font-size:8px;color:var(--muted);margin-top:3px;line-height:1.45}.mk-plan-status{font-size:7px;font-weight:900;padding:4px 6px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.mk-plan-status.completed{color:var(--lime);border-color:rgba(184,255,61,.35)}.mk-plan-status.running{color:var(--cyan);border-color:rgba(0,245,255,.35)}.mk-plan-status.overdue{color:var(--danger);border-color:rgba(255,77,109,.35)}.mk-plan-status.partial{color:var(--orange);border-color:rgba(255,157,61,.35)}.mk-plan-status.skipped{color:#8e99ad}
+.mk-plan-actions{display:flex;gap:5px;flex-wrap:wrap;margin:7px 0 0 27px}.mk-plan-action{border:1px solid var(--line);background:#121b2a;color:#dfe9f5;border-radius:8px;padding:6px 8px;font-size:8px;font-weight:800;cursor:pointer}.mk-plan-action.primary{background:linear-gradient(90deg,var(--cyan),#3cf7d2);border-color:transparent;color:#041013}
+.mk-plan-empty{padding:13px;text-align:center;color:var(--muted);font-size:8px}
+.mk-plan-date{font-size:8px;color:var(--cyan);font-weight:900;letter-spacing:.08em;margin:8px 2px 5px;text-transform:uppercase}
+.mk-plan-add{position:sticky;bottom:10px;width:calc(100% - 20px);margin:4px 10px 0;height:42px;border:0;border-radius:12px;background:linear-gradient(90deg,var(--cyan),#3cf7d2);color:#041013;font-size:10px;font-weight:950;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.mk-plan-form{padding:10px;border:1px solid rgba(0,245,255,.16);background:#0a1019;border-radius:13px;margin:6px 0}.mk-plan-form h3{font-size:11px;margin:0 0 9px}.mk-plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.mk-plan-field{display:flex;flex-direction:column;gap:4px}.mk-plan-field.full{grid-column:1/-1}.mk-plan-field label{font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.mk-plan-field input,.mk-plan-field select{width:100%;box-sizing:border-box;background:#080e17;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:9px;outline:none}.mk-plan-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.mk-plan-day{border:1px solid var(--line);background:#0d1521;color:var(--muted);border-radius:7px;padding:7px 2px;text-align:center;font-size:7px;cursor:pointer}.mk-plan-day.on{color:#041013;background:var(--cyan);border-color:var(--cyan);font-weight:900}.mk-plan-form-actions{display:flex;gap:6px;margin-top:9px}.mk-plan-form-actions button{flex:1}
+.mk-plan-upcoming-day{padding:8px 9px;background:#0d1521;border-radius:10px;margin:5px 0;border:1px solid rgba(255,255,255,.06)}.mk-plan-upcoming-day b{font-size:9px}.mk-plan-upcoming-day .mk-plan-task{margin-top:5px}
+.mk-plan-recurring{padding:9px;background:#0d1521;border:1px solid rgba(255,255,255,.07);border-radius:10px;margin:5px 0}.mk-plan-rec-head{display:flex;justify-content:space-between;gap:8px}.mk-plan-rec-title{font-size:10px;font-weight:900}.mk-plan-rec-meta{font-size:8px;color:var(--muted);margin-top:3px}.mk-plan-rec-actions{display:flex;gap:5px;margin-top:7px}.mk-plan-rec-actions button{border:1px solid var(--line);background:#121b2a;color:var(--text);border-radius:7px;padding:5px 7px;font-size:7px}.mk-plan-rec-actions .danger{color:var(--danger)}
+@media(min-width:761px){.mk-planner-backdrop,.mk-planner-sheet{display:none!important}}
+</style>
+
+<div class="mk-planner-backdrop" id="mkPlannerBackdrop" aria-hidden="true"></div>
+<section class="mk-planner-sheet" id="mkPlannerSheet" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Practice Planner">
+  <div class="mk-planner-handle"></div>
+  <div class="mk-planner-head"><div class="mk-planner-title"><i data-lucide="calendar-check-2"></i>Practice Planner</div><button class="mk-planner-close" type="button" onclick="closePracticePlanner()" aria-label="Close">×</button></div>
+  <div class="mk-planner-scroll" id="mkPlannerScroll"></div>
+  <button class="mk-plan-add" id="mkPlannerAddBtn" type="button" onclick="openPlannerForm()">＋ Add Practice</button>
+</section>
+
+<script id="mk-practice-planner-v1">
+(function(){
+  const DAY_NAMES=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const DAY_FULL=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const plannerDefault=()=>({version:1,recurringPlans:[],dailyTasks:[],overrides:[],reviewTasks:[],activeTaskId:null});
+  function ensurePlanner(){
+    if(!db.planner||typeof db.planner!=="object")db.planner=plannerDefault();
+    const p=db.planner;
+    p.recurringPlans=Array.isArray(p.recurringPlans)?p.recurringPlans:[];
+    p.dailyTasks=Array.isArray(p.dailyTasks)?p.dailyTasks:[];
+    p.overrides=Array.isArray(p.overrides)?p.overrides:[];
+    p.reviewTasks=Array.isArray(p.reviewTasks)?p.reviewTasks:[];
+    return p;
+  }
+  const esc=s=>typeof escapeHTML==="function"?escapeHTML(s):String(s??"");
+  const key=d=>localDateKey(d);
+  const parseKey=k=>{const [y,m,day]=String(k).split("-").map(Number);return new Date(y,m-1,day)};
+  const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+  const isoDate=d=>key(d);
+  const prettyDate=k=>{const d=parseKey(k);return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})};
+  const today=()=>new Date();
+  const planById=id=>ensurePlanner().recurringPlans.find(x=>x.id===id);
+  function taskId(planId,date){return "pt_"+planId+"_"+date}
+  function isDue(plan,date){
+    if(!plan.active)return false;
+    const d=parseKey(date), start=parseKey(plan.startDate||date);
+    if(d<start)return false;
+    const type=plan.recurrenceType;
+    if(type==="daily")return true;
+    if(type==="interval")return Math.round((d-start)/86400000)%Math.max(1,Number(plan.intervalDays)||1)===0;
+    if(type==="weekdays")return (plan.weekdays||[]).map(Number).includes(d.getDay());
+    return false;
+  }
+  function taskStatus(t){
+    if(t.status==="completed")return "completed";
+    if(t.status==="skipped")return "skipped";
+    if(t.status==="partially_completed")return "partial";
+    if(t.status==="running")return "running";
+    if(t.status==="overdue")return "overdue";
+    if(t.date<key(today()) && Number(t.actualDuration||0)<=0)return "overdue";
+    return "pending";
+  }
+  function statusLabel(s){return ({pending:"Pending",running:"Running",completed:"Completed",partially_completed:"Partially Completed",partial:"Partially Completed",skipped:"Skipped",overdue:"Overdue"})[s]||s}
+  function makeTask(plan,date,force=false){
+    const id=taskId(plan.id,date);
+    let t=ensurePlanner().dailyTasks.find(x=>x.id===id);
+    if(t)return t;
+    if(!force&&!isDue(plan,date))return null;
+    t={id,recurringPlanId:plan.id,userId:null,date,title:plan.title,type:plan.type,seasonId:plan.seasonId||null,partId:plan.partId||null,fullPieceId:plan.fullPieceId||null,duration:Number(plan.duration)||10,bpm:plan.bpm===""||plan.bpm==null?null:Number(plan.bpm),usePartTarget:!!plan.usePartTarget,status:"pending",actualDuration:0,completedAt:null,skippedAt:null,rescheduledTo:null,override:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+    ensurePlanner().dailyTasks.push(t);return t;
+  }
+  function ensureGenerated(horizon=45){
+    const pl=ensurePlanner(), now=today();
+    let changed=false;
+    pl.recurringPlans.forEach(plan=>{
+      if(!plan.active)return;
+      for(let i=0;i<=horizon;i++){const d=addDays(now,i),k=key(d);if(isDue(plan,k)&&!pl.dailyTasks.some(t=>t.id===taskId(plan.id,k))){makeTask(plan,k,true);changed=true}}
+    });
+    return changed;
+  }
+  function seasonById(id){return (db.practices||[]).find(p=>p.id===id)}
+  function partByIds(seasonId,partId){const p=seasonById(seasonId);return {p,part:(p?.parts||[]).find(x=>x.id===partId)}}
+  function syncReviewTasks(){
+    const pl=ensurePlanner();
+    (db.practices||[]).forEach(p=>(p.parts||[]).forEach(part=>{
+      let mastered=false;
+      try{mastered=typeof partComplete==="function"&&partComplete(p,part)}catch{}
+      if(!mastered)return;
+      const rid="review_"+p.id+"_"+part.id;
+      let state=pl.reviewTasks.find(x=>x.id===rid);
+      if(!state){state={id:rid,userId:null,seasonId:p.id,partId:part.id,dueDate:key(addDays(new Date(),1)),interval:1,status:"pending",completedAt:null,createdAt:new Date().toISOString()};pl.reviewTasks.push(state)}
+      if(state.status==="completed" && state.completedAt){
+        const last=parseKey(state.completedAt.slice(0,10));
+        if(key(today())>=state.dueDate)state.status="pending";
+      }
+      if(key(today())>=state.dueDate && state.status!=="completed"){
+        const existing=pl.dailyTasks.find(t=>t.id==="reviewtask_"+rid+"_"+state.dueDate);
+        if(!existing){
+          const planned=pl.dailyTasks.find(t=>t.date===state.dueDate&&t.seasonId===p.id&&t.partId===part.id&&t.status!=="skipped");
+          if(planned){
+            planned.title=(planned.title||part.name||"Part")+" · Review + Planned Practice";
+            planned.type=planned.type==="Review"?"Review":planned.type;
+            planned.reviewTaskId=rid;planned.updatedAt=new Date().toISOString();
+          }else{
+            pl.dailyTasks.push({id:"reviewtask_"+rid+"_"+state.dueDate,recurringPlanId:null,userId:null,date:state.dueDate,title:part.name||"Part Review",type:"Review",seasonId:p.id,partId:part.id,duration:10,bpm:Number(part.targetBpm)||Number(p.target)||120,status:"pending",actualDuration:0,completedAt:null,skippedAt:null,rescheduledTo:null,override:false,reviewTaskId:rid,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
+          }
+        }
+      }
+    }));
+  }
+  function savePlanner(render=true){
+    ensurePlanner();
+    localStorage.setItem(DB_KEY,JSON.stringify(db));markLocalChange();
+    if(render)renderPlanner();
+    if(typeof debouncedSync==="function")debouncedSync();
+  }
+  function closeCompeting(){
+    try{if(typeof closeEverySurface==="function")closeEverySurface("planner")}catch{}
+    document.querySelectorAll(".mk-review-modal.open,.mk-pro-panel.open,.mk-tools-sheet.open,.mk-mobile-category-sheet.open,.dashboard-menu.open,.metro-card>.panel.open").forEach(x=>x.classList.remove("open"));
+    const f=document.getElementById("focusOverlay");if(f){f.classList.remove("open");f.setAttribute("aria-hidden","true")}
+    document.querySelectorAll(".modal.open").forEach(x=>{if(x.id!=="profileModal")x.classList.remove("open")});
+  }
+  function openPlanner(){
+    if(!window.matchMedia?.("(max-width:760px)").matches)return;
+    closeCompeting();
+    const bd=document.getElementById("mkPlannerBackdrop"),sh=document.getElementById("mkPlannerSheet");
+    if(!bd||!sh)return;
+    const before=JSON.stringify(ensurePlanner());
+    ensureGenerated();syncReviewTasks();
+    if(JSON.stringify(ensurePlanner())!==before){
+      localStorage.setItem(DB_KEY,JSON.stringify(db));markLocalChange();
+      if(typeof debouncedSync==="function")debouncedSync();
+    }
+    bd.classList.add("open");sh.classList.add("open");bd.setAttribute("aria-hidden","false");sh.setAttribute("aria-hidden","false");document.body.classList.add("mk-mobile-sheet-open");
+    renderPlanner();try{lucide.createIcons()}catch{}
+  }
+  function closePracticePlanner(){
+    document.getElementById("mkPlannerBackdrop")?.classList.remove("open");
+    document.getElementById("mkPlannerSheet")?.classList.remove("open");
+    document.getElementById("mkPlannerBackdrop")?.setAttribute("aria-hidden","true");
+    document.getElementById("mkPlannerSheet")?.setAttribute("aria-hidden","true");
+    document.body.classList.remove("mk-mobile-sheet-open");
+  }
+  function toggleAcc(id){
+    const e=document.getElementById(id);if(!e)return;
+    const open=!e.classList.contains("open");
+    document.querySelectorAll(".mk-plan-accordion").forEach(x=>x.classList.remove("open"));
+    if(open)e.classList.add("open");
+  }
+  function taskSeasonStart(t){
+    const p=seasonById(t.seasonId);if(!p)return;
+    if(sessionRunning)stopSession(true);
+    currentId=p.id;localStorage.setItem("studioMetronomeCurrent",currentId);
+    loadPracticeSettings(p);
+    if(t.type==="Part" && t.partId){
+      const part=(p.parts||[]).find(x=>x.id===t.partId);
+      if(part){p.activePartId=part.id;practiceSessionMode="part";practiceSessionPartId=part.id;setBpm(t.bpm||part.startBpm||80,false);targetBpm=Number(t.bpm||part.targetBpm||p.target||120);updateTarget()}
+    }else if(t.type==="Full Piece"){
+      practiceSessionMode="full";practiceSessionPartId=null;setBpm(t.bpm||p.fullPiece?.targetBpm||p.target||120,false);targetBpm=Number(t.bpm||p.fullPiece?.targetBpm||p.target||120);updateTarget();
+    }else{
+      practiceSessionMode=t.type==="Season"?"part":"part";practiceSessionPartId=t.partId||p.activePartId||null;
+      if(t.bpm)setBpm(Number(t.bpm),false);
+    }
+    ensurePlanner().activeTaskId=t.id;
+    t.status="running";t.updatedAt=new Date().toISOString();savePlanner(false);
+    try{startSession()}catch(e){t.status="pending";ensurePlanner().activeTaskId=null;savePlanner(false);alert("Could not start the main MK Studio Timer.")} 
+    renderAll();renderPlanner();
+    if(window.matchMedia?.("(max-width:760px)").matches)document.getElementById("mkPlannerSheet")?.classList.add("open");
+  }
+  function markTask(t,status){
+    const pl=ensurePlanner(),now=new Date().toISOString();
+    if(status==="completed"){t.status="completed";t.actualDuration=Math.max(Number(t.actualDuration)||0,Number(t.duration)||0);t.completedAt=now}
+    else if(status==="skipped"){t.status="skipped";t.skippedAt=now}
+    else if(status==="pending"){t.status="pending";t.completedAt=null;t.skippedAt=null}
+    t.updatedAt=now;if(pl.activeTaskId===t.id&&status!=="running")pl.activeTaskId=null;
+    if(t.reviewTaskId){
+      const r=pl.reviewTasks.find(x=>x.id===t.reviewTaskId);
+      if(r&&status==="completed"){r.status="completed";r.completedAt=now;r.interval=Math.min(60,({1:3,3:7,7:14,14:30,30:60}[Number(r.interval)]||3));r.dueDate=key(addDays(new Date(),r.interval))}
+    }
+    savePlanner();renderPlanner();
+  }
+  function manualCheck(id,checked){
+    const t=ensurePlanner().dailyTasks.find(x=>x.id===id);if(!t)return;
+    if(checked)markTask(t,"completed");else markTask(t,"pending");
+  }
+  function rescheduleTask(id){
+    const t=ensurePlanner().dailyTasks.find(x=>x.id===id);if(!t)return;
+    const raw=prompt("Move this task to date (YYYY-MM-DD):",key(addDays(new Date(),1)));if(!raw||!/^\d{4}-\d{2}-\d{2}$/.test(raw))return;
+    const old=t.date;t.rescheduledTo=raw;t.date=raw;t.override=true;t.status="pending";t.updatedAt=new Date().toISOString();
+    ensurePlanner().overrides.push({id:"ov_"+t.id,date:old,rescheduledTo:raw,taskId:t.id,createdAt:new Date().toISOString()});
+    savePlanner();renderPlanner();
+  }
+  function doToday(id){
+    const t=ensurePlanner().dailyTasks.find(x=>x.id===id);if(!t)return;
+    t.date=key(today());t.rescheduledTo=null;t.status="pending";t.updatedAt=new Date().toISOString();savePlanner();renderPlanner();
+  }
+  function editPlan(id){
+    const p=planById(id);if(!p)return;openPlannerForm(p);
+  }
+  function pausePlan(id){
+    const p=planById(id);if(!p)return;p.active=!p.active;p.updatedAt=new Date().toISOString();savePlanner();renderPlanner();
+  }
+  function deletePlan(id){
+    const p=planById(id);if(!p)return;if(!confirm("Delete this recurring plan? Existing daily tasks will stay."))return;
+    const pl=ensurePlanner();pl.recurringPlans=pl.recurringPlans.filter(x=>x.id!==id);savePlanner();renderPlanner();
+  }
+  function openPlannerForm(edit){
+    const scroll=document.getElementById("mkPlannerScroll");if(!scroll)return;
+    const seasons=(db.practices||[]), first=seasons[0], selectedSeason=edit?.seasonId||currentId||first?.id||"";
+    scroll.dataset.previous=scroll.innerHTML;
+    scroll.innerHTML=`<div class="mk-plan-form">
+      <h3>${edit?"Edit Recurring Plan":"Add Practice"}</h3>
+      <div class="mk-plan-grid">
+        <div class="mk-plan-field full"><label>Title</label><input id="mkPFTitle" value="${esc(edit?.title||"")}" placeholder="e.g. Emilie"></div>
+        <div class="mk-plan-field"><label>Practice Type</label><select id="mkPFType"><option>Season</option><option>Part</option><option>Full Piece</option><option>Technique</option><option>Custom</option></select></div>
+        <div class="mk-plan-field"><label>Duration (min)</label><input id="mkPFDuration" type="number" min="1" value="${Number(edit?.duration)||10}"></div>
+        <div class="mk-plan-field"><label>Season</label><select id="mkPFSeason">${seasons.map(p=>`<option value="${p.id}" ${p.id===selectedSeason?"selected":""}>${esc(p.name)}</option>`).join("")}</select></div>
+        <div class="mk-plan-field"><label>Part</label><select id="mkPFPart"><option value="">—</option></select></div>
+        <div class="mk-plan-field"><label>Target BPM (optional)</label><input id="mkPFBpm" type="number" min="20" max="300" placeholder="Optional" value="${edit?.bpm??""}"></div>
+        <div class="mk-plan-field"><label>Use Part Target BPM</label><select id="mkPFUsePart"><option value="0">No</option><option value="1">Yes</option></select></div>
+        <div class="mk-plan-field"><label>Schedule</label><select id="mkPFRec"><option value="once">Once</option><option value="daily">Every Day</option><option value="interval">Every X Days</option><option value="weekdays">Specific Days</option></select></div>
+        <div class="mk-plan-field" id="mkPFDateWrap"><label>Date</label><input id="mkPFDate" type="date" value="${edit?.startDate||key(today())}"></div>
+        <div class="mk-plan-field" id="mkPFIntervalWrap" style="display:none"><label>Interval Days</label><input id="mkPFInterval" type="number" min="1" value="${Number(edit?.intervalDays)||4}"></div>
+        <div class="mk-plan-field full" id="mkPFWeekWrap" style="display:none"><label>Weekdays</label><div class="mk-plan-days">${DAY_FULL.map((x,i)=>`<button type="button" class="mk-plan-day ${(edit?.weekdays||[]).includes(i)?"on":""}" data-day="${i}">${DAY_NAMES[i]}</button>`).join("")}</div></div>
+      </div>
+      <div class="mk-plan-form-actions"><button class="small-btn" type="button" onclick="cancelPlannerForm()">Cancel</button><button class="small-btn" style="background:var(--cyan);color:#041013" type="button" onclick="savePlannerForm('${edit?.id||""}')">${edit?"Save Changes":"Create Plan"}</button></div>
+    </div>`;
+    const typeEl=document.getElementById("mkPFType"), seasonEl=document.getElementById("mkPFSeason"), partEl=document.getElementById("mkPFPart"),recEl=document.getElementById("mkPFRec");
+    if(edit)typeEl.value=edit.type||"Custom";if(edit?.usePartTarget)document.getElementById("mkPFUsePart").value="1";
+    function fillParts(){const p=seasonById(seasonEl.value);partEl.innerHTML='<option value="">—</option>'+(p?.parts||[]).map(x=>`<option value="${x.id}">${esc(x.name||"Part")}</option>`).join("");if(edit?.partId)partEl.value=edit.partId}
+    fillParts();seasonEl.onchange=fillParts;
+    recEl.onchange=()=>{document.getElementById("mkPFDateWrap").style.display=recEl.value==="once"?"block":"block";document.getElementById("mkPFIntervalWrap").style.display=recEl.value==="interval"?"block":"none";document.getElementById("mkPFWeekWrap").style.display=recEl.value==="weekdays"?"block":"none"};
+    recEl.value=edit?.recurrenceType||"once";recEl.onchange();
+    scroll.scrollTop=0;
+  }
+  function cancelPlannerForm(){renderPlanner()}
+  function savePlannerForm(editId){
+    const title=document.getElementById("mkPFTitle")?.value.trim()||"Practice";
+    const type=document.getElementById("mkPFType").value, seasonId=document.getElementById("mkPFSeason").value, partId=document.getElementById("mkPFPart").value||null;
+    const rec=document.getElementById("mkPFRec").value,date=document.getElementById("mkPFDate").value||key(today()),duration=Math.max(1,Number(document.getElementById("mkPFDuration").value)||10),bpmVal=document.getElementById("mkPFBpm").value.trim();
+    const usePartTarget=document.getElementById("mkPFUsePart").value==="1";
+    const weekdays=[...document.querySelectorAll(".mk-plan-day.on")].map(x=>Number(x.dataset.day));
+    if(rec==="weekdays"&&!weekdays.length){alert("Select at least one weekday.");return}
+    const pl=ensurePlanner();
+    if(rec==="once"){
+      const task={id:"once_"+(editId||crypto.randomUUID())+"_"+date,recurringPlanId:null,userId:null,date,title,type,seasonId:seasonId||null,partId:partId||null,duration,bpm:bpmVal===""?null:Number(bpmVal),usePartTarget,status:"pending",actualDuration:0,completedAt:null,skippedAt:null,rescheduledTo:null,override:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+      pl.dailyTasks=pl.dailyTasks.filter(x=>x.id!==task.id);pl.dailyTasks.push(task);
+    }else{
+      let plan=editId?planById(editId):null;
+      if(!plan){plan={id:"rp_"+crypto.randomUUID(),createdAt:new Date().toISOString(),active:true};pl.recurringPlans.push(plan)}
+      Object.assign(plan,{userId:null,title,type,seasonId:seasonId||null,partId:partId||null,fullPieceId:null,duration,bpm:bpmVal===""?null:Number(bpmVal),usePartTarget,recurrenceType:rec,intervalDays:rec==="interval"?Math.max(1,Number(document.getElementById("mkPFInterval").value)||1):null,weekdays:rec==="weekdays"?weekdays:[],startDate:date,active:true,updatedAt:new Date().toISOString()});
+      pl.dailyTasks=pl.dailyTasks.filter(t=>t.recurringPlanId!==plan.id || t.status==="completed" || t.status==="skipped");
+    }
+    savePlanner();renderPlanner();
+  }
+  function startOverdueAction(id,action){
+    if(action==="today")doToday(id);else if(action==="skip"){const t=ensurePlanner().dailyTasks.find(x=>x.id===id);if(t)markTask(t,"skipped")}else rescheduleTask(id);
+  }
+  function renderTask(t){
+    const s=taskStatus(t), p=seasonById(t.seasonId), part=partByIds(t.seasonId,t.partId).part;
+    let meta=`${Number(t.actualDuration)||0} / ${Number(t.duration)||0} min`;
+    if(Number(t.bpm))meta+=` · ${Number(t.bpm)} BPM`;
+    if(t.usePartTarget&&part)meta+=` · Part target ${Number(part.targetBpm)||Number(p?.target)||120} BPM`;
+    if(part)meta+=` · ${esc(p?.name||"Season")} / ${esc(part.name||"Part")}`;
+    else if(p)meta+=` · ${esc(p.name)}`;
+    const overdue=t.date<key(today())&&s==="overdue";
+    return `<div class="mk-plan-task" data-task-id="${t.id}">
+      <div class="mk-plan-task-row"><input class="mk-plan-check" type="checkbox" ${s==="completed"?"checked":""} onchange="plannerManualCheck('${t.id}',this.checked)">
+      <div><div class="mk-plan-task-title">${esc(t.title)}</div><div class="mk-plan-task-meta">${meta}</div></div><span class="mk-plan-status ${s}">${statusLabel(s)}</span></div>
+      <div class="mk-plan-actions">${s!=="completed"&&s!=="skipped"?`<button class="mk-plan-action primary" onclick="plannerStart('${t.id}')">▶ Start</button>`:""} ${s==="overdue"?`<button class="mk-plan-action" onclick="plannerOverdue('${t.id}','today')">Do Today</button><button class="mk-plan-action" onclick="plannerOverdue('${t.id}','reschedule')">Reschedule</button><button class="mk-plan-action" onclick="plannerOverdue('${t.id}','skip')">Skip</button>`:`<button class="mk-plan-action" onclick="plannerSkip('${t.id}')">Skip</button><button class="mk-plan-action" onclick="plannerReschedule('${t.id}')">Reschedule</button>`}</div>
+    </div>`;
+  }
+  function renderToday(pl){
+    const k=key(today()),tasks=pl.dailyTasks.filter(t=>t.date===k);
+    const planned=tasks.reduce((a,t)=>a+(Number(t.duration)||0),0),done=tasks.filter(t=>taskStatus(t)==="completed").length;
+    const actual=tasks.reduce((a,t)=>a+(Number(t.actualDuration)||0),0),pct=planned?Math.min(100,actual/planned*100):0;
+    return `<div class="mk-plan-summary"><div class="mk-plan-summary-head"><span class="mk-plan-summary-title">Today's Practice</span><span class="mk-plan-summary-meta">${actual||0} / ${planned||0} min · ${done} / ${tasks.length} completed</span></div><div class="mk-plan-bar"><span style="width:${pct}%"></span></div></div>
+      <div class="mk-plan-accordion open" id="mkPlanToday"><button class="mk-plan-acc-head" onclick="plannerAcc('mkPlanToday')"><div><strong>TODAY</strong><small>${tasks.length} task${tasks.length===1?"":"s"}</small></div><span class="mk-plan-chevron">⌄</span></button><div class="mk-plan-acc-body">${tasks.length?tasks.map(renderTask).join(""):'<div class="mk-plan-empty">Nothing planned for today.</div>'}</div></div>`;
+  }
+  function renderUpcoming(pl){
+    const dates=[...new Set(pl.dailyTasks.filter(t=>t.date>key(today())&&t.status!=="skipped").sort((a,b)=>a.date.localeCompare(b.date)).slice(0,20).map(t=>t.date))];
+    if(!dates.length)return '<div class="mk-plan-empty">No upcoming practice.</div>';
+    return dates.slice(0,8).map(d=>`<div class="mk-plan-upcoming-day"><b>${prettyDate(d)}</b>${pl.dailyTasks.filter(t=>t.date===d).map(renderTask).join("")}</div>`).join("");
+  }
+  function renderRecurring(pl){
+    if(!pl.recurringPlans.length)return '<div class="mk-plan-empty">No recurring plans yet.</div>';
+    return pl.recurringPlans.map(r=>{let next=pl.dailyTasks.filter(t=>t.recurringPlanId===r.id&&t.date>=key(today())&&t.status!=="skipped").sort((a,b)=>a.date.localeCompare(b.date))[0];let rec=r.recurrenceType==="daily"?"Every day":r.recurrenceType==="interval"?`Every ${r.intervalDays} days`:`${(r.weekdays||[]).map(i=>DAY_NAMES[i]).join(", ")}`;return `<div class="mk-plan-recurring"><div class="mk-plan-rec-head"><div><div class="mk-plan-rec-title">${esc(r.title)}</div><div class="mk-plan-rec-meta">${Number(r.duration)||0} min · ${esc(rec)} · Next: ${next?prettyDate(next.date):"—"}</div></div><span class="mk-plan-status ${r.active?"pending":"skipped"}">${r.active?"Active":"Paused"}</span></div><div class="mk-plan-rec-actions"><button onclick="plannerEditPlan('${r.id}')">Edit</button><button onclick="plannerPause('${r.id}')">${r.active?"Pause":"Resume"}</button><button class="danger" onclick="plannerDeletePlan('${r.id}')">Delete</button></div></div>`}).join("");
+  }
+  function renderOverdue(pl){
+    const tasks=pl.dailyTasks.filter(t=>taskStatus(t)==="overdue");
+    return tasks.length?tasks.map(renderTask).join(""):'<div class="mk-plan-empty">No overdue practice. Nice.</div>';
+  }
+  function renderPlanner(){
+    const scroll=document.getElementById("mkPlannerScroll");if(!scroll)return;
+    ensurePlanner();ensureGenerated();syncReviewTasks();
+    const pl=ensurePlanner(),form=scroll.querySelector(".mk-plan-form");
+    if(form)return;
+    scroll.innerHTML=renderToday(pl)+
+      `<div class="mk-plan-accordion" id="mkPlanUpcoming"><button class="mk-plan-acc-head" onclick="plannerAcc('mkPlanUpcoming')"><div><strong>UPCOMING</strong><small>Future practice</small></div><span class="mk-plan-chevron">⌄</span></button><div class="mk-plan-acc-body">${renderUpcoming(pl)}</div></div>`+
+      `<div class="mk-plan-accordion" id="mkPlanRecurring"><button class="mk-plan-acc-head" onclick="plannerAcc('mkPlanRecurring')"><div><strong>RECURRING</strong><small>Automatic daily task templates</small></div><span class="mk-plan-chevron">⌄</span></button><div class="mk-plan-acc-body">${renderRecurring(pl)}</div></div>`+
+      `<div class="mk-plan-accordion" id="mkPlanOverdue"><button class="mk-plan-acc-head" onclick="plannerAcc('mkPlanOverdue')"><div><strong>OVERDUE</strong><small>Missed and unfinished</small></div><span class="mk-plan-chevron">⌄</span></button><div class="mk-plan-acc-body">${renderOverdue(pl)}</div></div>`;
+    try{lucide.createIcons()}catch{}
+  }
+  function plannerStart(id){const t=ensurePlanner().dailyTasks.find(x=>x.id===id);if(t)taskSeasonStart(t)}
+  function plannerSkip(id){const t=ensurePlanner().dailyTasks.find(x=>x.id===id);if(t)markTask(t,"skipped")}
+  function plannerReschedule(id){rescheduleTask(id)}
+  function plannerManualCheck(id,c){manualCheck(id,c)}
+  function plannerOverdue(id,a){startOverdueAction(id,a)}
+  function plannerEditPlan(id){editPlan(id)}
+  function plannerPause(id){pausePlan(id)}
+  function plannerDeletePlan(id){deletePlan(id)}
+  window.openPracticePlanner=openPlanner;window.closePracticePlanner=closePracticePlanner;window.openPlannerForm=openPlannerForm;window.cancelPlannerForm=cancelPlannerForm;window.savePlannerForm=savePlannerForm;window.plannerAcc=toggleAcc;window.plannerStart=plannerStart;window.plannerSkip=plannerSkip;window.plannerReschedule=plannerReschedule;window.plannerManualCheck=plannerManualCheck;window.plannerOverdue=plannerOverdue;window.plannerEditPlan=plannerEditPlan;window.plannerPause=plannerPause;window.plannerDeletePlan=plannerDeletePlan;window.renderPlanner=renderPlanner;window.ensurePlanner=ensurePlanner;
+
+  /* Make the Planner a fifth mobile-nav destination without touching Focus Mode. */
+  function installNav(){
+    const nav=document.getElementById("mkMobileNav");if(!nav||nav.querySelector('[data-nav="planner"]'))return;
+    const b=document.createElement("button");b.dataset.nav="planner";b.innerHTML='<i data-lucide="calendar-check-2"></i><span>Planner</span>';nav.appendChild(b);
+    b.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();document.querySelectorAll(".mk-mobile-nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");openPlanner()});
+    document.getElementById("mkPlannerBackdrop")?.addEventListener("click",closePracticePlanner);
+    try{lucide.createIcons()}catch{}
+  }
+  function bindStop(){
+    if(window.__mkPlannerStopWrapped)return;
+    const old=window.stopSession;if(typeof old!=="function")return;
+    window.stopSession=function(save=true,stopMetronome=true){
+      const pl=ensurePlanner(),activeId=pl.activeTaskId,started=activeId&&pl.dailyTasks.find(t=>t.id===activeId);
+      old.apply(this,arguments);
+      if(started){
+        const actual=Math.max(0,Math.floor(Number(sessionElapsed)||0)),planned=Math.max(1,Number(started.duration)||1);
+        started.actualDuration=Math.max(Number(started.actualDuration)||0,actual);
+        started.status=actual>=planned?"completed":actual>0?"partially_completed":"pending";
+        started.completedAt=started.status==="completed"?new Date().toISOString():null;
+        started.updatedAt=new Date().toISOString();
+        pl.activeTaskId=null;
+        if(started.reviewTaskId&&started.status==="completed"){const r=pl.reviewTasks.find(x=>x.id===started.reviewTaskId);if(r){r.status="completed";r.completedAt=new Date().toISOString();r.interval=Math.min(60,({1:3,3:7,7:14,14:30,30:60}[Number(r.interval)]||3));r.dueDate=key(addDays(new Date(),r.interval))}}
+        savePlanner(false);if(document.getElementById("mkPlannerSheet")?.classList.contains("open"))renderPlanner();
+      }
+    };
+    window.__mkPlannerStopWrapped=true;
+  }
+  async function attachPlannerUser(){
+    try{
+      if(!window.sb||!sb.auth)return;
+      const {data:{user}}=await sb.auth.getUser();if(!user)return;
+      const pl=ensurePlanner();let changed=false;
+      pl.userId=user.id;
+      pl.recurringPlans.forEach(x=>{if(x.userId!==user.id){x.userId=user.id;changed=true}});
+      pl.dailyTasks.forEach(x=>{if(x.userId!==user.id){x.userId=user.id;changed=true}});
+      pl.overrides.forEach(x=>{if(x.userId!==user.id){x.userId=user.id;changed=true}});
+      pl.reviewTasks.forEach(x=>{if(x.userId!==user.id){x.userId=user.id;changed=true}});
+      if(changed){localStorage.setItem(DB_KEY,JSON.stringify(db));markLocalChange();if(typeof debouncedSync==="function")debouncedSync()}
+    }catch(e){}
+  }
+  function init(){
+    installNav();bindStop();attachPlannerUser();
+    document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.getElementById("mkPlannerSheet")?.classList.contains("open"))closePracticePlanner()});
+    if(typeof lucide!=="undefined")lucide.createIcons();
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else setTimeout(init,0);
+})();
+</script>
